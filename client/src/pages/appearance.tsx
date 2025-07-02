@@ -27,8 +27,10 @@ import {
   Bell,
   UserCircle,
   Table,
-  LayoutGrid
+  LayoutGrid,
+  ArrowLeft
 } from "lucide-react";
+import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 interface AppearancePageProps {
@@ -215,9 +217,17 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">إدارة المظهر</h1>
-              <p className="text-slate-600">تخصيص الألوان والأيقونات واللوجوهات</p>
+            <div className="flex items-center space-x-4 space-x-reverse">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                  <ArrowLeft className="h-4 w-4 ml-2" />
+                  الصفحة الرئيسية
+                </Button>
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">إدارة المظهر</h1>
+                <p className="text-slate-600">تخصيص الألوان والأيقونات واللوجوهات</p>
+              </div>
             </div>
             <div className="flex space-x-3 space-x-reverse">
               <Button variant="outline" onClick={resetToDefault}>
