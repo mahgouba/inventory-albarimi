@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye, Images, ArrowUpDown, ShoppingCart } from "lucide-react";
+import { Edit, Trash2, Eye, Images, ArrowUpDown, ShoppingCart, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { getStatusColor } from "@/lib/utils";
@@ -16,11 +16,11 @@ interface InventoryTableProps {
   manufacturerFilter: string;
   yearFilter: string;
   importTypeFilter: string;
-  locationFilter: string;
+  engineCapacityFilter: string;
   onEdit?: (item: InventoryItem) => void;
 }
 
-export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, locationFilter, onEdit }: InventoryTableProps) {
+export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, engineCapacityFilter, onEdit }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<InventoryItem | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<string>("");
@@ -113,9 +113,9 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
       const matchesManufacturer = !manufacturerFilter || manufacturerFilter === "جميع الصناع" || item.manufacturer === manufacturerFilter;
       const matchesYear = !yearFilter || yearFilter === "جميع السنوات" || item.year.toString() === yearFilter;
       const matchesImportType = !importTypeFilter || importTypeFilter === "جميع الأنواع" || item.importType === importTypeFilter;
-      const matchesLocation = !locationFilter || locationFilter === "جميع المواقع" || item.location === locationFilter;
+      const matchesEngineCapacity = !engineCapacityFilter || engineCapacityFilter === "جميع السعات" || item.engineCapacity === engineCapacityFilter;
       
-      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType && matchesLocation;
+      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType && matchesEngineCapacity;
     })
     .sort((a: InventoryItem, b: InventoryItem) => {
       if (!sortColumn) return 0;
@@ -150,20 +150,21 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                   variant="ghost"
                   size="sm"
                   className="text-white hover:text-teal-100 hover:bg-teal-700 p-1"
-                  onClick={() => handleSort("category")}
+                  onClick={() => handleSort("manufacturer")}
                 >
-                  الفئة
+                  الصانع
                   <ArrowUpDown className="mr-2 h-4 w-4" />
                 </Button>
               </TableHead>
+              <TableHead className="text-white text-right">اللوجو</TableHead>
               <TableHead className="text-white text-right">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-white hover:text-teal-100 hover:bg-teal-700 p-1"
-                  onClick={() => handleSort("manufacturer")}
+                  onClick={() => handleSort("category")}
                 >
-                  الصانع
+                  الفئة
                   <ArrowUpDown className="mr-2 h-4 w-4" />
                 </Button>
               </TableHead>
@@ -221,8 +222,13 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
             ) : (
               filteredAndSortedItems.map((item: InventoryItem) => (
                 <TableRow key={item.id} className="hover:bg-slate-50">
-                  <TableCell className="text-sm text-slate-800">{item.category}</TableCell>
                   <TableCell className="text-sm text-slate-800">{item.manufacturer}</TableCell>
+                  <TableCell className="text-center">
+                    <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-xs text-slate-600">
+                      {item.manufacturer.charAt(0)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm text-slate-800">{item.category}</TableCell>
                   <TableCell className="text-sm text-slate-800 font-latin">{item.engineCapacity}</TableCell>
                   <TableCell className="text-sm text-slate-800 font-latin">{item.year}</TableCell>
                   <TableCell className="text-sm text-slate-800">{item.exteriorColor}</TableCell>
@@ -261,6 +267,16 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                         disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleSell(item.id)}
+                        className="text-green-600 hover:text-green-800 p-1"
+                        title="بيع"
+                        disabled={sellMutation.isPending || item.isSold}
+                      >
+                        <DollarSign className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet } from "lucide-react";
+import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table } from "lucide-react";
 import InventoryStats from "@/components/inventory-stats";
 import InventoryTable from "@/components/inventory-table";
 import InventoryForm from "@/components/inventory-form";
@@ -18,7 +19,8 @@ export default function InventoryPage() {
   const [manufacturerFilter, setManufacturerFilter] = useState("جميع الصناع");
   const [yearFilter, setYearFilter] = useState("جميع السنوات");
   const [importTypeFilter, setImportTypeFilter] = useState("جميع الأنواع");
-  const [locationFilter, setLocationFilter] = useState("جميع المواقع");
+  const [locationFilter, setLocationFilter] = useState("");
+  const [engineCapacityFilter, setEngineCapacityFilter] = useState("جميع السعات");
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<InventoryItem | undefined>(undefined);
   const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
@@ -55,7 +57,8 @@ export default function InventoryPage() {
   const categories = allCategories;
   const years = ["جميع السنوات", "2025", "2024", "2023", "2022", "2021"];
   const importTypes = ["جميع الأنواع", "شخصي", "شركة", "مستعمل شخصي"];
-  const locations = ["جميع المواقع", "المستودع الرئيسي", "المعرض", "الورشة", "الميناء", "مستودع فرعي"];
+  const locations = ["المستودع الرئيسي", "المعرض", "الورشة", "الميناء", "مستودع فرعي"];
+  const engineCapacities = ["جميع السعات", "2.0L", "1.5L", "3.0L", "4.0L", "5.0L", "V6", "V8"];
 
   const handleExport = () => {
     exportToCSV(items, "inventory-export.csv");
@@ -88,6 +91,18 @@ export default function InventoryPage() {
               <span className="text-sm text-slate-500 font-latin">Inventory Management</span>
             </div>
             <div className="flex items-center space-x-4 space-x-reverse">
+              <div className="flex items-center space-x-2 space-x-reverse border border-slate-200 rounded-lg p-1">
+                <Button variant="default" size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                  <Table size={16} className="ml-1" />
+                  جدول
+                </Button>
+                <Link href="/cards">
+                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                    <LayoutGrid size={16} className="ml-1" />
+                    بطاقات
+                  </Button>
+                </Link>
+              </div>
               <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
                 <Bell size={20} />
               </Button>
@@ -174,14 +189,14 @@ export default function InventoryPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <Select value={engineCapacityFilter} onValueChange={setEngineCapacityFilter}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
+                    {engineCapacities.map((capacity) => (
+                      <SelectItem key={capacity} value={capacity}>
+                        {capacity}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -233,7 +248,7 @@ export default function InventoryPage() {
           manufacturerFilter={manufacturerFilter}
           yearFilter={yearFilter}
           importTypeFilter={importTypeFilter}
-          locationFilter={locationFilter}
+          engineCapacityFilter={engineCapacityFilter}
           onEdit={handleEdit}
         />
 
