@@ -16,9 +16,10 @@ interface InventoryTableProps {
   manufacturerFilter: string;
   yearFilter: string;
   importTypeFilter: string;
+  onEdit?: (item: InventoryItem) => void;
 }
 
-export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter }: InventoryTableProps) {
+export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, onEdit }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<InventoryItem | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<string>("");
@@ -81,8 +82,12 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
   };
 
   const handleEdit = (item: InventoryItem) => {
-    setEditItem(item);
-    setFormOpen(true);
+    if (onEdit) {
+      onEdit(item);
+    } else {
+      setEditItem(item);
+      setFormOpen(true);
+    }
   };
 
   const handleDelete = (id: number) => {

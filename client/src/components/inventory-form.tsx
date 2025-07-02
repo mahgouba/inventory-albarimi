@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -92,6 +92,41 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
     },
   });
 
+  // Pre-populate form when editing
+  useEffect(() => {
+    if (editItem && open) {
+      form.reset({
+        category: editItem.category || "",
+        engineCapacity: editItem.engineCapacity || "",
+        year: editItem.year || 2024,
+        exteriorColor: editItem.exteriorColor || "",
+        interiorColor: editItem.interiorColor || "",
+        status: editItem.status || "",
+        importType: editItem.importType || "",
+        manufacturer: editItem.manufacturer || "",
+        chassisNumber: editItem.chassisNumber || "",
+        images: editItem.images || [],
+        notes: editItem.notes || "",
+        isSold: editItem.isSold || false,
+      });
+    } else if (!editItem && open) {
+      form.reset({
+        category: "",
+        engineCapacity: "",
+        year: 2024,
+        exteriorColor: "",
+        interiorColor: "",
+        status: "",
+        importType: "",
+        manufacturer: "",
+        chassisNumber: "",
+        images: [],
+        notes: "",
+        isSold: false,
+      });
+    }
+  }, [editItem, open, form]);
+
   const onSubmit = (data: InsertInventoryItem) => {
     if (editItem) {
       updateMutation.mutate(data);
@@ -114,6 +149,32 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Manufacturer Field - First */}
+              <FormField
+                control={form.control}
+                name="manufacturer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الصانع</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الصانع" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {manufacturers.map((manufacturer) => (
+                            <SelectItem key={manufacturer} value={manufacturer}>
+                              {manufacturer}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="category"

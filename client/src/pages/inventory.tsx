@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Plus, Download, Printer, Bell, UserCircle } from "lucide-react";
+import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet } from "lucide-react";
 import InventoryStats from "@/components/inventory-stats";
 import InventoryTable from "@/components/inventory-table";
 import InventoryForm from "@/components/inventory-form";
+import ExcelImport from "@/components/excel-import";
 import { exportToCSV, printTable } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
 
@@ -18,6 +19,8 @@ export default function InventoryPage() {
   const [yearFilter, setYearFilter] = useState("جميع السنوات");
   const [importTypeFilter, setImportTypeFilter] = useState("جميع الأنواع");
   const [formOpen, setFormOpen] = useState(false);
+  const [editItem, setEditItem] = useState<InventoryItem | undefined>(undefined);
+  const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -36,6 +39,16 @@ export default function InventoryPage() {
 
   const handlePrint = () => {
     printTable();
+  };
+
+  const handleEdit = (item: InventoryItem) => {
+    setEditItem(item);
+    setFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setFormOpen(false);
+    setEditItem(undefined);
   };
 
   const totalPages = Math.ceil(items.length / itemsPerPage);
@@ -134,13 +147,23 @@ export default function InventoryPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <Button 
-                  onClick={() => setFormOpen(true)}
-                  className="bg-teal-600 hover:bg-teal-700 text-white"
-                >
-                  <Plus className="w-4 h-4 ml-2" />
-                  إضافة عنصر
-                </Button>
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Button 
+                    onClick={() => setFormOpen(true)}
+                    className="bg-teal-600 hover:bg-teal-700 text-white"
+                  >
+                    <Plus className="w-4 h-4 ml-2" />
+                    إضافة عنصر
+                  </Button>
+                  <Button 
+                    onClick={() => setIsExcelImportOpen(true)}
+                    variant="outline"
+                    className="border-teal-600 text-teal-600 hover:bg-teal-50"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 ml-2" />
+                    استيراد Excel
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
@@ -153,6 +176,7 @@ export default function InventoryPage() {
           manufacturerFilter={manufacturerFilter}
           yearFilter={yearFilter}
           importTypeFilter={importTypeFilter}
+          onEdit={handleEdit}
         />
 
         {/* Pagination */}
@@ -213,7 +237,17 @@ export default function InventoryPage() {
       </div>
 
       {/* Add/Edit Form */}
-      <InventoryForm open={formOpen} onOpenChange={setFormOpen} />
+      <InventoryForm 
+        open={formOpen} 
+        onOpenChange={handleFormClose} 
+        editItem={editItem}
+      />
+
+      {/* Excel Import Dialog */}
+      <ExcelImport 
+        open={isExcelImportOpen} 
+        onOpenChange={setIsExcelImportOpen} 
+      />
     </div>
   );
 }
