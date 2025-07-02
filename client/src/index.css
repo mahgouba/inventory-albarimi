@@ -118,3 +118,43 @@
   .hover\:bg-amber-700:hover { background-color: var(--amber-700); }
   .hover\:text-teal-800:hover { color: var(--teal-700); }
 }
+
+/* Mobile responsiveness improvements */
+@media (max-width: 768px) {
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Header improvements for mobile */
+  header h1 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Table improvements for mobile */
+  table th,
+  table td {
+    min-width: 100px;
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.875rem !important;
+  }
+  
+  /* Form improvements for mobile */
+  .grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Touch improvements for better mobile UX */
+@media (hover: none) and (pointer: coarse) {
+  button {
+    min-height: 44px;
+  }
+  
+  input, select {
+    min-height: 44px;
+  }
+  
+  .select-trigger {
+    min-height: 44px;
+  }
+}

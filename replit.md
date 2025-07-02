@@ -124,6 +124,7 @@ Changelog:
 - July 02, 2025: Initial setup with Arabic inventory management system
 - July 02, 2025: Updated field structure - changed المهنشي to الاستيراد, added الصانع field, split colors into interior/exterior, changed الإصدار to سعة المحرك
 - July 02, 2025: Added PostgreSQL database with DatabaseStorage implementation, seeded with sample data
+- July 02, 2025: Restructured to hierarchical manufacturer → category system (مرسيدس → E200, C200, C300), auto-populated entry date, enhanced mobile responsiveness
 ```
 
 ## User Preferences

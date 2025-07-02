@@ -28,8 +28,30 @@ export default function InventoryPage() {
     queryKey: ["/api/inventory"],
   });
 
-  const categories = ["جميع الفئات", "لاتوبيغرافي", "أوتوماتيكي", "يدوي"];
-  const manufacturers = ["جميع الصناع", "مرسيدس", "لاند روفر", "بي ام دبليو", "أودي", "تويوتا", "نيسان", "هوندا", "فورد", "هيونداي"];
+  const manufacturers = ["جميع الصناع", "مرسيدس", "بي ام دبليو", "اودي", "تويوتا", "نيسان", "هوندا", "فورد", "هيونداي"];
+  
+  // Generate categories based on all possible categories from manufacturers
+  const allCategories = ["جميع الفئات"];
+  const manufacturerCategories: Record<string, string[]> = {
+    "مرسيدس": ["E200", "C200", "C300", "S500", "GLE", "CLA", "A200"],
+    "بي ام دبليو": ["X5", "X3", "X6", "320i", "520i", "730i", "M3"],
+    "اودي": ["A4", "A6", "Q5", "Q7", "A3", "TT", "RS6"],
+    "تويوتا": ["كامري", "كورولا", "لاند كروزر", "هايلاندر", "يارس", "أفالون"],
+    "نيسان": ["التيما", "ماكسيما", "باترول", "اكس تريل", "سنترا", "مورانو"],
+    "هوندا": ["أكورد", "سيفيك", "بايلوت", "CR-V", "HR-V"],
+    "فورد": ["فوكس", "فيوجن", "اكسبلورر", "F-150", "موستانغ"],
+    "هيونداي": ["النترا", "سوناتا", "توسان", "سانتا في", "أكسنت"]
+  };
+  
+  Object.values(manufacturerCategories).forEach(cats => {
+    cats.forEach(cat => {
+      if (!allCategories.includes(cat)) {
+        allCategories.push(cat);
+      }
+    });
+  });
+  
+  const categories = allCategories;
   const years = ["جميع السنوات", "2025", "2024", "2023", "2022", "2021"];
   const importTypes = ["جميع الأنواع", "شخصي", "شركة", "مستعمل شخصي"];
 
@@ -85,9 +107,10 @@ export default function InventoryPage() {
         {/* Controls */}
         <Card className="mb-8 border border-slate-200">
           <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              <div className="flex-1 max-w-lg">
-                <div className="relative">
+            <div className="flex flex-col gap-4">
+              {/* Search Bar */}
+              <div className="w-full">
+                <div className="relative max-w-md">
                   <Input
                     type="text"
                     placeholder="البحث في المخزون..."
@@ -98,9 +121,11 @@ export default function InventoryPage() {
                   <Search className="absolute right-3 top-3 h-4 w-4 text-slate-400" />
                 </div>
               </div>
-              <div className="flex items-center space-x-4 space-x-reverse">
+              
+              {/* Filter Controls */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -112,7 +137,7 @@ export default function InventoryPage() {
                   </SelectContent>
                 </Select>
                 <Select value={manufacturerFilter} onValueChange={setManufacturerFilter}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -124,7 +149,7 @@ export default function InventoryPage() {
                   </SelectContent>
                 </Select>
                 <Select value={yearFilter} onValueChange={setYearFilter}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -136,7 +161,7 @@ export default function InventoryPage() {
                   </SelectContent>
                 </Select>
                 <Select value={importTypeFilter} onValueChange={setImportTypeFilter}>
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -147,23 +172,41 @@ export default function InventoryPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Button 
-                    onClick={() => setFormOpen(true)}
-                    className="bg-teal-600 hover:bg-teal-700 text-white"
-                  >
-                    <Plus className="w-4 h-4 ml-2" />
-                    إضافة عنصر
-                  </Button>
-                  <Button 
-                    onClick={() => setIsExcelImportOpen(true)}
-                    variant="outline"
-                    className="border-teal-600 text-teal-600 hover:bg-teal-50"
-                  >
-                    <FileSpreadsheet className="w-4 h-4 ml-2" />
-                    استيراد Excel
-                  </Button>
-                </div>
+              </div>
+              
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button 
+                  onClick={() => setFormOpen(true)}
+                  className="bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto"
+                >
+                  <Plus className="w-4 h-4 ml-2" />
+                  إضافة عنصر
+                </Button>
+                <Button 
+                  onClick={() => setIsExcelImportOpen(true)}
+                  variant="outline"
+                  className="border-teal-600 text-teal-600 hover:bg-teal-50 w-full sm:w-auto"
+                >
+                  <FileSpreadsheet className="w-4 h-4 ml-2" />
+                  استيراد Excel
+                </Button>
+                <Button 
+                  onClick={handleExport}
+                  variant="outline"
+                  className="border-slate-300 text-slate-600 hover:bg-slate-50 w-full sm:w-auto"
+                >
+                  <Download className="w-4 h-4 ml-2" />
+                  تصدير CSV
+                </Button>
+                <Button 
+                  onClick={handlePrint}
+                  variant="outline"
+                  className="border-slate-300 text-slate-600 hover:bg-slate-50 w-full sm:w-auto"
+                >
+                  <Printer className="w-4 h-4 ml-2" />
+                  طباعة
+                </Button>
               </div>
             </div>
           </CardContent>

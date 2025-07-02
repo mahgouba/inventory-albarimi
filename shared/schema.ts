@@ -10,14 +10,14 @@ export const users = pgTable("users", {
 
 export const inventoryItems = pgTable("inventory_items", {
   id: serial("id").primaryKey(),
-  category: text("category").notNull(), // الفئة
+  manufacturer: text("manufacturer").notNull(), // الصانع (مرسيدس، بي ام دبليو، اودي)
+  category: text("category").notNull(), // الفئة (E200, C200, C300, X5, A4)
   engineCapacity: text("engine_capacity").notNull(), // سعة المحرك
   year: integer("year").notNull(), // السنة
   exteriorColor: text("exterior_color").notNull(), // اللون الخارجي
   interiorColor: text("interior_color").notNull(), // اللون الداخلي
   status: text("status").notNull(), // الحالة
   importType: text("import_type").notNull(), // الاستيراد (شخصي/شركة/مستعمل شخصي)
-  manufacturer: text("manufacturer").notNull(), // الصانع
   chassisNumber: text("chassis_number").notNull().unique(), // رقم الهيكل
   images: text("images").array().default([]), // الصور
   notes: text("notes"), // الملاحظات

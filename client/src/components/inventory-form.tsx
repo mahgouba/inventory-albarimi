@@ -19,21 +19,37 @@ interface InventoryFormProps {
   editItem?: InventoryItem;
 }
 
-const categories = ["لاتوبيغرافي", "أوتوماتيكي", "يدوي"];
-const engineCapacities = ["V6", "V8", "V10", "V12", "4 سلندر", "6 سلندر", "8 سلندر"];
+const manufacturerCategories: Record<string, string[]> = {
+  "مرسيدس": ["E200", "C200", "C300", "S500", "GLE", "CLA", "A200"],
+  "بي ام دبليو": ["X5", "X3", "X6", "320i", "520i", "730i", "M3"],
+  "اودي": ["A4", "A6", "Q5", "Q7", "A3", "TT", "RS6"],
+  "تويوتا": ["كامري", "كورولا", "لاند كروزر", "هايلاندر", "يارس", "أفالون"],
+  "نيسان": ["التيما", "ماكسيما", "باترول", "اكس تريل", "سنترا", "مورانو"],
+  "هوندا": ["أكورد", "سيفيك", "بايلوت", "CR-V", "HR-V"],
+  "فورد": ["فوكس", "فيوجن", "اكسبلورر", "F-150", "موستانغ"],
+  "هيونداي": ["النترا", "سوناتا", "توسان", "سانتا في", "أكسنت"]
+};
+
+const manufacturers = Object.keys(manufacturerCategories);
+const engineCapacities = ["2.0L", "1.5L", "3.0L", "4.0L", "5.0L", "V6", "V8"];
 const years = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018];
 const statuses = ["متوفر", "في الطريق", "قيد الصيانة"];
 const importTypes = ["شخصي", "شركة", "مستعمل شخصي"];
-const manufacturers = ["مرسيدس", "لاند روفر", "بي ام دبليو", "أودي", "تويوتا", "نيسان", "هوندا", "فورد", "هيونداي"];
-const colors = ["أسود", "أبيض", "رمادي", "أزرق", "أحمر", "بني", "فضي", "ذهبي"];
+const colors = ["أسود", "أبيض", "رمادي", "أزرق", "أحمر", "بني", "فضي", "ذهبي", "بيج"];
 
 export default function InventoryForm({ open, onOpenChange, editItem }: InventoryFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  const [selectedManufacturer, setSelectedManufacturer] = useState(editItem?.manufacturer || "");
+  const [availableCategories, setAvailableCategories] = useState<string[]>(
+    editItem?.manufacturer ? manufacturerCategories[editItem.manufacturer] || [] : []
+  );
 
   const form = useForm<InsertInventoryItem>({
     resolver: zodResolver(insertInventoryItemSchema),
     defaultValues: editItem || {
+      manufacturer: "",
       category: "",
       engineCapacity: "",
       year: new Date().getFullYear(),
@@ -41,13 +57,31 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
       interiorColor: "",
       status: "",
       importType: "",
-      manufacturer: "",
       chassisNumber: "",
       images: [],
       notes: "",
       isSold: false,
     },
   });
+
+  // Handle manufacturer change
+  const handleManufacturerChange = (manufacturer: string) => {
+    setSelectedManufacturer(manufacturer);
+    setAvailableCategories(manufacturerCategories[manufacturer] || []);
+    
+    // Reset category when manufacturer changes
+    form.setValue("manufacturer", manufacturer);
+    form.setValue("category", "");
+  };
+
+  // Update form when editItem changes
+  useEffect(() => {
+    if (editItem) {
+      form.reset(editItem);
+      setSelectedManufacturer(editItem.manufacturer);
+      setAvailableCategories(manufacturerCategories[editItem.manufacturer] || []);
+    }
+  }, [editItem, form]);
 
   const createMutation = useMutation({
     mutationFn: (data: InsertInventoryItem) => apiRequest("POST", "/api/inventory", data),
@@ -92,40 +126,7 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
     },
   });
 
-  // Pre-populate form when editing
-  useEffect(() => {
-    if (editItem && open) {
-      form.reset({
-        category: editItem.category || "",
-        engineCapacity: editItem.engineCapacity || "",
-        year: editItem.year || 2024,
-        exteriorColor: editItem.exteriorColor || "",
-        interiorColor: editItem.interiorColor || "",
-        status: editItem.status || "",
-        importType: editItem.importType || "",
-        manufacturer: editItem.manufacturer || "",
-        chassisNumber: editItem.chassisNumber || "",
-        images: editItem.images || [],
-        notes: editItem.notes || "",
-        isSold: editItem.isSold || false,
-      });
-    } else if (!editItem && open) {
-      form.reset({
-        category: "",
-        engineCapacity: "",
-        year: 2024,
-        exteriorColor: "",
-        interiorColor: "",
-        status: "",
-        importType: "",
-        manufacturer: "",
-        chassisNumber: "",
-        images: [],
-        notes: "",
-        isSold: false,
-      });
-    }
-  }, [editItem, open, form]);
+
 
   const onSubmit = (data: InsertInventoryItem) => {
     if (editItem) {
@@ -139,7 +140,7 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-screen overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-screen overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-slate-800">
             {editItem ? "تحرير العنصر" : "إضافة عنصر جديد"}
@@ -157,7 +158,13 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>الصانع</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select 
+                        onValueChange={(value) => {
+                          handleManufacturerChange(value);
+                          field.onChange(value);
+                        }} 
+                        value={field.value}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="اختر الصانع" />
                         </SelectTrigger>
@@ -182,16 +189,22 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>الفئة</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <SelectTrigger>
                           <SelectValue placeholder="اختر الفئة" />
                         </SelectTrigger>
                         <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
+                          {availableCategories.length > 0 ? (
+                            availableCategories.map((category) => (
+                              <SelectItem key={category} value={category}>
+                                {category}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem disabled value="no-manufacturer">
+                              يرجى اختيار الصانع أولاً
                             </SelectItem>
-                          ))}
+                          )}
                         </SelectContent>
                       </Select>
                     </FormControl>
