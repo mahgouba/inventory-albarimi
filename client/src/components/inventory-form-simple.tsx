@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertInventoryItemSchema, type InsertInventoryItem, type InventoryItem } from "@shared/schema";
 import { CloudUpload, Settings } from "lucide-react";
-import ListManager from "@/components/list-manager";
+import ListManagerSimple from "@/components/list-manager-simple";
 import ManufacturerCategoriesButton from "@/components/manufacturer-categories-button";
 
 interface InventoryFormProps {
@@ -163,15 +163,32 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
     }
   };
 
-  const setOptionsForType = (type: string, newOptions: string[]) => {
+  const setOptionsForType = (type: string, newList: string[] | Record<string, string[]>) => {
     switch (type) {
-      case "manufacturers": setManufacturers(newOptions); break;
-      case "engineCapacities": setEngineCapacities(newOptions); break;
-      case "statuses": setStatuses(newOptions); break;
-      case "importTypes": setImportTypes(newOptions); break;
-      case "locations": setLocations(newOptions); break;
-      case "exteriorColors": setExteriorColors(newOptions); break;
-      case "interiorColors": setInteriorColors(newOptions); break;
+      case "manufacturers": 
+        setManufacturers(newList as string[]); 
+        break;
+      case "manufacturerCategories": 
+        setLocalManufacturerCategories(newList as Record<string, string[]>); 
+        break;
+      case "engineCapacities": 
+        setEngineCapacities(newList as string[]); 
+        break;
+      case "statuses": 
+        setStatuses(newList as string[]); 
+        break;
+      case "importTypes": 
+        setImportTypes(newList as string[]); 
+        break;
+      case "locations": 
+        setLocations(newList as string[]); 
+        break;
+      case "exteriorColors": 
+        setExteriorColors(newList as string[]); 
+        break;
+      case "interiorColors": 
+        setInteriorColors(newList as string[]); 
+        break;
     }
   };
 
@@ -557,7 +574,7 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
       </Dialog>
 
       {/* List Manager Dialog */}
-      <ListManager
+      <ListManagerSimple
         open={showListManager}
         onOpenChange={setShowListManager}
         listsData={{
@@ -569,7 +586,7 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
           exteriorColors,
           interiorColors,
         }}
-        onSave={setOptionsForType}
+        onSave={(type, newList) => setOptionsForType(type, newList as string[])}
       />
     </>
   );

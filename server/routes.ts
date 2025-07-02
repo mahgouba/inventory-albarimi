@@ -164,8 +164,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create inventory item
   app.post("/api/inventory", async (req, res) => {
     try {
+      console.log("Received data:", req.body);
       const validation = insertInventoryItemSchema.safeParse(req.body);
       if (!validation.success) {
+        console.log("Validation errors:", validation.error.errors);
         return res.status(400).json({ 
           message: "Invalid data", 
           errors: validation.error.errors 
@@ -175,7 +177,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const item = await storage.createInventoryItem(validation.data);
       res.status(201).json(item);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create inventory item" });
+      console.error("Create inventory item error:", error);
+      res.status(500).json({ message: "Failed to create inventory item", error: error.message });
     }
   });
 

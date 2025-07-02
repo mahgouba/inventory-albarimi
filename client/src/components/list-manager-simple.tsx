@@ -5,10 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Trash2, Edit2, Plus, Check, X, Settings, Car, Factory } from "lucide-react";
+import { Trash2, Edit2, Plus, Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -26,7 +23,6 @@ interface ListManagerProps {
   onOpenChange: (open: boolean) => void;
   listsData: {
     manufacturers: string[];
-    manufacturerCategories: Record<string, string[]>; // { "مرسيدس": ["E200", "C200"], "بي ام دبليو": ["X5", "X3"] }
     engineCapacities: string[];
     statuses: string[];
     importTypes: string[];
@@ -34,24 +30,21 @@ interface ListManagerProps {
     exteriorColors: string[];
     interiorColors: string[];
   };
-  onSave: (type: string, newList: string[] | Record<string, string[]>) => void;
+  onSave: (type: string, newList: string[]) => void;
 }
 
-export default function ListManager({ open, onOpenChange, listsData, onSave }: ListManagerProps) {
+export default function ListManagerSimple({ open, onOpenChange, listsData, onSave }: ListManagerProps) {
   const { toast } = useToast();
   const [editingItem, setEditingItem] = useState<{type: string, index: number, value: string} | null>(null);
   const [newItem, setNewItem] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState<{type: string, index: number, value: string} | null>(null);
-  const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
-  const [newCategory, setNewCategory] = useState("");
 
   const listConfigs = [
     { key: "manufacturers", label: "الشركات المصنعة", color: "bg-blue-100 text-blue-800" },
-    { key: "manufacturerCategories", label: "فئات الشركات المصنعة", color: "bg-indigo-100 text-indigo-800" },
     { key: "engineCapacities", label: "سعات المحرك", color: "bg-green-100 text-green-800" },
-    { key: "statuses", label: "حالات المركبة", color: "bg-purple-100 text-purple-800" },
-    { key: "importTypes", label: "أنواع الاستيراد", color: "bg-orange-100 text-orange-800" },
-    { key: "locations", label: "المواقع", color: "bg-teal-100 text-teal-800" },
+    { key: "statuses", label: "حالات المركبة", color: "bg-yellow-100 text-yellow-800" },
+    { key: "importTypes", label: "أنواع الاستيراد", color: "bg-purple-100 text-purple-800" },
+    { key: "locations", label: "المواقع", color: "bg-orange-100 text-orange-800" },
     { key: "exteriorColors", label: "الألوان الخارجية", color: "bg-red-100 text-red-800" },
     { key: "interiorColors", label: "الألوان الداخلية", color: "bg-pink-100 text-pink-800" }
   ];
@@ -66,7 +59,7 @@ export default function ListManager({ open, onOpenChange, listsData, onSave }: L
       return;
     }
 
-    const currentList = listsData[type as keyof typeof listsData] || [];
+    const currentList = (listsData[type as keyof typeof listsData] || []) as string[];
     if (currentList.includes(newItem.trim())) {
       toast({
         title: "خطأ",
@@ -86,7 +79,6 @@ export default function ListManager({ open, onOpenChange, listsData, onSave }: L
   };
 
   const handleEditItem = (type: string, index: number, newValue: string) => {
-    const currentList = listsData[type as keyof typeof listsData] || [];
     if (!newValue.trim()) {
       toast({
         title: "خطأ",
@@ -96,6 +88,7 @@ export default function ListManager({ open, onOpenChange, listsData, onSave }: L
       return;
     }
 
+    const currentList = (listsData[type as keyof typeof listsData] || []) as string[];
     if (currentList.includes(newValue.trim()) && currentList[index] !== newValue.trim()) {
       toast({
         title: "خطأ",
@@ -119,7 +112,7 @@ export default function ListManager({ open, onOpenChange, listsData, onSave }: L
     if (!showDeleteDialog) return;
     
     const { type, index } = showDeleteDialog;
-    const currentList = listsData[type as keyof typeof listsData] || [];
+    const currentList = (listsData[type as keyof typeof listsData] || []) as string[];
     const newList = currentList.filter((_, i) => i !== index);
     onSave(type, newList);
     setShowDeleteDialog(null);
@@ -202,6 +195,11 @@ export default function ListManager({ open, onOpenChange, listsData, onSave }: L
             )}
           </div>
         ))}
+        {items.length === 0 && (
+          <div className="text-center text-gray-500 py-4">
+            لا توجد عناصر
+          </div>
+        )}
       </div>
     </div>
   );
@@ -211,20 +209,18 @@ export default function ListManager({ open, onOpenChange, listsData, onSave }: L
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800">
-              إدارة قوائم الخيارات
-            </DialogTitle>
+            <DialogTitle>إدارة قوائم الخيارات</DialogTitle>
           </DialogHeader>
-
+          
           <Tabs defaultValue="manufacturers" className="w-full">
-            <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
+            <TabsList className="grid w-full grid-cols-7">
               {listConfigs.map((config) => (
                 <TabsTrigger 
                   key={config.key} 
                   value={config.key}
                   className="text-xs"
                 >
-                  {config.label}
+                  {config.label.split(' ')[0]}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -235,12 +231,12 @@ export default function ListManager({ open, onOpenChange, listsData, onSave }: L
                   <div className="flex items-center justify-between">
                     <Label className="text-lg font-semibold">{config.label}</Label>
                     <Badge variant="outline">
-                      {(listsData[config.key as keyof typeof listsData] || []).length} عنصر
+                      {((listsData[config.key as keyof typeof listsData] || []) as string[]).length} عنصر
                     </Badge>
                   </div>
                   {renderListItems(
                     config.key, 
-                    listsData[config.key as keyof typeof listsData] || [], 
+                    (listsData[config.key as keyof typeof listsData] || []) as string[], 
                     config.color
                   )}
                 </div>
