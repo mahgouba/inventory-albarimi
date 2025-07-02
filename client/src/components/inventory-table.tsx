@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye, Images, ArrowUpDown } from "lucide-react";
+import { Edit, Trash2, Eye, Images, ArrowUpDown, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { getStatusColor } from "@/lib/utils";
@@ -15,9 +15,10 @@ interface InventoryTableProps {
   categoryFilter: string;
   manufacturerFilter: string;
   yearFilter: string;
+  importTypeFilter: string;
 }
 
-export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter }: InventoryTableProps) {
+export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<InventoryItem | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<string>("");
@@ -35,6 +36,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
       toast({
         title: "تم بنجاح",
         description: "تم حذف العنصر بنجاح",
@@ -44,6 +46,26 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
       toast({
         title: "خطأ",
         description: "فشل في حذف العنصر",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const sellMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/inventory/${id}/sell`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+      toast({
+        title: "تم بنجاح",
+        description: "تم تحديد السيارة كمباعة",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في تحديد السيارة كمباعة",
         variant: "destructive",
       });
     },
@@ -69,6 +91,12 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
     }
   };
 
+  const handleSell = (id: number) => {
+    if (window.confirm("هل أنت متأكد من تحديد هذه السيارة كمباعة؟")) {
+      sellMutation.mutate(id);
+    }
+  };
+
   const filteredAndSortedItems = items
     .filter((item: InventoryItem) => {
       const matchesSearch = !searchQuery || 
@@ -78,8 +106,9 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
       const matchesCategory = !categoryFilter || categoryFilter === "جميع الفئات" || item.category === categoryFilter;
       const matchesManufacturer = !manufacturerFilter || manufacturerFilter === "جميع الصناع" || item.manufacturer === manufacturerFilter;
       const matchesYear = !yearFilter || yearFilter === "جميع السنوات" || item.year.toString() === yearFilter;
+      const matchesImportType = !importTypeFilter || importTypeFilter === "جميع الأنواع" || item.importType === importTypeFilter;
       
-      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear;
+      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType;
     })
     .sort((a: InventoryItem, b: InventoryItem) => {
       if (!sortColumn) return 0;
@@ -159,13 +188,15 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
               <TableHead className="text-white text-right">الاستيراد</TableHead>
               <TableHead className="text-white text-right">رقم الهيكل</TableHead>
               <TableHead className="text-white text-right">الصور</TableHead>
+              <TableHead className="text-white text-right">تاريخ الدخول</TableHead>
+              <TableHead className="text-white text-right">الملاحظات</TableHead>
               <TableHead className="text-white text-right">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredAndSortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={11} className="text-center py-8">
+                <TableCell colSpan={13} className="text-center py-8">
                   <p className="text-slate-500">لا توجد عناصر للعرض</p>
                 </TableCell>
               </TableRow>

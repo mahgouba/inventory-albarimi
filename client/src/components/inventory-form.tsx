@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -20,10 +21,11 @@ interface InventoryFormProps {
 
 const categories = ["لاتوبيغرافي", "أوتوماتيكي", "يدوي"];
 const engineCapacities = ["V6", "V8", "V10", "V12", "4 سلندر", "6 سلندر", "8 سلندر"];
-const years = [2025, 2024, 2023, 2022];
+const years = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018];
 const statuses = ["متوفر", "في الطريق", "قيد الصيانة"];
 const importTypes = ["شخصي", "شركة", "مستعمل شخصي"];
-const manufacturers = ["مرسيدس", "لاند روفر", "BMW", "أودي", "تويوتا", "نيسان", "هوندا"];
+const manufacturers = ["مرسيدس", "لاند روفر", "بي ام دبليو", "أودي", "تويوتا", "نيسان", "هوندا", "فورد", "هيونداي"];
+const colors = ["أسود", "أبيض", "رمادي", "أزرق", "أحمر", "بني", "فضي", "ذهبي"];
 
 export default function InventoryForm({ open, onOpenChange, editItem }: InventoryFormProps) {
   const { toast } = useToast();
@@ -42,6 +44,8 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
       manufacturer: "",
       chassisNumber: "",
       images: [],
+      notes: "",
+      isSold: false,
     },
   });
 
@@ -218,7 +222,18 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>اللون الخارجي</FormLabel>
                     <FormControl>
-                      <Input placeholder="اللون الخارجي" {...field} />
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر اللون الخارجي" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {colors.map((color) => (
+                            <SelectItem key={color} value={color}>
+                              {color}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -232,7 +247,18 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>اللون الداخلي</FormLabel>
                     <FormControl>
-                      <Input placeholder="اللون الداخلي" {...field} />
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر اللون الداخلي" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {colors.map((color) => (
+                            <SelectItem key={color} value={color}>
+                              {color}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -254,6 +280,31 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                           {importTypes.map((type) => (
                             <SelectItem key={type} value={type}>
                               {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="manufacturer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الصانع</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الصانع" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {manufacturers.map((manufacturer) => (
+                            <SelectItem key={manufacturer} value={manufacturer}>
+                              {manufacturer}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -293,7 +344,7 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                 control={form.control}
                 name="chassisNumber"
                 render={({ field }) => (
-                  <FormItem className="md:col-span-2">
+                  <FormItem>
                     <FormLabel>رقم الهيكل</FormLabel>
                     <FormControl>
                       <Input placeholder="WASSBER0000000" className="font-latin" {...field} />
@@ -303,14 +354,42 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                 )}
               />
 
-              <div className="md:col-span-2">
-                <FormLabel>الصور</FormLabel>
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center mt-2">
-                  <CloudUpload className="mx-auto text-3xl text-slate-400 mb-2" size={48} />
-                  <p className="text-sm text-slate-600">اسحب الصور هنا أو انقر للتحميل</p>
-                  <input type="file" className="hidden" multiple accept="image/*" />
-                </div>
-              </div>
+              <FormField
+                control={form.control}
+                name="images"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>رابط الصورة</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="https://example.com/image.jpg" 
+                        value={Array.isArray(field.value) ? field.value.join(', ') : field.value || ''}
+                        onChange={(e) => field.onChange(e.target.value ? [e.target.value] : [])}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>الملاحظات</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="أدخل الملاحظات هنا..."
+                        className="min-h-[100px]"
+                        value={field.value || ""}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div className="flex justify-end space-x-4 space-x-reverse pt-6 border-t border-slate-200">

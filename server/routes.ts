@@ -39,20 +39,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Filter inventory items
+  // Filter inventory items  
   app.get("/api/inventory/filter", async (req, res) => {
     try {
-      const { category, status, year } = req.query;
-      const filters: { category?: string; status?: string; year?: number } = {};
+      const { category, status, year, manufacturer, importType } = req.query;
+      const filters: { 
+        category?: string; 
+        status?: string; 
+        year?: number; 
+        manufacturer?: string;
+        importType?: string;
+      } = {};
       
       if (category) filters.category = category as string;
       if (status) filters.status = status as string;
       if (year) filters.year = parseInt(year as string);
+      if (manufacturer) filters.manufacturer = manufacturer as string;
+      if (importType) filters.importType = importType as string;
       
       const items = await storage.filterInventoryItems(filters);
       res.json(items);
     } catch (error) {
       res.status(500).json({ message: "Failed to filter inventory items" });
+    }
+  });
+
+  // Get manufacturer statistics
+  app.get("/api/inventory/manufacturer-stats", async (req, res) => {
+    try {
+      const stats = await storage.getManufacturerStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch manufacturer stats" });
+    }
+  });
+
+  // Mark item as sold
+  app.post("/api/inventory/:id/sell", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid item ID" });
+      }
+      
+      const success = await storage.markAsSold(id);
+      if (!success) {
+        return res.status(404).json({ message: "Item not found" });
+      }
+      
+      res.json({ message: "Item marked as sold successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark item as sold" });
     }
   });
 

@@ -1,27 +1,54 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { Package, Truck, CheckCircle, Wrench } from "lucide-react";
+import { Package, Truck, CheckCircle, Wrench, ShoppingCart, User, Building, Users } from "lucide-react";
+
+// Manufacturer logos mapping
+const manufacturerLogos: { [key: string]: string } = {
+  "مرسيدس": "🔹",
+  "لاند روفر": "🟢", 
+  "تويوتا": "🔴",
+  "بي ام دبليو": "🔵",
+  "اودي": "⚪",
+  "فورد": "⚫",
+  "نيسان": "🔺",
+  "هيونداي": "🔶",
+};
 
 export default function InventoryStats() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["/api/inventory/stats"],
   });
 
-  if (isLoading) {
+  const { data: manufacturerStats, isLoading: isLoadingManufacturers } = useQuery({
+    queryKey: ["/api/inventory/manufacturer-stats"],
+  });
+
+  if (isLoading || isLoadingManufacturers) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {[1, 2, 3, 4].map((i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="h-16 bg-gray-200 rounded"></div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-16 bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-6">
+                <div className="h-24 bg-gray-200 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
-  const statsData = [
+  const mainStatsData = [
     {
       title: "إجمالي العناصر",
       value: stats?.total || 0,
@@ -48,23 +75,106 @@ export default function InventoryStats() {
     },
   ];
 
+  const importStatsData = [
+    {
+      title: "شخصي",
+      value: stats?.personal || 0,
+      icon: User,
+      color: "bg-blue-100 text-blue-600",
+    },
+    {
+      title: "شركة",
+      value: stats?.company || 0,
+      icon: Building,
+      color: "bg-purple-100 text-purple-600",
+    },
+    {
+      title: "مستعمل شخصي",
+      value: stats?.usedPersonal || 0,
+      icon: Users,
+      color: "bg-orange-100 text-orange-600",
+    },
+    {
+      title: "مباع",
+      value: stats?.sold || 0,
+      icon: ShoppingCart,
+      color: "bg-red-100 text-red-600",
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-      {statsData.map((stat, index) => (
-        <Card key={index} className="border border-slate-200">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">{stat.title}</p>
-                <p className="text-3xl font-bold text-slate-800">{stat.value}</p>
+    <div className="space-y-6 mb-8">
+      {/* Main Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {mainStatsData.map((stat, index) => (
+          <Card key={index} className="border border-slate-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">{stat.title}</p>
+                  <p className="text-3xl font-bold text-slate-800">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-full ${stat.color}`}>
+                  <stat.icon className="text-xl" size={24} />
+                </div>
               </div>
-              <div className={`p-3 rounded-full ${stat.color}`}>
-                <stat.icon className="text-xl" size={24} />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Import Type Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {importStatsData.map((stat, index) => (
+          <Card key={index} className="border border-slate-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">{stat.title}</p>
+                  <p className="text-2xl font-bold text-slate-800">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-full ${stat.color}`}>
+                  <stat.icon className="text-xl" size={20} />
+                </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Manufacturer Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {manufacturerStats?.slice(0, 6).map((manufacturer: any, index: number) => (
+          <Card key={index} className="border border-slate-200">
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <span className="text-2xl">{manufacturerLogos[manufacturer.manufacturer] || "🔸"}</span>
+                {manufacturer.manufacturer}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm text-slate-600">إجمالي:</span>
+                  <span className="font-semibold">{manufacturer.total}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-slate-600">شخصي:</span>
+                  <span className="font-medium text-blue-600">{manufacturer.personal}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-slate-600">شركة:</span>
+                  <span className="font-medium text-purple-600">{manufacturer.company}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm text-slate-600">مستعمل:</span>
+                  <span className="font-medium text-orange-600">{manufacturer.usedPersonal}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

@@ -14,8 +14,31 @@ export interface IStorage {
   updateInventoryItem(id: number, item: Partial<InsertInventoryItem>): Promise<InventoryItem | undefined>;
   deleteInventoryItem(id: number): Promise<boolean>;
   searchInventoryItems(query: string): Promise<InventoryItem[]>;
-  filterInventoryItems(filters: { category?: string; status?: string; year?: number }): Promise<InventoryItem[]>;
-  getInventoryStats(): Promise<{ total: number; available: number; inTransit: number; maintenance: number }>;
+  filterInventoryItems(filters: { 
+    category?: string; 
+    status?: string; 
+    year?: number; 
+    manufacturer?: string;
+    importType?: string;
+  }): Promise<InventoryItem[]>;
+  getInventoryStats(): Promise<{ 
+    total: number; 
+    available: number; 
+    inTransit: number; 
+    maintenance: number;
+    sold: number;
+    personal: number;
+    company: number;
+    usedPersonal: number;
+  }>;
+  getManufacturerStats(): Promise<Array<{
+    manufacturer: string;
+    total: number;
+    personal: number;
+    company: number;
+    usedPersonal: number;
+  }>>;
+  markAsSold(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -130,7 +153,14 @@ export class MemStorage implements IStorage {
 
   async createInventoryItem(insertItem: InsertInventoryItem): Promise<InventoryItem> {
     const id = this.currentInventoryId++;
-    const item: InventoryItem = { ...insertItem, id };
+    const item: InventoryItem = { 
+      ...insertItem, 
+      id, 
+      entryDate: new Date(),
+      isSold: insertItem.isSold || false,
+      images: insertItem.images || [],
+      notes: insertItem.notes || null
+    };
     this.inventoryItems.set(id, item);
     return item;
   }
@@ -162,23 +192,76 @@ export class MemStorage implements IStorage {
     );
   }
 
-  async filterInventoryItems(filters: { category?: string; status?: string; year?: number }): Promise<InventoryItem[]> {
+  async filterInventoryItems(filters: { 
+    category?: string; 
+    status?: string; 
+    year?: number; 
+    manufacturer?: string;
+    importType?: string;
+  }): Promise<InventoryItem[]> {
     return Array.from(this.inventoryItems.values()).filter(item => {
       if (filters.category && item.category !== filters.category) return false;
       if (filters.status && item.status !== filters.status) return false;
       if (filters.year && item.year !== filters.year) return false;
+      if (filters.manufacturer && item.manufacturer !== filters.manufacturer) return false;
+      if (filters.importType && item.importType !== filters.importType) return false;
       return true;
     });
   }
 
-  async getInventoryStats(): Promise<{ total: number; available: number; inTransit: number; maintenance: number }> {
+  async getInventoryStats(): Promise<{ 
+    total: number; 
+    available: number; 
+    inTransit: number; 
+    maintenance: number;
+    sold: number;
+    personal: number;
+    company: number;
+    usedPersonal: number;
+  }> {
     const items = Array.from(this.inventoryItems.values());
     return {
       total: items.length,
       available: items.filter(item => item.status === "متوفر").length,
       inTransit: items.filter(item => item.status === "في الطريق").length,
-      maintenance: items.filter(item => item.status === "قيد الصيانة").length
+      maintenance: items.filter(item => item.status === "قيد الصيانة").length,
+      sold: items.filter(item => item.isSold).length,
+      personal: items.filter(item => item.importType === "شخصي").length,
+      company: items.filter(item => item.importType === "شركة").length,
+      usedPersonal: items.filter(item => item.importType === "مستعمل شخصي").length,
     };
+  }
+
+  async getManufacturerStats(): Promise<Array<{
+    manufacturer: string;
+    total: number;
+    personal: number;
+    company: number;
+    usedPersonal: number;
+  }>> {
+    const items = Array.from(this.inventoryItems.values());
+    const manufacturerSet = new Set(items.map(item => item.manufacturer));
+    const manufacturers = Array.from(manufacturerSet);
+    
+    return manufacturers.map(manufacturer => {
+      const manufacturerItems = items.filter(item => item.manufacturer === manufacturer);
+      return {
+        manufacturer,
+        total: manufacturerItems.length,
+        personal: manufacturerItems.filter(item => item.importType === "شخصي").length,
+        company: manufacturerItems.filter(item => item.importType === "شركة").length,
+        usedPersonal: manufacturerItems.filter(item => item.importType === "مستعمل شخصي").length,
+      };
+    });
+  }
+
+  async markAsSold(id: number): Promise<boolean> {
+    const item = this.inventoryItems.get(id);
+    if (!item) return false;
+    
+    const updatedItem = { ...item, isSold: true };
+    this.inventoryItems.set(id, updatedItem);
+    return true;
   }
 }
 
@@ -229,7 +312,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteInventoryItem(id: number): Promise<boolean> {
     const result = await db.delete(inventoryItems).where(eq(inventoryItems.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount ?? 0) > 0;
   }
 
   async searchInventoryItems(query: string): Promise<InventoryItem[]> {
@@ -247,24 +330,76 @@ export class DatabaseStorage implements IStorage {
     );
   }
 
-  async filterInventoryItems(filters: { category?: string; status?: string; year?: number }): Promise<InventoryItem[]> {
+  async filterInventoryItems(filters: { 
+    category?: string; 
+    status?: string; 
+    year?: number; 
+    manufacturer?: string;
+    importType?: string;
+  }): Promise<InventoryItem[]> {
     const items = await db.select().from(inventoryItems);
     return items.filter(item => {
       if (filters.category && item.category !== filters.category) return false;
       if (filters.status && item.status !== filters.status) return false;
       if (filters.year && item.year !== filters.year) return false;
+      if (filters.manufacturer && item.manufacturer !== filters.manufacturer) return false;
+      if (filters.importType && item.importType !== filters.importType) return false;
       return true;
     });
   }
 
-  async getInventoryStats(): Promise<{ total: number; available: number; inTransit: number; maintenance: number }> {
+  async getInventoryStats(): Promise<{ 
+    total: number; 
+    available: number; 
+    inTransit: number; 
+    maintenance: number;
+    sold: number;
+    personal: number;
+    company: number;
+    usedPersonal: number;
+  }> {
     const items = await db.select().from(inventoryItems);
     return {
       total: items.length,
       available: items.filter(item => item.status === "متوفر").length,
       inTransit: items.filter(item => item.status === "في الطريق").length,
-      maintenance: items.filter(item => item.status === "قيد الصيانة").length
+      maintenance: items.filter(item => item.status === "قيد الصيانة").length,
+      sold: items.filter(item => item.isSold).length,
+      personal: items.filter(item => item.importType === "شخصي").length,
+      company: items.filter(item => item.importType === "شركة").length,
+      usedPersonal: items.filter(item => item.importType === "مستعمل شخصي").length,
     };
+  }
+
+  async getManufacturerStats(): Promise<Array<{
+    manufacturer: string;
+    total: number;
+    personal: number;
+    company: number;
+    usedPersonal: number;
+  }>> {
+    const items = await db.select().from(inventoryItems);
+    const manufacturerSet = new Set(items.map(item => item.manufacturer));
+    const manufacturers = Array.from(manufacturerSet);
+    
+    return manufacturers.map(manufacturer => {
+      const manufacturerItems = items.filter(item => item.manufacturer === manufacturer);
+      return {
+        manufacturer,
+        total: manufacturerItems.length,
+        personal: manufacturerItems.filter(item => item.importType === "شخصي").length,
+        company: manufacturerItems.filter(item => item.importType === "شركة").length,
+        usedPersonal: manufacturerItems.filter(item => item.importType === "مستعمل شخصي").length,
+      };
+    });
+  }
+
+  async markAsSold(id: number): Promise<boolean> {
+    const result = await db
+      .update(inventoryItems)
+      .set({ isSold: true })
+      .where(eq(inventoryItems.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 

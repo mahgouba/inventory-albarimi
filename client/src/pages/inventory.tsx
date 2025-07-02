@@ -16,6 +16,7 @@ export default function InventoryPage() {
   const [categoryFilter, setCategoryFilter] = useState("جميع الفئات");
   const [manufacturerFilter, setManufacturerFilter] = useState("جميع الصناع");
   const [yearFilter, setYearFilter] = useState("جميع السنوات");
+  const [importTypeFilter, setImportTypeFilter] = useState("جميع الأنواع");
   const [formOpen, setFormOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -25,8 +26,9 @@ export default function InventoryPage() {
   });
 
   const categories = ["جميع الفئات", "لاتوبيغرافي", "أوتوماتيكي", "يدوي"];
-  const manufacturers = ["جميع الصناع", "مرسيدس", "لاند روفر", "BMW", "أودي", "تويوتا", "نيسان", "هوندا"];
-  const years = ["جميع السنوات", "2025", "2024", "2023"];
+  const manufacturers = ["جميع الصناع", "مرسيدس", "لاند روفر", "بي ام دبليو", "أودي", "تويوتا", "نيسان", "هوندا", "فورد", "هيونداي"];
+  const years = ["جميع السنوات", "2025", "2024", "2023", "2022", "2021"];
+  const importTypes = ["جميع الأنواع", "شخصي", "شركة", "مستعمل شخصي"];
 
   const handleExport = () => {
     exportToCSV(items, "inventory-export.csv");
@@ -120,6 +122,18 @@ export default function InventoryPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                <Select value={importTypeFilter} onValueChange={setImportTypeFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {importTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button 
                   onClick={() => setFormOpen(true)}
                   className="bg-teal-600 hover:bg-teal-700 text-white"
@@ -138,6 +152,7 @@ export default function InventoryPage() {
           categoryFilter={categoryFilter}
           manufacturerFilter={manufacturerFilter}
           yearFilter={yearFilter}
+          importTypeFilter={importTypeFilter}
         />
 
         {/* Pagination */}

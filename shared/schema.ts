@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -20,6 +20,9 @@ export const inventoryItems = pgTable("inventory_items", {
   manufacturer: text("manufacturer").notNull(), // الصانع
   chassisNumber: text("chassis_number").notNull().unique(), // رقم الهيكل
   images: text("images").array().default([]), // الصور
+  notes: text("notes"), // الملاحظات
+  entryDate: timestamp("entry_date").defaultNow().notNull(), // تاريخ الدخول
+  isSold: boolean("is_sold").default(false).notNull(), // مباع
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -29,6 +32,7 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export const insertInventoryItemSchema = createInsertSchema(inventoryItems).omit({
   id: true,
+  entryDate: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;

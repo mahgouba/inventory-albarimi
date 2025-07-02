@@ -15,7 +15,9 @@ async function seedDatabase() {
       importType: "شخصي",
       manufacturer: "مرسيدس",
       chassisNumber: "WASSBER0056464",
-      images: []
+      images: [],
+      notes: "سيارة جديدة وصلت من المعرض",
+      isSold: false
     },
     {
       category: "لاتوبيغرافي",
@@ -27,7 +29,9 @@ async function seedDatabase() {
       importType: "شركة",
       manufacturer: "لاند روفر",
       chassisNumber: "WASSBER0056465",
-      images: []
+      images: ["https://example.com/car1.jpg"],
+      notes: "للشركة الرئيسية",
+      isSold: false
     },
     {
       category: "لاتوبيغرافي",
@@ -39,7 +43,9 @@ async function seedDatabase() {
       importType: "مستعمل شخصي",
       manufacturer: "مرسيدس",
       chassisNumber: "WASSBER0056466",
-      images: []
+      images: [],
+      notes: "حالة ممتازة",
+      isSold: true
     },
     {
       category: "أوتوماتيكي",
@@ -51,7 +57,9 @@ async function seedDatabase() {
       importType: "شخصي",
       manufacturer: "لاند روفر",
       chassisNumber: "WASSBER0087523",
-      images: []
+      images: [],
+      notes: "تحتاج صيانة دورية",
+      isSold: false
     },
     {
       category: "يدوي",
@@ -61,9 +69,11 @@ async function seedDatabase() {
       interiorColor: "أسود",
       status: "متوفر",
       importType: "شركة",
-      manufacturer: "مرسيدس",
+      manufacturer: "بي ام دبليو",
       chassisNumber: "WASSBER0098765",
-      images: []
+      images: ["https://example.com/bmw1.jpg"],
+      notes: "موديل حديث",
+      isSold: false
     }
   ];
 
