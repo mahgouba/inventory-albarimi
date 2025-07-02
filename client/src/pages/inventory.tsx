@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table } from "lucide-react";
+import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign } from "lucide-react";
 import InventoryStats from "@/components/inventory-stats";
 import InventoryTable from "@/components/inventory-table";
 import InventoryForm from "@/components/inventory-form";
@@ -25,6 +25,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
   const [importTypeFilter, setImportTypeFilter] = useState("جميع الأنواع");
   const [locationFilter, setLocationFilter] = useState("");
   const [engineCapacityFilter, setEngineCapacityFilter] = useState("جميع السعات");
+  const [showSoldCars, setShowSoldCars] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<InventoryItem | undefined>(undefined);
   const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
@@ -240,6 +241,14 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                   <Printer className="w-4 h-4 ml-2" />
                   طباعة
                 </Button>
+                <Button 
+                  onClick={() => setShowSoldCars(!showSoldCars)}
+                  variant={showSoldCars ? "default" : "outline"}
+                  className={showSoldCars ? "bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto" : "border-red-300 text-red-600 hover:bg-red-50 w-full sm:w-auto"}
+                >
+                  <DollarSign className="w-4 h-4 ml-2" />
+                  {showSoldCars ? "إخفاء السيارات المباعة" : "إظهار السيارات المباعة"}
+                </Button>
               </div>
             </div>
           </CardContent>
@@ -253,6 +262,8 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
           yearFilter={yearFilter}
           importTypeFilter={importTypeFilter}
           engineCapacityFilter={engineCapacityFilter}
+          showSoldCars={showSoldCars}
+          userRole={userRole}
           onEdit={handleEdit}
         />
 

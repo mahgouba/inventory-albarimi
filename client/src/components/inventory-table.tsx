@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Edit, Trash2, Eye, Images, ArrowUpDown, ShoppingCart, DollarSign } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { getStatusColor } from "@/lib/utils";
@@ -17,10 +18,12 @@ interface InventoryTableProps {
   yearFilter: string;
   importTypeFilter: string;
   engineCapacityFilter: string;
+  showSoldCars: boolean;
+  userRole: string;
   onEdit?: (item: InventoryItem) => void;
 }
 
-export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, engineCapacityFilter, onEdit }: InventoryTableProps) {
+export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, engineCapacityFilter, showSoldCars, userRole, onEdit }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<InventoryItem | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<string>("");
@@ -114,8 +117,9 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
       const matchesYear = !yearFilter || yearFilter === "جميع السنوات" || item.year.toString() === yearFilter;
       const matchesImportType = !importTypeFilter || importTypeFilter === "جميع الأنواع" || item.importType === importTypeFilter;
       const matchesEngineCapacity = !engineCapacityFilter || engineCapacityFilter === "جميع السعات" || item.engineCapacity === engineCapacityFilter;
+      const matchesSoldFilter = showSoldCars || !item.isSold;
       
-      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType && matchesEngineCapacity;
+      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType && matchesEngineCapacity && matchesSoldFilter;
     })
     .sort((a: InventoryItem, b: InventoryItem) => {
       if (!sortColumn) return 0;
@@ -208,6 +212,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
               <TableHead className="text-white text-right">رقم الهيكل</TableHead>
               <TableHead className="text-white text-right">الصور</TableHead>
               <TableHead className="text-white text-right">تاريخ الدخول</TableHead>
+              <TableHead className="text-white text-right">السعر</TableHead>
               <TableHead className="text-white text-right">الملاحظات</TableHead>
               <TableHead className="text-white text-right">الإجراءات</TableHead>
             </TableRow>
@@ -215,13 +220,13 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
           <TableBody>
             {filteredAndSortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={14} className="text-center py-8">
+                <TableCell colSpan={15} className="text-center py-8">
                   <p className="text-slate-500">لا توجد عناصر للعرض</p>
                 </TableCell>
               </TableRow>
             ) : (
               filteredAndSortedItems.map((item: InventoryItem) => (
-                <TableRow key={item.id} className="hover:bg-slate-50">
+                <TableRow key={item.id} className={`hover:bg-slate-50 ${item.isSold ? 'bg-red-50 border-l-4 border-red-500' : ''}`}>
                   <TableCell className="text-sm text-slate-800">{item.manufacturer}</TableCell>
                   <TableCell className="text-center">
                     {item.logo ? (
@@ -261,6 +266,9 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                       month: '2-digit',
                       year: 'numeric'
                     })}
+                  </TableCell>
+                  <TableCell className="text-sm text-slate-800 font-latin">
+                    {item.price ? `${parseFloat(item.price).toLocaleString()} ر.س` : '-'}
                   </TableCell>
                   <TableCell className="text-sm text-slate-600">{item.notes || '-'}</TableCell>
                   <TableCell>

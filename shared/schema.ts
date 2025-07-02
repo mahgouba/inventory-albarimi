@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, decimal } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -25,7 +25,17 @@ export const inventoryItems = pgTable("inventory_items", {
   logo: text("logo"), // اللوجو
   notes: text("notes"), // الملاحظات
   entryDate: timestamp("entry_date").defaultNow().notNull(), // تاريخ الدخول
+  price: decimal("price", { precision: 10, scale: 2 }), // السعر
   isSold: boolean("is_sold").default(false).notNull(), // مباع
+  soldDate: timestamp("sold_date"), // تاريخ البيع
+});
+
+// Manufacturers table for storing manufacturer logos
+export const manufacturers = pgTable("manufacturers", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  logo: text("logo"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -38,7 +48,14 @@ export const insertInventoryItemSchema = createInsertSchema(inventoryItems).omit
   entryDate: true,
 });
 
+export const insertManufacturerSchema = createInsertSchema(manufacturers).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertInventoryItem = z.infer<typeof insertInventoryItemSchema>;
 export type InventoryItem = typeof inventoryItems.$inferSelect;
+export type InsertManufacturer = z.infer<typeof insertManufacturerSchema>;
+export type Manufacturer = typeof manufacturers.$inferSelect;

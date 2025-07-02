@@ -409,6 +409,24 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
 
               <FormField
                 control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>السعر (ريال سعودي)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="150000" 
+                        type="number"
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="images"
                 render={({ field }) => (
                   <FormItem>
