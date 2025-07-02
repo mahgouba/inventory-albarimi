@@ -311,22 +311,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
         </Table>
       </div>
 
-      {/* Results counter */}
-      <div className="mt-4 flex justify-between items-center text-sm text-slate-600">
-        <div>
-          عرض {filteredAndSortedItems.length} من أصل {items.length} عنصر
-          {showSoldCars && (
-            <span className="mr-2 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
-              تشمل السيارات المباعة
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-4">
-          <span>المتوفر: {filteredAndSortedItems.filter(item => !item.isSold && item.status === "متوفر").length}</span>
-          <span>في الطريق: {filteredAndSortedItems.filter(item => !item.isSold && item.status === "في الطريق").length}</span>
-          <span className="text-red-600">مباع: {filteredAndSortedItems.filter(item => item.isSold).length}</span>
-        </div>
-      </div>
+
 
       <InventoryForm
         open={formOpen}

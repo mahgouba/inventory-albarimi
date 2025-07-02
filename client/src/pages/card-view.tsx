@@ -20,14 +20,49 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
     queryKey: ["/api/inventory"],
   });
 
-  // Group items by manufacturer
-  const groupedItems = items.reduce((acc, item) => {
+  const { data: manufacturerStats = [] } = useQuery<any[]>({
+    queryKey: ["/api/inventory/manufacturer-stats"],
+  });
+
+  // Group items by manufacturer and category
+  const groupedData = items.reduce((acc, item) => {
     if (!acc[item.manufacturer]) {
-      acc[item.manufacturer] = [];
+      acc[item.manufacturer] = {
+        items: [],
+        categories: {}
+      };
     }
-    acc[item.manufacturer].push(item);
+    acc[item.manufacturer].items.push(item);
+    
+    if (!acc[item.manufacturer].categories[item.category]) {
+      acc[item.manufacturer].categories[item.category] = {
+        total: 0,
+        available: 0,
+        inTransit: 0,
+        maintenance: 0,
+        sold: 0
+      };
+    }
+    
+    acc[item.manufacturer].categories[item.category].total++;
+    if (item.isSold) {
+      acc[item.manufacturer].categories[item.category].sold++;
+    } else if (item.status === "متوفر") {
+      acc[item.manufacturer].categories[item.category].available++;
+    } else if (item.status === "في الطريق") {
+      acc[item.manufacturer].categories[item.category].inTransit++;
+    } else if (item.status === "صيانة") {
+      acc[item.manufacturer].categories[item.category].maintenance++;
+    }
+    
     return acc;
-  }, {} as Record<string, InventoryItem[]>);
+  }, {} as Record<string, { items: InventoryItem[], categories: Record<string, any> }>);
+
+  // Get manufacturer logo
+  const getManufacturerLogo = (manufacturerName: string) => {
+    const manufacturer = manufacturerStats.find((m) => m.manufacturer === manufacturerName);
+    return manufacturer?.logo;
+  };
 
   const toggleManufacturer = (manufacturer: string) => {
     const newExpanded = new Set(expandedManufacturers);
@@ -87,123 +122,197 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
           <p className="text-slate-600">عرض المركبات مجمعة حسب الصانع</p>
         </div>
 
-        <div className="space-y-6">
-          {Object.entries(groupedItems).map(([manufacturer, manufacturerItems]) => (
-            <Card key={manufacturer} className="shadow-lg">
-              <Collapsible
-                open={expandedManufacturers.has(manufacturer)}
-                onOpenChange={() => toggleManufacturer(manufacturer)}
-              >
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-slate-50 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4 space-x-reverse">
-                        <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
-                          <span className="text-lg font-bold text-teal-700">
-                            {manufacturer.charAt(0)}
-                          </span>
-                        </div>
-                        <div>
-                          <CardTitle className="text-xl text-slate-800">{manufacturer}</CardTitle>
-                          <p className="text-sm text-slate-600">
-                            {manufacturerItems.length} مركبة
-                          </p>
-                        </div>
-                      </div>
-                      {expandedManufacturers.has(manufacturer) ? (
-                        <ChevronUp className="h-5 w-5 text-slate-500" />
-                      ) : (
-                        <ChevronDown className="h-5 w-5 text-slate-500" />
-                      )}
-                    </div>
-                  </CardHeader>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent>
-                  <CardContent className="pt-0">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {manufacturerItems.map((item) => (
-                        <Card key={item.id} className="border border-slate-200 hover:shadow-md transition-shadow">
-                          <CardContent className="p-4">
-                            <div className="space-y-3">
-                              {/* Header with category and status */}
-                              <div className="flex items-center justify-between">
-                                <h3 className="font-semibold text-slate-800">{item.category}</h3>
-                                <Badge variant="secondary" className={getStatusColor(item.status)}>
-                                  {item.status}
-                                </Badge>
-                              </div>
-
-                              {/* Vehicle details */}
-                              <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-slate-600">سعة المحرك:</span>
-                                  <span className="font-medium font-latin">{item.engineCapacity}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-slate-600">السنة:</span>
-                                  <span className="font-medium font-latin">{item.year}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-slate-600">اللون الخارجي:</span>
-                                  <span className="font-medium">{item.exteriorColor}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-slate-600">اللون الداخلي:</span>
-                                  <span className="font-medium">{item.interiorColor}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-slate-600">الموقع:</span>
-                                  <span className="font-medium">{item.location}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-slate-600">نوع الاستيراد:</span>
-                                  <span className="font-medium">{item.importType}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-slate-600">رقم الهيكل:</span>
-                                  <span className="font-medium font-latin text-xs">{item.chassisNumber}</span>
-                                </div>
-                                {item.notes && (
-                                  <div className="flex justify-between">
-                                    <span className="text-slate-600">الملاحظات:</span>
-                                    <span className="font-medium text-xs">{item.notes}</span>
+        <div className="space-y-4">
+          {Object.entries(groupedData).map(([manufacturer, data]) => {
+            const logo = getManufacturerLogo(manufacturer);
+            const totalCount = data.items.length;
+            const availableCount = data.items.filter(item => !item.isSold && item.status === "متوفر").length;
+            
+            return (
+              <Card key={manufacturer} className="shadow-sm border border-slate-200">
+                <Collapsible
+                  open={expandedManufacturers.has(manufacturer)}
+                  onOpenChange={() => toggleManufacturer(manufacturer)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer hover:bg-slate-50 transition-colors py-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4 space-x-reverse">
+                          {/* Manufacturer Logo */}
+                          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200">
+                            {logo ? (
+                              <img 
+                                src={logo} 
+                                alt={manufacturer}
+                                className="w-12 h-12 object-contain rounded-full"
+                              />
+                            ) : (
+                              <span className="text-xl font-bold text-slate-600">
+                                {manufacturer.charAt(0)}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Manufacturer Info */}
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <CardTitle className="text-xl text-slate-800 mb-1">{manufacturer}</CardTitle>
+                              <div className="flex items-center space-x-4 space-x-reverse">
+                                {/* Category counts */}
+                                {Object.entries(data.categories).map(([category, stats]) => (
+                                  <div key={category} className="text-center min-w-[60px]">
+                                    <div className="text-lg font-bold text-slate-700">{stats.total}</div>
+                                    <div className="text-xs text-slate-500">{category}</div>
                                   </div>
-                                )}
-                              </div>
-
-                              {/* Action buttons */}
-                              <div className="flex justify-between pt-2 border-t border-slate-100">
-                                <div className="flex space-x-2 space-x-reverse">
-                                  <Button variant="ghost" size="sm" className="text-teal-600 hover:text-teal-800">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                  <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-green-600 hover:text-green-800"
-                                    disabled={item.isSold}
-                                  >
-                                    <DollarSign className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                                <div className="text-xs text-slate-500">
-                                  {item.entryDate ? new Date(item.entryDate).toLocaleDateString('ar-SA') : ''}
+                                ))}
+                                <div className="text-center min-w-[60px] mr-4">
+                                  <div className="text-lg font-bold text-teal-600">{availableCount}</div>
+                                  <div className="text-xs text-slate-500">متوفر</div>
                                 </div>
                               </div>
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </CardContent>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-          ))}
+                            <p className="text-sm text-slate-600">
+                              {totalCount} مركبة إجمالي • {availableCount} متوفر
+                            </p>
+                          </div>
+                        </div>
+                        {expandedManufacturers.has(manufacturer) ? (
+                          <ChevronUp className="h-5 w-5 text-slate-500" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-slate-500" />
+                        )}
+                      </div>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent>
+                    <CardContent className="pt-0 pb-4">
+                      {/* Category breakdown */}
+                      <div className="mb-4 p-4 bg-slate-50 rounded-lg">
+                        <h4 className="font-semibold text-slate-700 mb-3">تفاصيل الفئات</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {Object.entries(data.categories).map(([category, stats]) => (
+                            <div key={category} className="bg-white p-3 rounded border border-slate-200">
+                              <h5 className="font-medium text-slate-800 mb-2">{category}</h5>
+                              <div className="space-y-1 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-green-600">متوفر:</span>
+                                  <span className="font-medium">{stats.available}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-blue-600">في الطريق:</span>
+                                  <span className="font-medium">{stats.inTransit}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-yellow-600">صيانة:</span>
+                                  <span className="font-medium">{stats.maintenance}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-red-600">مباع:</span>
+                                  <span className="font-medium">{stats.sold}</span>
+                                </div>
+                                <div className="flex justify-between border-t pt-1 mt-1">
+                                  <span className="font-medium">الإجمالي:</span>
+                                  <span className="font-bold">{stats.total}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Individual vehicles */}
+                      <div>
+                        <h4 className="font-semibold text-slate-700 mb-3">جميع المركبات</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {data.items.map((item) => (
+                            <Card key={item.id} className={`border hover:shadow-md transition-shadow ${item.isSold ? 'border-red-200 bg-red-50' : 'border-slate-200'}`}>
+                              <CardContent className="p-4">
+                                <div className="space-y-3">
+                                  {/* Header with category and status */}
+                                  <div className="flex items-center justify-between">
+                                    <h3 className="font-semibold text-slate-800">{item.category}</h3>
+                                    <div className="flex items-center space-x-2 space-x-reverse">
+                                      <Badge variant="secondary" className={getStatusColor(item.status)}>
+                                        {item.status}
+                                      </Badge>
+                                      {item.isSold && (
+                                        <Badge variant="destructive" className="bg-red-600 text-white">
+                                          مباع
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Vehicle details */}
+                                  <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-600">سعة المحرك:</span>
+                                      <span className="font-medium font-latin">{item.engineCapacity}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-600">السنة:</span>
+                                      <span className="font-medium font-latin">{item.year}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-600">اللون الخارجي:</span>
+                                      <span className="font-medium">{item.exteriorColor}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-600">الموقع:</span>
+                                      <span className="font-medium">{item.location}</span>
+                                    </div>
+                                    {item.price && (
+                                      <div className="flex justify-between">
+                                        <span className="text-slate-600">السعر:</span>
+                                        <span className="font-medium text-green-600">{item.price} ر.س</span>
+                                      </div>
+                                    )}
+                                    {item.soldDate && (
+                                      <div className="flex justify-between">
+                                        <span className="text-slate-600">تاريخ البيع:</span>
+                                        <span className="font-medium text-red-600">
+                                          {new Date(item.soldDate).toLocaleDateString('ar-SA')}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Action buttons */}
+                                  <div className="flex justify-between pt-2 border-t border-slate-100">
+                                    <div className="flex space-x-2 space-x-reverse">
+                                      {userRole === "admin" && (
+                                        <>
+                                          <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                                            <Edit className="h-4 w-4" />
+                                          </Button>
+                                          <Button 
+                                            variant="ghost" 
+                                            size="sm" 
+                                            className="text-green-600 hover:text-green-800"
+                                            disabled={item.isSold}
+                                          >
+                                            <DollarSign className="h-4 w-4" />
+                                          </Button>
+                                        </>
+                                      )}
+                                    </div>
+                                    <div className="text-xs text-slate-500">
+                                      {item.entryDate ? new Date(item.entryDate).toLocaleDateString('ar-SA') : ''}
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </div>
