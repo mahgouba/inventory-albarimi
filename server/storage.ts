@@ -20,6 +20,7 @@ export interface IStorage {
     year?: number; 
     manufacturer?: string;
     importType?: string;
+    location?: string;
   }): Promise<InventoryItem[]>;
   getInventoryStats(): Promise<{ 
     total: number; 
@@ -38,6 +39,15 @@ export interface IStorage {
     company: number;
     usedPersonal: number;
   }>>;
+  getLocationStats(): Promise<Array<{
+    location: string;
+    total: number;
+    available: number;
+    inTransit: number;
+    maintenance: number;
+    sold: number;
+  }>>;
+  transferItem(id: number, newLocation: string): Promise<boolean>;
   markAsSold(id: number): Promise<boolean>;
 }
 
@@ -68,6 +78,7 @@ export class MemStorage implements IStorage {
         status: "في الطريق",
         importType: "شخصي",
         manufacturer: "مرسيدس",
+        location: "الميناء",
         chassisNumber: "WASSBER0056464",
         images: []
       },
@@ -80,6 +91,7 @@ export class MemStorage implements IStorage {
         status: "في الطريق",
         importType: "شركة",
         manufacturer: "لاند روفر",
+        location: "المعرض",
         chassisNumber: "WASSBER0056465",
         images: []
       },
@@ -92,6 +104,7 @@ export class MemStorage implements IStorage {
         status: "متوفر",
         importType: "مستعمل شخصي",
         manufacturer: "مرسيدس",
+        location: "الورشة",
         chassisNumber: "WASSBER0056466",
         images: []
       },
@@ -104,6 +117,7 @@ export class MemStorage implements IStorage {
         status: "قيد الصيانة",
         importType: "شخصي",
         manufacturer: "لاند روفر",
+        location: "مستودع فرعي",
         chassisNumber: "WASSBER0087523",
         images: []
       },
@@ -116,6 +130,7 @@ export class MemStorage implements IStorage {
         status: "متوفر",
         importType: "شركة",
         manufacturer: "مرسيدس",
+        location: "المستودع الرئيسي",
         chassisNumber: "WASSBER0098765",
         images: []
       }
@@ -392,6 +407,62 @@ export class DatabaseStorage implements IStorage {
         usedPersonal: manufacturerItems.filter(item => item.importType === "مستعمل شخصي").length,
       };
     });
+  }
+
+  async getLocationStats(): Promise<Array<{
+    location: string;
+    total: number;
+    available: number;
+    inTransit: number;
+    maintenance: number;
+    sold: number;
+  }>> {
+    const items = await db.select().from(inventoryItems);
+    const locationMap = new Map<string, {
+      total: number;
+      available: number;
+      inTransit: number;
+      maintenance: number;
+      sold: number;
+    }>();
+
+    items.forEach(item => {
+      if (!locationMap.has(item.location)) {
+        locationMap.set(item.location, {
+          total: 0,
+          available: 0,
+          inTransit: 0,
+          maintenance: 0,
+          sold: 0
+        });
+      }
+      
+      const stats = locationMap.get(item.location)!;
+      stats.total++;
+      
+      if (item.isSold) {
+        stats.sold++;
+      } else if (item.status === "متوفر") {
+        stats.available++;
+      } else if (item.status === "في الطريق") {
+        stats.inTransit++;
+      } else if (item.status === "قيد الصيانة") {
+        stats.maintenance++;
+      }
+    });
+
+    return Array.from(locationMap.entries()).map(([location, stats]) => ({
+      location,
+      ...stats
+    }));
+  }
+
+  async transferItem(id: number, newLocation: string): Promise<boolean> {
+    const result = await db
+      .update(inventoryItems)
+      .set({ location: newLocation })
+      .where(eq(inventoryItems.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 
   async markAsSold(id: number): Promise<boolean> {

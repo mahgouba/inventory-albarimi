@@ -18,6 +18,7 @@ export const inventoryItems = pgTable("inventory_items", {
   interiorColor: text("interior_color").notNull(), // اللون الداخلي
   status: text("status").notNull(), // الحالة
   importType: text("import_type").notNull(), // الاستيراد (شخصي/شركة/مستعمل شخصي)
+  location: text("location").notNull(), // الموقع (المستودع الرئيسي، المعرض، الورشة، الميناء)
   chassisNumber: text("chassis_number").notNull().unique(), // رقم الهيكل
   images: text("images").array().default([]), // الصور
   notes: text("notes"), // الملاحظات

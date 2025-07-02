@@ -42,13 +42,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Filter inventory items  
   app.get("/api/inventory/filter", async (req, res) => {
     try {
-      const { category, status, year, manufacturer, importType } = req.query;
+      const { category, status, year, manufacturer, importType, location } = req.query;
       const filters: { 
         category?: string; 
         status?: string; 
         year?: number; 
         manufacturer?: string;
         importType?: string;
+        location?: string;
       } = {};
       
       if (category) filters.category = category as string;
@@ -56,6 +57,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (year) filters.year = parseInt(year as string);
       if (manufacturer) filters.manufacturer = manufacturer as string;
       if (importType) filters.importType = importType as string;
+      if (location) filters.location = location as string;
       
       const items = await storage.filterInventoryItems(filters);
       res.json(items);
@@ -71,6 +73,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch manufacturer stats" });
+    }
+  });
+
+  // Get location statistics
+  app.get("/api/inventory/location-stats", async (req, res) => {
+    try {
+      const stats = await storage.getLocationStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch location stats" });
+    }
+  });
+
+  // Transfer item to different location
+  app.patch("/api/inventory/:id/transfer", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { location } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid item ID" });
+      }
+      
+      if (!location) {
+        return res.status(400).json({ message: "Location is required" });
+      }
+      
+      const success = await storage.transferItem(id, location);
+      if (!success) {
+        return res.status(404).json({ message: "Item not found" });
+      }
+      
+      res.json({ message: "Item transferred successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to transfer item" });
     }
   });
 

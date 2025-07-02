@@ -16,10 +16,11 @@ interface InventoryTableProps {
   manufacturerFilter: string;
   yearFilter: string;
   importTypeFilter: string;
+  locationFilter: string;
   onEdit?: (item: InventoryItem) => void;
 }
 
-export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, onEdit }: InventoryTableProps) {
+export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, locationFilter, onEdit }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<InventoryItem | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<string>("");
@@ -112,8 +113,9 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
       const matchesManufacturer = !manufacturerFilter || manufacturerFilter === "جميع الصناع" || item.manufacturer === manufacturerFilter;
       const matchesYear = !yearFilter || yearFilter === "جميع السنوات" || item.year.toString() === yearFilter;
       const matchesImportType = !importTypeFilter || importTypeFilter === "جميع الأنواع" || item.importType === importTypeFilter;
+      const matchesLocation = !locationFilter || locationFilter === "جميع المواقع" || item.location === locationFilter;
       
-      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType;
+      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType && matchesLocation;
     })
     .sort((a: InventoryItem, b: InventoryItem) => {
       if (!sortColumn) return 0;
@@ -190,6 +192,17 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
               <TableHead className="text-white text-right">اللون الخارجي</TableHead>
               <TableHead className="text-white text-right">اللون الداخلي</TableHead>
               <TableHead className="text-white text-right">الحالة</TableHead>
+              <TableHead className="text-white text-right">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:text-teal-100 hover:bg-teal-700 p-1"
+                  onClick={() => handleSort("location")}
+                >
+                  الموقع
+                  <ArrowUpDown className="mr-2 h-4 w-4" />
+                </Button>
+              </TableHead>
               <TableHead className="text-white text-right">الاستيراد</TableHead>
               <TableHead className="text-white text-right">رقم الهيكل</TableHead>
               <TableHead className="text-white text-right">الصور</TableHead>
@@ -201,7 +214,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
           <TableBody>
             {filteredAndSortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={13} className="text-center py-8">
+                <TableCell colSpan={14} className="text-center py-8">
                   <p className="text-slate-500">لا توجد عناصر للعرض</p>
                 </TableCell>
               </TableRow>
@@ -219,6 +232,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                       {item.status}
                     </Badge>
                   </TableCell>
+                  <TableCell className="text-sm text-slate-800">{item.location}</TableCell>
                   <TableCell className="text-sm text-slate-800">{item.importType}</TableCell>
                   <TableCell className="text-sm text-slate-600 font-latin">{item.chassisNumber}</TableCell>
                   <TableCell>

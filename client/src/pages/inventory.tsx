@@ -18,6 +18,7 @@ export default function InventoryPage() {
   const [manufacturerFilter, setManufacturerFilter] = useState("جميع الصناع");
   const [yearFilter, setYearFilter] = useState("جميع السنوات");
   const [importTypeFilter, setImportTypeFilter] = useState("جميع الأنواع");
+  const [locationFilter, setLocationFilter] = useState("جميع المواقع");
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<InventoryItem | undefined>(undefined);
   const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
@@ -54,6 +55,7 @@ export default function InventoryPage() {
   const categories = allCategories;
   const years = ["جميع السنوات", "2025", "2024", "2023", "2022", "2021"];
   const importTypes = ["جميع الأنواع", "شخصي", "شركة", "مستعمل شخصي"];
+  const locations = ["جميع المواقع", "المستودع الرئيسي", "المعرض", "الورشة", "الميناء", "مستودع فرعي"];
 
   const handleExport = () => {
     exportToCSV(items, "inventory-export.csv");
@@ -123,7 +125,7 @@ export default function InventoryPage() {
               </div>
               
               {/* Filter Controls */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
@@ -168,6 +170,18 @@ export default function InventoryPage() {
                     {importTypes.map((type) => (
                       <SelectItem key={type} value={type}>
                         {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {locations.map((location) => (
+                      <SelectItem key={location} value={location}>
+                        {location}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -219,6 +233,7 @@ export default function InventoryPage() {
           manufacturerFilter={manufacturerFilter}
           yearFilter={yearFilter}
           importTypeFilter={importTypeFilter}
+          locationFilter={locationFilter}
           onEdit={handleEdit}
         />
 

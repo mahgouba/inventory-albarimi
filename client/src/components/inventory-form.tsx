@@ -35,6 +35,7 @@ const engineCapacities = ["2.0L", "1.5L", "3.0L", "4.0L", "5.0L", "V6", "V8"];
 const years = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018];
 const statuses = ["متوفر", "في الطريق", "قيد الصيانة"];
 const importTypes = ["شخصي", "شركة", "مستعمل شخصي"];
+const locations = ["المستودع الرئيسي", "المعرض", "الورشة", "الميناء", "مستودع فرعي"];
 const colors = ["أسود", "أبيض", "رمادي", "أزرق", "أحمر", "بني", "فضي", "ذهبي", "بيج"];
 
 export default function InventoryForm({ open, onOpenChange, editItem }: InventoryFormProps) {
@@ -57,6 +58,7 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
       interiorColor: "",
       status: "",
       importType: "",
+      location: "",
       chassisNumber: "",
       images: [],
       notes: "",
@@ -354,6 +356,31 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                           {importTypes.map((type) => (
                             <SelectItem key={type} value={type}>
                               {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الموقع</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الموقع" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {locations.map((location) => (
+                            <SelectItem key={location} value={location}>
+                              {location}
                             </SelectItem>
                           ))}
                         </SelectContent>
