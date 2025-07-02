@@ -57,7 +57,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
   });
 
   const sellMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("POST", `/api/inventory/${id}/sell`, {}),
+    mutationFn: (id: number) => apiRequest("PUT", `/api/inventory/${id}/sell`, {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });

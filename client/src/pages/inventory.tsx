@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign } from "lucide-react";
+import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign, Settings, LogOut, Palette, Users } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import InventoryStats from "@/components/inventory-stats";
 import InventoryTable from "@/components/inventory-table";
 import InventoryFormSimple from "@/components/inventory-form-simple";
@@ -158,6 +159,39 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                 <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800 hidden sm:flex">
                   <Bell size={18} />
                 </Button>
+                
+                {/* Admin Dropdown Menu */}
+                {userRole === "admin" && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
+                        <Settings size={18} />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <Link href="/appearance">
+                        <DropdownMenuItem>
+                          <Palette className="mr-2 h-4 w-4" />
+                          إدارة المظهر
+                        </DropdownMenuItem>
+                      </Link>
+                      <Link href="/users">
+                        <DropdownMenuItem>
+                          <Users className="mr-2 h-4 w-4" />
+                          إدارة المستخدمين
+                        </DropdownMenuItem>
+                      </Link>
+                      <DropdownMenuSeparator />
+                      <Link href="/manufacturers">
+                        <DropdownMenuItem>
+                          <Settings className="mr-2 h-4 w-4" />
+                          الشركات المصنعة
+                        </DropdownMenuItem>
+                      </Link>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+                
                 <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
                   <UserCircle size={18} />
                 </Button>
@@ -170,6 +204,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                 className="border-red-300 text-red-600 hover:bg-red-50 hidden sm:flex"
                 onClick={() => window.location.href = '/login'}
               >
+                <LogOut size={16} className="mr-1" />
                 تسجيل الخروج
               </Button>
             </div>

@@ -206,6 +206,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sell inventory item (mark as sold with current date)
+  app.put("/api/inventory/:id/sell", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid item ID" });
+      }
+
+      const item = await storage.updateInventoryItem(id, {
+        status: "مباع",
+        isSold: true,
+        soldDate: new Date()
+      });
+      
+      if (!item) {
+        return res.status(404).json({ message: "Item not found" });
+      }
+      
+      res.json(item);
+    } catch (error) {
+      console.error("Error selling inventory item:", error);
+      res.status(500).json({ message: "Failed to sell inventory item" });
+    }
+  });
+
   // Delete inventory item
   app.delete("/api/inventory/:id", async (req, res) => {
     try {
