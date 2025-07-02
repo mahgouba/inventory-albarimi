@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,704 +11,491 @@ import { Switch } from "@/components/ui/switch";
 import { 
   Palette, 
   Upload, 
-  RotateCcw, 
   Save, 
   Eye, 
-  Download,
-  Smartphone,
+  ArrowLeft,
+  Settings,
   Monitor,
-  Tablet,
+  Smartphone,
   Sun,
   Moon,
-  Settings,
-  Home,
-  BarChart3,
-  FileText,
-  Users,
-  Bell,
-  UserCircle,
-  Table,
-  LayoutGrid,
-  ArrowLeft,
-  LogOut,
-  Shield,
-  Activity
+  Image as ImageIcon,
+  Check,
+  AlertCircle
 } from "lucide-react";
 import { Link } from "wouter";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import CategoryManager from "@/components/category-manager";
+import { apiRequest } from "@/lib/queryClient";
+import type { Manufacturer, AppearanceSettings } from "@shared/schema";
 
 interface AppearancePageProps {
   userRole: string;
 }
 
-interface ColorScheme {
-  primary: string;
-  secondary: string;
-  accent: string;
-  background: string;
-  surface: string;
-  text: string;
-  success: string;
-  warning: string;
-  error: string;
-}
-
-interface LogoSettings {
-  company: string | null;
-  dashboard: string | null;
-  manufacturers: Record<string, string>;
-}
-
 export default function AppearancePage({ userRole }: AppearancePageProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
-  // حالة إدارة الألوان
-  const [colorScheme, setColorScheme] = useState<ColorScheme>({
-    primary: "#0f766e", // teal-700
-    secondary: "#64748b", // slate-500
-    accent: "#BF9231", // gold
-    background: "#f8fafc", // slate-50
-    surface: "#ffffff", // white
-    text: "#1e293b", // slate-800
-    success: "#059669", // emerald-600
-    warning: "#d97706", // amber-600
-    error: "#dc2626", // red-600
-  });
+  // State for appearance settings
+  const [companyName, setCompanyName] = useState("إدارة المخزون");
+  const [companyNameEn, setCompanyNameEn] = useState("Inventory System");
+  const [companyLogo, setCompanyLogo] = useState<string | null>(null);
+  const [primaryColor, setPrimaryColor] = useState("#0f766e");
+  const [secondaryColor, setSecondaryColor] = useState("#0891b2");
+  const [accentColor, setAccentColor] = useState("#BF9231");
+  const [darkMode, setDarkMode] = useState(false);
+  const [rtlLayout, setRtlLayout] = useState(true);
 
-  // حالة إدارة اللوجوهات
-  const [logoSettings, setLogoSettings] = useState<LogoSettings>({
-    company: null,
-    dashboard: null,
-    manufacturers: {
-      "مرسيدس": "",
-      "بي ام دبليو": "",
-      "رولز رويز": "",
-      "بنتلي": "",
-      "رنج روفر": "",
-      "دفندر": "",
-      "بورش": "",
-      "لكزس": "",
-      "لينكون": "",
-      "شوفولية": "",
-      "تويوتا": "",
-      "تسلا": "",
-      "لوسيد": ""
+  // Fetch current appearance settings
+  const { data: appearanceSettings } = useQuery<AppearanceSettings>({
+    queryKey: ["/api/appearance"],
+    onSuccess: (data) => {
+      if (data) {
+        setCompanyName(data.companyName || "إدارة المخزون");
+        setCompanyNameEn(data.companyNameEn || "Inventory System");
+        setCompanyLogo(data.companyLogo);
+        setPrimaryColor(data.primaryColor || "#0f766e");
+        setSecondaryColor(data.secondaryColor || "#0891b2");
+        setAccentColor(data.accentColor || "#BF9231");
+        setDarkMode(data.darkMode || false);
+        setRtlLayout(data.rtlLayout !== false);
+      }
     }
   });
 
-  // حالة إدارة الفئات
-  const [manufacturerCategories, setManufacturerCategories] = useState<Record<string, string[]>>({
-    "مرسيدس": ["E200", "C200", "C300", "S500", "GLC"],
-    "بي ام دبليو": ["X5", "X3", "X1", "320i", "520i"],
-    "رولز رويز": ["Ghost", "Phantom", "Cullinan"],
-    "بنتلي": ["Continental", "Bentayga", "Mulsanne"],
-    "رنج روفر": ["Sport", "Evoque", "Vogue", "Velar"],
-    "دفندر": ["90", "110", "130"],
-    "بورش": ["Cayenne", "Macan", "911", "Panamera"],
-    "لكزس": ["LX570", "RX350", "ES350", "LS500"],
-    "لينكون": ["Navigator", "Aviator", "Continental"],
-    "شوفولية": ["Tahoe", "Suburban", "Camaro"],
-    "تويوتا": ["Land Cruiser", "Prado", "Camry", "Corolla"],
-    "تسلا": ["Model S", "Model 3", "Model X", "Model Y"],
-    "لوسيد": ["Air Dream", "Air Touring", "Air Pure"]
+  // Fetch manufacturers for logo management
+  const { data: manufacturers = [] } = useQuery<Manufacturer[]>({
+    queryKey: ["/api/manufacturers"],
   });
 
-  // حالة إدارة الأيقونات
-  const [iconSettings, setIconSettings] = useState({
-    dashboard: "Home",
-    inventory: "Package",
-    manufacturers: "Building",
-    reports: "BarChart3",
-    settings: "Settings",
-    users: "Users",
-    notifications: "Bell",
-    profile: "UserCircle"
-  });
-
-  const [isDarkMode, setIsDarkMode] = useState(false);
-  const [previewDevice, setPreviewDevice] = useState<'mobile' | 'tablet' | 'desktop'>('desktop');
-
-  // الألوان المحددة مسبقاً
-  const presetColors = {
-    "الأزرق الكلاسيكي": {
-      primary: "#1e40af",
-      secondary: "#64748b",
-      accent: "#3b82f6"
+  // Save appearance settings mutation
+  const saveSettingsMutation = useMutation({
+    mutationFn: (settings: Partial<AppearanceSettings>) => 
+      apiRequest("PUT", "/api/appearance", settings),
+    onSuccess: () => {
+      toast({
+        title: "تم الحفظ بنجاح",
+        description: "تم حفظ إعدادات المظهر وستظهر على كامل النظام",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/appearance"] });
+      // Apply changes to current page immediately
+      applyThemeChanges();
     },
-    "الأخضر الزمردي": {
-      primary: "#047857",
-      secondary: "#6b7280",
-      accent: "#10b981"
-    },
-    "البرتقالي الدافئ": {
-      primary: "#ea580c",
-      secondary: "#71717a",
-      accent: "#f97316"
-    },
-    "البنفسجي الأنيق": {
-      primary: "#7c3aed",
-      secondary: "#64748b",
-      accent: "#8b5cf6"
-    },
-    "الذهبي الفاخر": {
-      primary: "#BF9231",
-      secondary: "#00627F",
-      accent: "#d97706"
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في حفظ إعدادات المظهر",
+        variant: "destructive",
+      });
     }
+  });
+
+  // Update manufacturer logo mutation
+  const updateLogoMutation = useMutation({
+    mutationFn: ({ id, logo }: { id: number; logo: string }) =>
+      apiRequest("PUT", `/api/manufacturers/${id}/logo`, { logo }),
+    onSuccess: () => {
+      toast({
+        title: "تم الحفظ بنجاح", 
+        description: "تم حفظ شعار الشركة المصنعة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/manufacturers"] });
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في حفظ شعار الشركة المصنعة",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Apply theme changes to current page
+  const applyThemeChanges = () => {
+    const root = document.documentElement;
+    root.style.setProperty('--primary', primaryColor);
+    root.style.setProperty('--secondary', secondaryColor);
+    root.style.setProperty('--accent', accentColor);
+    
+    if (darkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    
+    document.dir = rtlLayout ? 'rtl' : 'ltr';
   };
 
-  const handleColorChange = (colorKey: keyof ColorScheme, value: string) => {
-    setColorScheme(prev => ({
-      ...prev,
-      [colorKey]: value
-    }));
-  };
-
-  const applyPresetColors = (preset: typeof presetColors[keyof typeof presetColors]) => {
-    setColorScheme(prev => ({
-      ...prev,
-      ...preset
-    }));
-    toast({
-      title: "تم تطبيق الألوان",
-      description: "تم تحديث نظام الألوان بنجاح",
-    });
-  };
-
-  const handleLogoUpload = (type: 'company' | 'dashboard' | string, event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle file upload for company logo
+  const handleCompanyLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const result = e.target?.result as string;
-        if (type === 'company' || type === 'dashboard') {
-          setLogoSettings(prev => ({
-            ...prev,
-            [type]: result
-          }));
-        } else {
-          setLogoSettings(prev => ({
-            ...prev,
-            manufacturers: {
-              ...prev.manufacturers,
-              [type]: result
-            }
-          }));
-        }
+      reader.onload = () => {
+        setCompanyLogo(reader.result as string);
       };
       reader.readAsDataURL(file);
-      
-      toast({
-        title: "تم رفع اللوجو",
-        description: "تم حفظ اللوجو الجديد بنجاح",
-      });
     }
   };
 
-  const resetToDefault = () => {
-    setColorScheme({
-      primary: "#0f766e",
-      secondary: "#64748b", 
-      accent: "#BF9231",
-      background: "#f8fafc",
-      surface: "#ffffff",
-      text: "#1e293b",
-      success: "#059669",
-      warning: "#d97706",
-      error: "#dc2626",
-    });
-    
-    toast({
-      title: "تم الإعادة للافتراضي",
-      description: "تم استعادة الإعدادات الافتراضية",
-    });
+  // Handle file upload for manufacturer logos
+  const handleManufacturerLogoUpload = (manufacturerId: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const logoData = reader.result as string;
+        updateLogoMutation.mutate({ id: manufacturerId, logo: logoData });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const saveSettings = () => {
-    // هنا يمكن حفظ الإعدادات في قاعدة البيانات
-    toast({
-      title: "تم الحفظ",
-      description: "تم حفظ جميع إعدادات المظهر بنجاح",
-    });
+  // Save all settings
+  const handleSaveSettings = () => {
+    const settings = {
+      companyName,
+      companyNameEn,
+      companyLogo,
+      primaryColor,
+      secondaryColor,
+      accentColor,
+      darkMode,
+      rtlLayout
+    };
+    saveSettingsMutation.mutate(settings);
   };
+
+  // Preview theme changes
+  useEffect(() => {
+    applyThemeChanges();
+  }, [primaryColor, secondaryColor, accentColor, darkMode, rtlLayout]);
 
   return (
-    <div className="bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 min-h-screen" dir={rtlLayout ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6">
+          <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4 space-x-reverse">
               <Link href="/">
                 <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
-                  <ArrowLeft className="h-4 w-4 ml-2" />
-                  الصفحة الرئيسية
+                  <ArrowLeft size={18} className="ml-2" />
+                  العودة للرئيسية
                 </Button>
               </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-900">إدارة المظهر</h1>
-                <p className="text-slate-600">تخصيص الألوان والأيقونات واللوجوهات</p>
-              </div>
+              <Separator orientation="vertical" className="h-6" />
+              <h1 className="text-xl font-bold text-slate-800">إدارة المظهر</h1>
             </div>
-            <div className="flex items-center space-x-3 space-x-reverse">
-              <Button variant="outline" onClick={resetToDefault}>
-                <RotateCcw className="h-4 w-4 ml-2" />
-                إعادة تعيين
-              </Button>
-              <Button onClick={saveSettings}>
-                <Save className="h-4 w-4 ml-2" />
-                حفظ التغييرات
-              </Button>
-              
-              {/* User Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
-                    <UserCircle className="h-5 w-5 ml-2" />
-                    المستخدم
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem>
-                    <Shield className="h-4 w-4 ml-2" />
-                    الصلاحيات: {userRole === "admin" ? "مدير" : "بائع"}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  {userRole === "admin" && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link href="/users" className="cursor-pointer">
-                          <Users className="h-4 w-4 ml-2" />
-                          إدارة المستخدمين
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                    </>
-                  )}
-                  <DropdownMenuItem>
-                    <Activity className="h-4 w-4 ml-2" />
-                    سجل النشاط
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => window.location.href = "/login"}>
-                    <LogOut className="h-4 w-4 ml-2" />
-                    تسجيل الخروج
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            
+            <Button 
+              onClick={handleSaveSettings}
+              disabled={saveSettingsMutation.isPending}
+              className="bg-teal-600 hover:bg-teal-700"
+            >
+              {saveSettingsMutation.isPending ? (
+                "جاري الحفظ..."
+              ) : (
+                <>
+                  <Save size={16} className="ml-2" />
+                  حفظ التغييرات
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* عمود الإعدادات */}
-          <div className="lg:col-span-2 space-y-6">
-            <Tabs defaultValue="colors" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="colors">الألوان</TabsTrigger>
-                <TabsTrigger value="logos">اللوجوهات</TabsTrigger>
-                <TabsTrigger value="categories">إدارة الفئات</TabsTrigger>
-                <TabsTrigger value="icons">الأيقونات</TabsTrigger>
-              </TabsList>
+      <div className="max-w-7xl mx-auto px-4 lg:px-6 py-8">
+        <Tabs defaultValue="branding" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="branding">العلامة التجارية</TabsTrigger>
+            <TabsTrigger value="colors">الألوان</TabsTrigger>
+            <TabsTrigger value="logos">شعارات الشركات</TabsTrigger>
+            <TabsTrigger value="layout">التخطيط</TabsTrigger>
+          </TabsList>
 
-              {/* تبويب الألوان */}
-              <TabsContent value="colors" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Palette className="h-5 w-5 ml-2" />
-                      نظام الألوان
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* الألوان المحددة مسبقاً */}
-                    <div>
-                      <Label className="text-base font-medium">الألوان المحددة مسبقاً</Label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
-                        {Object.entries(presetColors).map(([name, colors]) => (
-                          <Button
-                            key={name}
-                            variant="outline"
-                            className="h-auto p-3 justify-start"
-                            onClick={() => applyPresetColors(colors)}
-                          >
-                            <div className="flex items-center space-x-3 space-x-reverse">
-                              <div className="flex space-x-1 space-x-reverse">
-                                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.primary }} />
-                                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.secondary }} />
-                                <div className="w-4 h-4 rounded-full" style={{ backgroundColor: colors.accent }} />
-                              </div>
-                              <span className="text-sm">{name}</span>
-                            </div>
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    <Separator />
-
-                    {/* الألوان المخصصة */}
-                    <div>
-                      <Label className="text-base font-medium">الألوان المخصصة</Label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-                        {Object.entries(colorScheme).map(([key, value]) => (
-                          <div key={key} className="space-y-2">
-                            <Label className="text-sm capitalize">
-                              {key === 'primary' && 'اللون الأساسي'}
-                              {key === 'secondary' && 'اللون الثانوي'}
-                              {key === 'accent' && 'لون التمييز'}
-                              {key === 'background' && 'لون الخلفية'}
-                              {key === 'surface' && 'لون السطح'}
-                              {key === 'text' && 'لون النص'}
-                              {key === 'success' && 'لون النجاح'}
-                              {key === 'warning' && 'لون التحذير'}
-                              {key === 'error' && 'لون الخطأ'}
-                            </Label>
-                            <div className="flex space-x-2 space-x-reverse">
-                              <Input
-                                type="color"
-                                value={value}
-                                onChange={(e) => handleColorChange(key as keyof ColorScheme, e.target.value)}
-                                className="w-12 h-10 p-1 border-2"
-                              />
-                              <Input
-                                type="text"
-                                value={value}
-                                onChange={(e) => handleColorChange(key as keyof ColorScheme, e.target.value)}
-                                className="flex-1 font-mono text-sm"
-                                placeholder="#000000"
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* الوضع المظلم */}
-                    <Separator />
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <Label className="text-base font-medium">الوضع المظلم</Label>
-                        <p className="text-sm text-slate-600">تفعيل المظهر المظلم للنظام</p>
-                      </div>
-                      <Switch
-                        checked={isDarkMode}
-                        onCheckedChange={setIsDarkMode}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* تبويب اللوجوهات */}
-              <TabsContent value="logos" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Upload className="h-5 w-5 ml-2" />
-                      إدارة اللوجوهات
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* لوجو الشركة */}
-                    <div>
-                      <Label className="text-base font-medium">لوجو الشركة</Label>
-                      <div className="mt-3 p-4 border-2 border-dashed border-slate-300 rounded-lg">
-                        <div className="flex items-center justify-center space-x-3 space-x-reverse">
-                          {logoSettings.company ? (
-                            <img src={logoSettings.company} alt="Company Logo" className="h-16 w-auto" />
-                          ) : (
-                            <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center">
-                              <Upload className="h-6 w-6 text-slate-400" />
-                            </div>
-                          )}
-                          <div>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleLogoUpload('company', e)}
-                              className="hidden"
-                              id="company-logo"
-                            />
-                            <Button variant="outline" asChild>
-                              <label htmlFor="company-logo">رفع لوجو الشركة</label>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* لوجو لوحة التحكم */}
-                    <div>
-                      <Label className="text-base font-medium">أيقونة لوحة التحكم</Label>
-                      <div className="mt-3 p-4 border-2 border-dashed border-slate-300 rounded-lg">
-                        <div className="flex items-center justify-center space-x-3 space-x-reverse">
-                          {logoSettings.dashboard ? (
-                            <img src={logoSettings.dashboard} alt="Dashboard Icon" className="h-12 w-auto" />
-                          ) : (
-                            <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                              <Home className="h-6 w-6 text-slate-400" />
-                            </div>
-                          )}
-                          <div>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              onChange={(e) => handleLogoUpload('dashboard', e)}
-                              className="hidden"
-                              id="dashboard-icon"
-                            />
-                            <Button variant="outline" asChild>
-                              <label htmlFor="dashboard-icon">رفع أيقونة لوحة التحكم</label>
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* لوجوهات الشركات المصنعة */}
-                    <div>
-                      <Label className="text-base font-medium">لوجوهات الشركات المصنعة</Label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-3">
-                        {Object.entries(logoSettings.manufacturers).map(([manufacturer, logo]) => (
-                          <div key={manufacturer} className="p-3 border rounded-lg">
-                            <div className="text-center space-y-3">
-                              <div className="h-16 flex items-center justify-center">
-                                {logo ? (
-                                  <img src={logo} alt={manufacturer} className="h-full w-auto max-w-full" />
-                                ) : (
-                                  <div className="w-16 h-16 bg-slate-100 rounded-lg flex items-center justify-center">
-                                    <span className="text-xs text-slate-500">{manufacturer}</span>
-                                  </div>
-                                )}
-                              </div>
-                              <div>
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => handleLogoUpload(manufacturer, e)}
-                                  className="hidden"
-                                  id={`logo-${manufacturer}`}
-                                />
-                                <Button variant="outline" size="sm" asChild className="w-full">
-                                  <label htmlFor={`logo-${manufacturer}`}>
-                                    {logo ? 'تغيير' : 'رفع'} لوجو
-                                  </label>
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* تبويب إدارة الفئات */}
-              <TabsContent value="categories" className="space-y-6">
-                <CategoryManager 
-                  open={true}
-                  onOpenChange={() => {}}
-                  manufacturers={Object.keys(logoSettings.manufacturers)}
-                  manufacturerCategories={manufacturerCategories}
-                  onSave={(updatedCategories) => {
-                    setManufacturerCategories(updatedCategories);
-                    console.log("حفظ الفئات:", updatedCategories);
-                    toast({
-                      title: "تم الحفظ",
-                      description: "تم حفظ إعدادات الفئات بنجاح",
-                    });
-                  }}
-                />
-              </TabsContent>
-
-              {/* تبويب الأيقونات */}
-              <TabsContent value="icons" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Settings className="h-5 w-5 ml-2" />
-                      إدارة الأيقونات
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {Object.entries(iconSettings).map(([key, iconName]) => (
-                        <div key={key} className="p-3 border rounded-lg">
-                          <div className="flex items-center space-x-3 space-x-reverse">
-                            <div className="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center">
-                              {iconName === 'Home' && <Home className="h-5 w-5" />}
-                              {iconName === 'Package' && <Table className="h-5 w-5" />}
-                              {iconName === 'Building' && <LayoutGrid className="h-5 w-5" />}
-                              {iconName === 'BarChart3' && <BarChart3 className="h-5 w-5" />}
-                              {iconName === 'Settings' && <Settings className="h-5 w-5" />}
-                              {iconName === 'Users' && <Users className="h-5 w-5" />}
-                              {iconName === 'Bell' && <Bell className="h-5 w-5" />}
-                              {iconName === 'UserCircle' && <UserCircle className="h-5 w-5" />}
-                            </div>
-                            <div className="flex-1">
-                              <Label className="text-sm font-medium">
-                                {key === 'dashboard' && 'لوحة التحكم'}
-                                {key === 'inventory' && 'المخزون'}
-                                {key === 'manufacturers' && 'الشركات المصنعة'}
-                                {key === 'reports' && 'التقارير'}
-                                {key === 'settings' && 'الإعدادات'}
-                                {key === 'users' && 'المستخدمين'}
-                                {key === 'notifications' && 'الإشعارات'}
-                                {key === 'profile' && 'الملف الشخصي'}
-                              </Label>
-                              <p className="text-xs text-slate-500">أيقونة {iconName}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* عمود المعاينة */}
-          <div className="space-y-6">
+          {/* Company Branding */}
+          <TabsContent value="branding" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center">
-                    <Eye className="h-5 w-5 ml-2" />
-                    معاينة
-                  </span>
-                  <div className="flex space-x-1 space-x-reverse">
-                    <Button
-                      variant={previewDevice === 'mobile' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPreviewDevice('mobile')}
-                    >
-                      <Smartphone className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={previewDevice === 'tablet' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPreviewDevice('tablet')}
-                    >
-                      <Tablet className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={previewDevice === 'desktop' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setPreviewDevice('desktop')}
-                    >
-                      <Monitor className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings size={20} />
+                  معلومات الشركة
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div 
-                  className={`${
-                    previewDevice === 'mobile' ? 'w-80' : 
-                    previewDevice === 'tablet' ? 'w-96' : 'w-full'
-                  } mx-auto border rounded-lg overflow-hidden`}
-                  style={{ 
-                    backgroundColor: colorScheme.background,
-                    minHeight: '400px'
-                  }}
-                >
-                  {/* معاينة شريط التنقل */}
-                  <div 
-                    className="p-4 border-b"
-                    style={{ backgroundColor: colorScheme.surface }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3 space-x-reverse">
-                        <div 
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: colorScheme.primary }}
-                        >
-                          <span className="text-white font-bold text-sm">ش</span>
-                        </div>
-                        <div>
-                          <h3 className="font-semibold" style={{ color: colorScheme.text }}>
-                            إدارة المخزون
-                          </h3>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2 space-x-reverse">
-                        <Button 
-                          size="sm" 
-                          style={{ 
-                            backgroundColor: colorScheme.primary,
-                            color: 'white'
-                          }}
-                        >
-                          جدول
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          بطاقات
-                        </Button>
-                      </div>
-                    </div>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName">اسم الشركة (عربي)</Label>
+                    <Input
+                      id="companyName"
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      placeholder="إدارة المخزون"
+                    />
                   </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="companyNameEn">اسم الشركة (إنجليزي)</Label>
+                    <Input
+                      id="companyNameEn"
+                      value={companyNameEn}
+                      onChange={(e) => setCompanyNameEn(e.target.value)}
+                      placeholder="Inventory System"
+                    />
+                  </div>
+                </div>
 
-                  {/* معاينة المحتوى */}
-                  <div className="p-4 space-y-4">
-                    <div 
-                      className="p-3 rounded-lg"
-                      style={{ backgroundColor: colorScheme.surface }}
-                    >
-                      <h4 className="font-medium mb-2" style={{ color: colorScheme.text }}>
-                        إحصائيات المخزون
-                      </h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        <div 
-                          className="p-2 rounded text-center"
-                          style={{ backgroundColor: colorScheme.primary, color: 'white' }}
-                        >
-                          <div className="text-lg font-bold">7</div>
-                          <div className="text-xs">إجمالي</div>
-                        </div>
-                        <div 
-                          className="p-2 rounded text-center"
-                          style={{ backgroundColor: colorScheme.success, color: 'white' }}
-                        >
-                          <div className="text-lg font-bold">4</div>
-                          <div className="text-xs">متوفر</div>
-                        </div>
+                <div className="space-y-4">
+                  <Label>شعار الشركة</Label>
+                  <div className="flex items-center space-x-4 space-x-reverse">
+                    {companyLogo && (
+                      <div className="w-20 h-20 border rounded-lg overflow-hidden bg-white flex items-center justify-center">
+                        <img 
+                          src={companyLogo} 
+                          alt="شعار الشركة" 
+                          className="max-w-full max-h-full object-contain"
+                        />
                       </div>
-                    </div>
-
-                    <div 
-                      className="p-3 rounded-lg"
-                      style={{ backgroundColor: colorScheme.surface }}
-                    >
-                      <Badge style={{ backgroundColor: colorScheme.accent, color: 'white' }}>
-                        مرسيدس E200
-                      </Badge>
+                    )}
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCompanyLogoUpload}
+                        className="hidden"
+                        id="companyLogoUpload"
+                      />
+                      <label htmlFor="companyLogoUpload">
+                        <Button variant="outline" className="cursor-pointer" asChild>
+                          <span>
+                            <Upload size={16} className="ml-2" />
+                            رفع شعار جديد
+                          </span>
+                        </Button>
+                      </label>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* معلومات إضافية */}
+          {/* Color Scheme */}
+          <TabsContent value="colors" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">نصائح التصميم</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette size={20} />
+                  نظام الألوان
+                </CardTitle>
               </CardHeader>
-              <CardContent className="text-sm text-slate-600 space-y-2">
-                <p>• استخدم ألوان متباينة لضمان سهولة القراءة</p>
-                <p>• تأكد من أن اللوجوهات بصيغة PNG مع خلفية شفافة</p>
-                <p>• الحد الأدنى لحجم اللوجو هو 100x100 بيكسل</p>
-                <p>• اختبر المظهر على جميع أحجام الشاشات</p>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="primaryColor">اللون الأساسي</Label>
+                    <div className="flex items-center space-x-3 space-x-reverse">
+                      <input
+                        type="color"
+                        id="primaryColor"
+                        value={primaryColor}
+                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="w-12 h-10 rounded border border-slate-300"
+                      />
+                      <Input
+                        value={primaryColor}
+                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="secondaryColor">اللون الثانوي</Label>
+                    <div className="flex items-center space-x-3 space-x-reverse">
+                      <input
+                        type="color"
+                        id="secondaryColor"
+                        value={secondaryColor}
+                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        className="w-12 h-10 rounded border border-slate-300"
+                      />
+                      <Input
+                        value={secondaryColor}
+                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="accentColor">لون التمييز</Label>
+                    <div className="flex items-center space-x-3 space-x-reverse">
+                      <input
+                        type="color"
+                        id="accentColor"
+                        value={accentColor}
+                        onChange={(e) => setAccentColor(e.target.value)}
+                        className="w-12 h-10 rounded border border-slate-300"
+                      />
+                      <Input
+                        value={accentColor}
+                        onChange={(e) => setAccentColor(e.target.value)}
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Color Preview */}
+                <div className="space-y-4">
+                  <Label>معاينة الألوان</Label>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div 
+                      className="h-20 rounded-lg flex items-center justify-center text-white font-semibold"
+                      style={{ backgroundColor: primaryColor }}
+                    >
+                      أساسي
+                    </div>
+                    <div 
+                      className="h-20 rounded-lg flex items-center justify-center text-white font-semibold"
+                      style={{ backgroundColor: secondaryColor }}
+                    >
+                      ثانوي
+                    </div>
+                    <div 
+                      className="h-20 rounded-lg flex items-center justify-center text-white font-semibold"
+                      style={{ backgroundColor: accentColor }}
+                    >
+                      تمييز
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          </div>
-        </div>
+          </TabsContent>
+
+          {/* Manufacturer Logos */}
+          <TabsContent value="logos" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ImageIcon size={20} />
+                  شعارات الشركات المصنعة
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {manufacturers.map((manufacturer) => (
+                    <div key={manufacturer.id} className="border rounded-lg p-4 space-y-4">
+                      <div className="text-center">
+                        <h3 className="font-semibold text-lg">{manufacturer.name}</h3>
+                      </div>
+                      
+                      <div className="flex flex-col items-center space-y-3">
+                        {manufacturer.logo ? (
+                          <div className="w-20 h-20 border rounded-lg overflow-hidden bg-white flex items-center justify-center">
+                            <img 
+                              src={manufacturer.logo} 
+                              alt={manufacturer.name} 
+                              className="max-w-full max-h-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center text-slate-400">
+                            <ImageIcon size={24} />
+                          </div>
+                        )}
+                        
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleManufacturerLogoUpload(manufacturer.id, e)}
+                            className="hidden"
+                            id={`manufacturerLogo-${manufacturer.id}`}
+                          />
+                          <label htmlFor={`manufacturerLogo-${manufacturer.id}`}>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="cursor-pointer" 
+                              asChild
+                              disabled={updateLogoMutation.isPending}
+                            >
+                              <span>
+                                <Upload size={14} className="ml-2" />
+                                {manufacturer.logo ? "تغيير" : "رفع"}
+                              </span>
+                            </Button>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Layout Settings */}
+          <TabsContent value="layout" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Monitor size={20} />
+                  إعدادات التخطيط
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label className="text-base font-medium">الوضع المظلم</Label>
+                    <p className="text-sm text-slate-600">تفعيل الوضع المظلم للواجهة</p>
+                  </div>
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <Sun size={16} className="text-slate-400" />
+                    <Switch
+                      checked={darkMode}
+                      onCheckedChange={setDarkMode}
+                    />
+                    <Moon size={16} className="text-slate-400" />
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label className="text-base font-medium">اتجاه النص</Label>
+                    <p className="text-sm text-slate-600">تخطيط من اليمين لليسار (RTL)</p>
+                  </div>
+                  <div className="flex items-center space-x-2 space-x-reverse">
+                    <span className="text-sm">LTR</span>
+                    <Switch
+                      checked={rtlLayout}
+                      onCheckedChange={setRtlLayout}
+                    />
+                    <span className="text-sm">RTL</span>
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="space-y-4">
+                  <Label>معاينة التخطيط</Label>
+                  <div className="border rounded-lg p-4 bg-white">
+                    <div className="space-y-3">
+                      <div className="h-8 bg-slate-200 rounded w-full"></div>
+                      <div className="h-4 bg-slate-100 rounded w-3/4"></div>
+                      <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

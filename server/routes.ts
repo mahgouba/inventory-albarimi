@@ -288,6 +288,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Appearance settings routes
+  app.get("/api/appearance", async (req, res) => {
+    try {
+      const settings = await storage.getAppearanceSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Error fetching appearance settings:", error);
+      res.status(500).json({ message: "Failed to fetch appearance settings" });
+    }
+  });
+
+  app.put("/api/appearance", async (req, res) => {
+    try {
+      const settings = await storage.updateAppearanceSettings(req.body);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating appearance settings:", error);
+      res.status(500).json({ message: "Failed to update appearance settings" });
+    }
+  });
+
+  app.put("/api/manufacturers/:id/logo", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { logo } = req.body;
+      
+      if (!logo) {
+        return res.status(400).json({ message: "Logo data is required" });
+      }
+
+      const manufacturer = await storage.updateManufacturerLogo(id, logo);
+      if (manufacturer) {
+        res.json(manufacturer);
+      } else {
+        res.status(404).json({ message: "Manufacturer not found" });
+      }
+    } catch (error) {
+      console.error("Error updating manufacturer logo:", error);
+      res.status(500).json({ message: "Failed to update manufacturer logo" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, boolean, decimal } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, boolean, decimal, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -180,3 +180,27 @@ export type InsertLowStockAlert = z.infer<typeof insertLowStockAlertSchema>;
 
 export type StockSettings = typeof stockSettings.$inferSelect;
 export type InsertStockSettings = z.infer<typeof insertStockSettingsSchema>;
+
+// Appearance settings table
+export const appearanceSettings = pgTable("appearance_settings", {
+  id: serial("id").primaryKey(),
+  companyName: varchar("company_name", { length: 255 }).default("إدارة المخزون"),
+  companyNameEn: varchar("company_name_en", { length: 255 }).default("Inventory System"),
+  companyLogo: text("company_logo"), // Base64 encoded image
+  primaryColor: varchar("primary_color", { length: 7 }).default("#0f766e"), // Teal-700
+  secondaryColor: varchar("secondary_color", { length: 7 }).default("#0891b2"), // Sky-600
+  accentColor: varchar("accent_color", { length: 7 }).default("#BF9231"), // Custom golden
+  darkMode: boolean("dark_mode").default(false),
+  rtlLayout: boolean("rtl_layout").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow()
+});
+
+export const insertAppearanceSettingsSchema = createInsertSchema(appearanceSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true
+});
+
+export type AppearanceSettings = typeof appearanceSettings.$inferSelect;
+export type InsertAppearanceSettings = z.infer<typeof insertAppearanceSettingsSchema>;

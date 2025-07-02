@@ -92,6 +92,11 @@ export interface IStorage {
   createStockSettings(settings: InsertStockSettings): Promise<StockSettings>;
   updateStockSettings(id: number, settings: Partial<InsertStockSettings>): Promise<StockSettings | undefined>;
   deleteStockSettings(id: number): Promise<boolean>;
+  
+  // Appearance settings methods
+  getAppearanceSettings(): Promise<AppearanceSettings | undefined>;
+  updateAppearanceSettings(settings: Partial<InsertAppearanceSettings>): Promise<AppearanceSettings>;
+  updateManufacturerLogo(id: number, logo: string): Promise<Manufacturer | undefined>;
 }
 
 export class MemStorage implements IStorage {
