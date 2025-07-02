@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp, Eye, Edit, DollarSign, Table, LayoutGrid, Bell, UserCircle } from "lucide-react";
 import { getStatusColor } from "@/lib/utils";
@@ -24,8 +25,10 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
     queryKey: ["/api/inventory/manufacturer-stats"],
   });
 
-  // Group items by manufacturer and category
-  const groupedData = items.reduce((acc, item) => {
+  // Filter out sold cars and group by manufacturer and category
+  const availableItems = items.filter(item => !item.isSold);
+  
+  const groupedData = availableItems.reduce((acc, item) => {
     if (!acc[item.manufacturer]) {
       acc[item.manufacturer] = {
         items: [],
@@ -36,22 +39,17 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
     
     if (!acc[item.manufacturer].categories[item.category]) {
       acc[item.manufacturer].categories[item.category] = {
-        total: 0,
         available: 0,
         inTransit: 0,
-        maintenance: 0,
-        sold: 0
+        maintenance: 0
       };
     }
     
-    acc[item.manufacturer].categories[item.category].total++;
-    if (item.isSold) {
-      acc[item.manufacturer].categories[item.category].sold++;
-    } else if (item.status === "متوفر") {
+    if (item.status === "متوفر") {
       acc[item.manufacturer].categories[item.category].available++;
     } else if (item.status === "في الطريق") {
       acc[item.manufacturer].categories[item.category].inTransit++;
-    } else if (item.status === "صيانة") {
+    } else if (item.status === "قيد الصيانة") {
       acc[item.manufacturer].categories[item.category].maintenance++;
     }
     
@@ -151,7 +149,7 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
           {Object.entries(groupedData).map(([manufacturer, data]) => {
             const logo = getManufacturerLogo(manufacturer);
             const totalCount = data.items.length;
-            const availableCount = data.items.filter(item => !item.isSold && item.status === "متوفر").length;
+            const availableCount = data.items.filter(item => item.status === "متوفر").length;
             
             return (
               <Card key={manufacturer} className="shadow-sm border border-slate-200">
@@ -183,15 +181,21 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                               <CardTitle className="text-xl text-slate-800 mb-2 sm:mb-1">{manufacturer}</CardTitle>
                               
-                              {/* Category counts - responsive grid */}
-                              <div className="grid grid-cols-3 sm:flex sm:items-center sm:space-x-4 sm:space-x-reverse gap-2 sm:gap-0">
-                                {Object.entries(data.categories).map(([category, stats]) => (
-                                  <div key={category} className="text-center min-w-[60px] bg-slate-50 rounded-md p-2 sm:bg-transparent sm:p-0">
-                                    <div className="text-base sm:text-lg font-bold text-slate-700">{stats.total}</div>
-                                    <div className="text-xs text-slate-500">{category}</div>
-                                  </div>
-                                ))}
-                                <div className="text-center min-w-[60px] bg-teal-50 rounded-md p-2 sm:bg-transparent sm:p-0 sm:mr-4 col-span-3 sm:col-span-1">
+                              {/* Categories dropdown and available count */}
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 sm:space-x-reverse gap-2 sm:gap-0">
+                                <Select>
+                                  <SelectTrigger className="w-40 text-sm">
+                                    <SelectValue placeholder="الفئات المتوفرة" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {Object.keys(data.categories).map((category) => (
+                                      <SelectItem key={category} value={category}>
+                                        {category}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                                <div className="text-center min-w-[60px] bg-teal-50 rounded-md p-2 sm:bg-transparent sm:p-0">
                                   <div className="text-base sm:text-lg font-bold text-teal-600">{availableCount}</div>
                                   <div className="text-xs text-slate-500">متوفر</div>
                                 </div>

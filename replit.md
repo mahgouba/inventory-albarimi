@@ -125,6 +125,9 @@ Changelog:
 - July 02, 2025: Updated field structure - changed المهنشي to الاستيراد, added الصانع field, split colors into interior/exterior, changed الإصدار to سعة المحرك
 - July 02, 2025: Added PostgreSQL database with DatabaseStorage implementation, seeded with sample data
 - July 02, 2025: Restructured to hierarchical manufacturer → category system (مرسيدس → E200, C200, C300), auto-populated entry date, enhanced mobile responsiveness
+- July 02, 2025: Implemented one-time manufacturer logo management system with dedicated manufacturers table and API endpoints
+- July 02, 2025: Added 13 base manufacturers (مرسيدس، بي ام دبليو، رولز رويز، بنتلي، رنج روفر، دفندر، بورش، لكزس، لينكون، شوفولية، تويوتا، تسلا، لوسيد)
+- July 02, 2025: Modified card view to exclude sold cars from display and calculations, replaced category counts with dropdown list
 ```
 
 ## User Preferences
