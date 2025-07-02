@@ -14,16 +14,18 @@ import type { InventoryItem } from "@shared/schema";
 export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("جميع الفئات");
+  const [manufacturerFilter, setManufacturerFilter] = useState("جميع الصناع");
   const [yearFilter, setYearFilter] = useState("جميع السنوات");
   const [formOpen, setFormOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const { data: items = [] } = useQuery({
+  const { data: items = [] } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
   });
 
   const categories = ["جميع الفئات", "لاتوبيغرافي", "أوتوماتيكي", "يدوي"];
+  const manufacturers = ["جميع الصناع", "مرسيدس", "لاند روفر", "BMW", "أودي", "تويوتا", "نيسان", "هوندا"];
   const years = ["جميع السنوات", "2025", "2024", "2023"];
 
   const handleExport = () => {
@@ -58,25 +60,7 @@ export default function InventoryPage() {
         </div>
       </header>
 
-      {/* Navigation Tabs */}
-      <nav className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8 space-x-reverse">
-            <Button className="px-4 py-3 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-t-lg border-b-2 border-amber-600">
-              البحث
-            </Button>
-            <Button className="px-4 py-3 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-t-lg border-b-2 border-amber-600">
-              الهيكل
-            </Button>
-            <Button className="px-4 py-3 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-t-lg border-b-2 border-amber-600">
-              البوع
-            </Button>
-            <Button className="px-4 py-3 text-sm font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-t-lg border-b-2 border-amber-600">
-              المحرك
-            </Button>
-          </div>
-        </div>
-      </nav>
+
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -112,6 +96,18 @@ export default function InventoryPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                <Select value={manufacturerFilter} onValueChange={setManufacturerFilter}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {manufacturers.map((manufacturer) => (
+                      <SelectItem key={manufacturer} value={manufacturer}>
+                        {manufacturer}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Select value={yearFilter} onValueChange={setYearFilter}>
                   <SelectTrigger className="w-40">
                     <SelectValue />
@@ -140,6 +136,7 @@ export default function InventoryPage() {
         <InventoryTable
           searchQuery={searchQuery}
           categoryFilter={categoryFilter}
+          manufacturerFilter={manufacturerFilter}
           yearFilter={yearFilter}
         />
 

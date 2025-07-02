@@ -13,10 +13,11 @@ import InventoryForm from "./inventory-form";
 interface InventoryTableProps {
   searchQuery: string;
   categoryFilter: string;
+  manufacturerFilter: string;
   yearFilter: string;
 }
 
-export default function InventoryTable({ searchQuery, categoryFilter, yearFilter }: InventoryTableProps) {
+export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<InventoryItem | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<string>("");
@@ -25,7 +26,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, yearFilter
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
   });
 
@@ -75,9 +76,10 @@ export default function InventoryTable({ searchQuery, categoryFilter, yearFilter
           value?.toString().toLowerCase().includes(searchQuery.toLowerCase())
         );
       const matchesCategory = !categoryFilter || categoryFilter === "جميع الفئات" || item.category === categoryFilter;
+      const matchesManufacturer = !manufacturerFilter || manufacturerFilter === "جميع الصناع" || item.manufacturer === manufacturerFilter;
       const matchesYear = !yearFilter || yearFilter === "جميع السنوات" || item.year.toString() === yearFilter;
       
-      return matchesSearch && matchesCategory && matchesYear;
+      return matchesSearch && matchesCategory && matchesManufacturer && matchesYear;
     })
     .sort((a: InventoryItem, b: InventoryItem) => {
       if (!sortColumn) return 0;
@@ -123,9 +125,20 @@ export default function InventoryTable({ searchQuery, categoryFilter, yearFilter
                   variant="ghost"
                   size="sm"
                   className="text-white hover:text-teal-100 hover:bg-teal-700 p-1"
-                  onClick={() => handleSort("version")}
+                  onClick={() => handleSort("manufacturer")}
                 >
-                  الإصدار
+                  الصانع
+                  <ArrowUpDown className="mr-2 h-4 w-4" />
+                </Button>
+              </TableHead>
+              <TableHead className="text-white text-right">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:text-teal-100 hover:bg-teal-700 p-1"
+                  onClick={() => handleSort("engineCapacity")}
+                >
+                  سعة المحرك
                   <ArrowUpDown className="mr-2 h-4 w-4" />
                 </Button>
               </TableHead>
@@ -140,9 +153,10 @@ export default function InventoryTable({ searchQuery, categoryFilter, yearFilter
                   <ArrowUpDown className="mr-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead className="text-white text-right">اللون</TableHead>
+              <TableHead className="text-white text-right">اللون الخارجي</TableHead>
+              <TableHead className="text-white text-right">اللون الداخلي</TableHead>
               <TableHead className="text-white text-right">الحالة</TableHead>
-              <TableHead className="text-white text-right">المهنشي</TableHead>
+              <TableHead className="text-white text-right">الاستيراد</TableHead>
               <TableHead className="text-white text-right">رقم الهيكل</TableHead>
               <TableHead className="text-white text-right">الصور</TableHead>
               <TableHead className="text-white text-right">الإجراءات</TableHead>
@@ -151,7 +165,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, yearFilter
           <TableBody>
             {filteredAndSortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center py-8">
+                <TableCell colSpan={11} className="text-center py-8">
                   <p className="text-slate-500">لا توجد عناصر للعرض</p>
                 </TableCell>
               </TableRow>
@@ -159,15 +173,17 @@ export default function InventoryTable({ searchQuery, categoryFilter, yearFilter
               filteredAndSortedItems.map((item: InventoryItem) => (
                 <TableRow key={item.id} className="hover:bg-slate-50">
                   <TableCell className="text-sm text-slate-800">{item.category}</TableCell>
-                  <TableCell className="text-sm text-slate-800 font-latin">{item.version}</TableCell>
+                  <TableCell className="text-sm text-slate-800">{item.manufacturer}</TableCell>
+                  <TableCell className="text-sm text-slate-800 font-latin">{item.engineCapacity}</TableCell>
                   <TableCell className="text-sm text-slate-800 font-latin">{item.year}</TableCell>
-                  <TableCell className="text-sm text-slate-800">{item.color}</TableCell>
+                  <TableCell className="text-sm text-slate-800">{item.exteriorColor}</TableCell>
+                  <TableCell className="text-sm text-slate-800">{item.interiorColor}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className={getStatusColor(item.status)}>
                       {item.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-slate-800">{item.engineer}</TableCell>
+                  <TableCell className="text-sm text-slate-800">{item.importType}</TableCell>
                   <TableCell className="text-sm text-slate-600 font-latin">{item.chassisNumber}</TableCell>
                   <TableCell>
                     <Button variant="ghost" size="sm" className="text-teal-600 hover:text-teal-800">

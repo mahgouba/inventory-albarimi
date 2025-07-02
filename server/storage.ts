@@ -36,51 +36,61 @@ export class MemStorage implements IStorage {
     const sampleItems: InsertInventoryItem[] = [
       {
         category: "لاتوبيغرافي",
-        version: "V6",
+        engineCapacity: "V6",
         year: 2025,
-        color: "أسود أبيض",
+        exteriorColor: "أسود",
+        interiorColor: "أبيض",
         status: "في الطريق",
-        engineer: "المهنشي",
+        importType: "شخصي",
+        manufacturer: "مرسيدس",
         chassisNumber: "WASSBER0056464",
         images: []
       },
       {
         category: "لاتوبيغرافي",
-        version: "V6",
+        engineCapacity: "V6",
         year: 2024,
-        color: "أسود أبيض",
+        exteriorColor: "أسود",
+        interiorColor: "أبيض",
         status: "في الطريق",
-        engineer: "المهنشي",
+        importType: "شركة",
+        manufacturer: "لاند روفر",
         chassisNumber: "WASSBER0056465",
         images: []
       },
       {
         category: "لاتوبيغرافي",
-        version: "V8",
+        engineCapacity: "V8",
         year: 2025,
-        color: "أسود أبيض",
+        exteriorColor: "أسود",
+        interiorColor: "أبيض",
         status: "متوفر",
-        engineer: "المهنشي",
+        importType: "مستعمل شخصي",
+        manufacturer: "مرسيدس",
         chassisNumber: "WASSBER0056466",
         images: []
       },
       {
         category: "أوتوماتيكي",
-        version: "V6",
+        engineCapacity: "V6",
         year: 2024,
-        color: "أسود",
+        exteriorColor: "أسود",
+        interiorColor: "رمادي",
         status: "قيد الصيانة",
-        engineer: "الفني",
+        importType: "شخصي",
+        manufacturer: "لاند روفر",
         chassisNumber: "WASSBER0087523",
         images: []
       },
       {
         category: "يدوي",
-        version: "V8",
+        engineCapacity: "V8",
         year: 2025,
-        color: "أبيض",
+        exteriorColor: "أبيض",
+        interiorColor: "أسود",
         status: "متوفر",
-        engineer: "المهنشي",
+        importType: "شركة",
+        manufacturer: "مرسيدس",
         chassisNumber: "WASSBER0098765",
         images: []
       }
@@ -140,10 +150,12 @@ export class MemStorage implements IStorage {
     const lowerQuery = query.toLowerCase();
     return Array.from(this.inventoryItems.values()).filter(item =>
       item.category.toLowerCase().includes(lowerQuery) ||
-      item.version.toLowerCase().includes(lowerQuery) ||
-      item.color.toLowerCase().includes(lowerQuery) ||
+      item.engineCapacity.toLowerCase().includes(lowerQuery) ||
+      item.exteriorColor.toLowerCase().includes(lowerQuery) ||
+      item.interiorColor.toLowerCase().includes(lowerQuery) ||
       item.status.toLowerCase().includes(lowerQuery) ||
-      item.engineer.toLowerCase().includes(lowerQuery) ||
+      item.importType.toLowerCase().includes(lowerQuery) ||
+      item.manufacturer.toLowerCase().includes(lowerQuery) ||
       item.chassisNumber.toLowerCase().includes(lowerQuery)
     );
   }

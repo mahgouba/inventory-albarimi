@@ -19,9 +19,11 @@ interface InventoryFormProps {
 }
 
 const categories = ["لاتوبيغرافي", "أوتوماتيكي", "يدوي"];
-const versions = ["V6", "V8", "V10"];
+const engineCapacities = ["V6", "V8", "V10", "V12", "4 سلندر", "6 سلندر", "8 سلندر"];
 const years = [2025, 2024, 2023, 2022];
 const statuses = ["متوفر", "في الطريق", "قيد الصيانة"];
+const importTypes = ["شخصي", "شركة", "مستعمل شخصي"];
+const manufacturers = ["مرسيدس", "لاند روفر", "BMW", "أودي", "تويوتا", "نيسان", "هوندا"];
 
 export default function InventoryForm({ open, onOpenChange, editItem }: InventoryFormProps) {
   const { toast } = useToast();
@@ -31,11 +33,13 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
     resolver: zodResolver(insertInventoryItemSchema),
     defaultValues: editItem || {
       category: "",
-      version: "",
+      engineCapacity: "",
       year: new Date().getFullYear(),
-      color: "",
+      exteriorColor: "",
+      interiorColor: "",
       status: "",
-      engineer: "",
+      importType: "",
+      manufacturer: "",
       chassisNumber: "",
       images: [],
     },
@@ -133,19 +137,44 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
 
               <FormField
                 control={form.control}
-                name="version"
+                name="engineCapacity"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الإصدار</FormLabel>
+                    <FormLabel>سعة المحرك</FormLabel>
                     <FormControl>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <SelectTrigger>
-                          <SelectValue placeholder="اختر الإصدار" />
+                          <SelectValue placeholder="اختر سعة المحرك" />
                         </SelectTrigger>
                         <SelectContent>
-                          {versions.map((version) => (
-                            <SelectItem key={version} value={version}>
-                              {version}
+                          {engineCapacities.map((capacity) => (
+                            <SelectItem key={capacity} value={capacity}>
+                              {capacity}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="manufacturer"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الصانع</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الصانع" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {manufacturers.map((manufacturer) => (
+                            <SelectItem key={manufacturer} value={manufacturer}>
+                              {manufacturer}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -184,12 +213,51 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
 
               <FormField
                 control={form.control}
-                name="color"
+                name="exteriorColor"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>اللون</FormLabel>
+                    <FormLabel>اللون الخارجي</FormLabel>
                     <FormControl>
-                      <Input placeholder="اللون" {...field} />
+                      <Input placeholder="اللون الخارجي" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="interiorColor"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>اللون الداخلي</FormLabel>
+                    <FormControl>
+                      <Input placeholder="اللون الداخلي" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="importType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الاستيراد</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر نوع الاستيراد" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {importTypes.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -215,20 +283,6 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                           ))}
                         </SelectContent>
                       </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="engineer"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>المهنشي</FormLabel>
-                    <FormControl>
-                      <Input placeholder="المهنشي" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
