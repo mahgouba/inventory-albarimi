@@ -38,6 +38,31 @@ export const manufacturers = pgTable("manufacturers", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Locations table for managing inventory locations
+export const locations = pgTable("locations", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(), // اسم الموقع
+  description: text("description"), // الوصف
+  address: text("address"), // العنوان
+  manager: text("manager"), // المسؤول
+  phone: text("phone"), // الهاتف
+  capacity: integer("capacity"), // السعة القصوى
+  isActive: boolean("is_active").default(true).notNull(), // نشط
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Location transfers table for tracking item movements
+export const locationTransfers = pgTable("location_transfers", {
+  id: serial("id").primaryKey(),
+  inventoryItemId: integer("inventory_item_id").notNull(),
+  fromLocation: text("from_location").notNull(), // الموقع السابق
+  toLocation: text("to_location").notNull(), // الموقع الجديد
+  transferDate: timestamp("transfer_date").defaultNow().notNull(), // تاريخ النقل
+  reason: text("reason"), // السبب
+  transferredBy: text("transferred_by"), // المنقول بواسطة
+  notes: text("notes"), // ملاحظات
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -53,9 +78,23 @@ export const insertManufacturerSchema = createInsertSchema(manufacturers).omit({
   createdAt: true,
 });
 
+export const insertLocationSchema = createInsertSchema(locations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertLocationTransferSchema = createInsertSchema(locationTransfers).omit({
+  id: true,
+  transferDate: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertInventoryItem = z.infer<typeof insertInventoryItemSchema>;
 export type InventoryItem = typeof inventoryItems.$inferSelect;
 export type InsertManufacturer = z.infer<typeof insertManufacturerSchema>;
 export type Manufacturer = typeof manufacturers.$inferSelect;
+export type InsertLocation = z.infer<typeof insertLocationSchema>;
+export type Location = typeof locations.$inferSelect;
+export type InsertLocationTransfer = z.infer<typeof insertLocationTransferSchema>;
+export type LocationTransfer = typeof locationTransfers.$inferSelect;

@@ -117,7 +117,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
       const matchesYear = !yearFilter || yearFilter === "جميع السنوات" || item.year.toString() === yearFilter;
       const matchesImportType = !importTypeFilter || importTypeFilter === "جميع الأنواع" || item.importType === importTypeFilter;
       const matchesEngineCapacity = !engineCapacityFilter || engineCapacityFilter === "جميع السعات" || item.engineCapacity === engineCapacityFilter;
-      const matchesSoldFilter = showSoldCars || !item.isSold;
+      const matchesSoldFilter = showSoldCars ? true : !item.isSold;
       
       return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType && matchesEngineCapacity && matchesSoldFilter;
     })
@@ -309,6 +309,23 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Results counter */}
+      <div className="mt-4 flex justify-between items-center text-sm text-slate-600">
+        <div>
+          عرض {filteredAndSortedItems.length} من أصل {items.length} عنصر
+          {showSoldCars && (
+            <span className="mr-2 px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+              تشمل السيارات المباعة
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-4">
+          <span>المتوفر: {filteredAndSortedItems.filter(item => !item.isSold && item.status === "متوفر").length}</span>
+          <span>في الطريق: {filteredAndSortedItems.filter(item => !item.isSold && item.status === "في الطريق").length}</span>
+          <span className="text-red-600">مباع: {filteredAndSortedItems.filter(item => item.isSold).length}</span>
+        </div>
       </div>
 
       <InventoryForm

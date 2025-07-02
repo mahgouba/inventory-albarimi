@@ -1,4 +1,4 @@
-import { users, inventoryItems, type User, type InsertUser, type InventoryItem, type InsertInventoryItem } from "@shared/schema";
+import { users, inventoryItems, manufacturers, locations, locationTransfers, type User, type InsertUser, type InventoryItem, type InsertInventoryItem, type Manufacturer, type InsertManufacturer, type Location, type InsertLocation, type LocationTransfer, type InsertLocationTransfer } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -47,7 +47,18 @@ export interface IStorage {
     maintenance: number;
     sold: number;
   }>>;
-  transferItem(id: number, newLocation: string): Promise<boolean>;
+  transferItem(id: number, newLocation: string, reason?: string, transferredBy?: string): Promise<boolean>;
+  
+  // Location management methods
+  getAllLocations(): Promise<Location[]>;
+  getLocation(id: number): Promise<Location | undefined>;
+  createLocation(location: InsertLocation): Promise<Location>;
+  updateLocation(id: number, location: Partial<InsertLocation>): Promise<Location | undefined>;
+  deleteLocation(id: number): Promise<boolean>;
+  
+  // Location transfer methods
+  getLocationTransfers(inventoryItemId?: number): Promise<LocationTransfer[]>;
+  createLocationTransfer(transfer: InsertLocationTransfer): Promise<LocationTransfer>;
   markAsSold(id: number): Promise<boolean>;
 }
 
@@ -275,9 +286,99 @@ export class MemStorage implements IStorage {
     const item = this.inventoryItems.get(id);
     if (!item) return false;
     
-    const updatedItem = { ...item, isSold: true };
+    const updatedItem = { ...item, isSold: true, soldDate: new Date() };
     this.inventoryItems.set(id, updatedItem);
     return true;
+  }
+
+  async getLocationStats(): Promise<Array<{
+    location: string;
+    total: number;
+    available: number;
+    inTransit: number;
+    maintenance: number;
+    sold: number;
+  }>> {
+    const items = Array.from(this.inventoryItems.values());
+    const locationSet = new Set(items.map(item => item.location));
+    const locations = Array.from(locationSet);
+    
+    return locations.map(location => {
+      const locationItems = items.filter(item => item.location === location);
+      return {
+        location,
+        total: locationItems.length,
+        available: locationItems.filter(item => item.status === "متوفر").length,
+        inTransit: locationItems.filter(item => item.status === "في الطريق").length,
+        maintenance: locationItems.filter(item => item.status === "صيانة").length,
+        sold: locationItems.filter(item => item.isSold).length,
+      };
+    });
+  }
+
+  async transferItem(id: number, newLocation: string, reason?: string, transferredBy?: string): Promise<boolean> {
+    const item = this.inventoryItems.get(id);
+    if (!item) return false;
+    
+    const updatedItem = { ...item, location: newLocation };
+    this.inventoryItems.set(id, updatedItem);
+    return true;
+  }
+
+  // Location management methods (stub implementations for memory storage)
+  async getAllLocations(): Promise<Location[]> {
+    const items = Array.from(this.inventoryItems.values());
+    const locationNames = [...new Set(items.map(item => item.location))];
+    
+    return locationNames.map((name, index) => ({
+      id: index + 1,
+      name,
+      description: null,
+      address: null,
+      manager: null,
+      phone: null,
+      capacity: null,
+      isActive: true,
+      createdAt: new Date(),
+    }));
+  }
+
+  async getLocation(id: number): Promise<Location | undefined> {
+    const locations = await this.getAllLocations();
+    return locations.find(loc => loc.id === id);
+  }
+
+  async createLocation(location: InsertLocation): Promise<Location> {
+    const locations = await this.getAllLocations();
+    const newLocation: Location = {
+      id: locations.length + 1,
+      ...location,
+      createdAt: new Date(),
+    };
+    return newLocation;
+  }
+
+  async updateLocation(id: number, location: Partial<InsertLocation>): Promise<Location | undefined> {
+    const existing = await this.getLocation(id);
+    if (!existing) return undefined;
+    
+    return { ...existing, ...location };
+  }
+
+  async deleteLocation(id: number): Promise<boolean> {
+    return true; // Stub implementation
+  }
+
+  async getLocationTransfers(inventoryItemId?: number): Promise<LocationTransfer[]> {
+    return []; // Stub implementation for memory storage
+  }
+
+  async createLocationTransfer(transfer: InsertLocationTransfer): Promise<LocationTransfer> {
+    return {
+      id: 1,
+      ...transfer,
+      transferDate: new Date(),
+    };
   }
 }
 
@@ -458,7 +559,24 @@ export class DatabaseStorage implements IStorage {
     }));
   }
 
-  async transferItem(id: number, newLocation: string): Promise<boolean> {
+  async transferItem(id: number, newLocation: string, reason?: string, transferredBy?: string): Promise<boolean> {
+    // First, get the current item to record the transfer
+    const [currentItem] = await db.select().from(inventoryItems).where(eq(inventoryItems.id, id));
+    if (!currentItem) return false;
+
+    // Create transfer record
+    if (currentItem.location !== newLocation) {
+      await db.insert(locationTransfers).values({
+        inventoryItemId: id,
+        fromLocation: currentItem.location,
+        toLocation: newLocation,
+        reason: reason || null,
+        transferredBy: transferredBy || null,
+        notes: null,
+      });
+    }
+
+    // Update item location
     const result = await db
       .update(inventoryItems)
       .set({ location: newLocation })
@@ -469,9 +587,74 @@ export class DatabaseStorage implements IStorage {
   async markAsSold(id: number): Promise<boolean> {
     const result = await db
       .update(inventoryItems)
-      .set({ isSold: true })
+      .set({ isSold: true, soldDate: new Date() })
       .where(eq(inventoryItems.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  // Location management methods
+  async getAllLocations(): Promise<Location[]> {
+    return await db.select().from(locations).where(eq(locations.isActive, true));
+  }
+
+  async getLocation(id: number): Promise<Location | undefined> {
+    const [location] = await db.select().from(locations).where(eq(locations.id, id));
+    return location || undefined;
+  }
+
+  async createLocation(location: InsertLocation): Promise<Location> {
+    const [newLocation] = await db
+      .insert(locations)
+      .values(location)
+      .returning();
+    return newLocation;
+  }
+
+  async updateLocation(id: number, locationData: Partial<InsertLocation>): Promise<Location | undefined> {
+    const [updatedLocation] = await db
+      .update(locations)
+      .set(locationData)
+      .where(eq(locations.id, id))
+      .returning();
+    return updatedLocation || undefined;
+  }
+
+  async deleteLocation(id: number): Promise<boolean> {
+    // Check if location has inventory items
+    const itemsInLocation = await db
+      .select()
+      .from(inventoryItems)
+      .where(eq(inventoryItems.location, 
+        await db.select({ name: locations.name }).from(locations).where(eq(locations.id, id)).then(res => res[0]?.name || '')
+      ));
+    
+    if (itemsInLocation.length > 0) {
+      return false; // Cannot delete location with items
+    }
+
+    const result = await db
+      .update(locations)
+      .set({ isActive: false })
+      .where(eq(locations.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async getLocationTransfers(inventoryItemId?: number): Promise<LocationTransfer[]> {
+    if (inventoryItemId) {
+      return await db
+        .select()
+        .from(locationTransfers)
+        .where(eq(locationTransfers.inventoryItemId, inventoryItemId));
+    }
+    return await db.select().from(locationTransfers);
+  }
+
+  async createLocationTransfer(transfer: InsertLocationTransfer): Promise<LocationTransfer> {
+    const [newTransfer] = await db
+      .insert(locationTransfers)
+      .values(transfer)
+      .returning();
+    return newTransfer;
   }
 }
 
