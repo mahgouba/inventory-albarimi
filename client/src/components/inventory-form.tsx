@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertInventoryItemSchema, type InsertInventoryItem, type InventoryItem } from "@shared/schema";
 import { CloudUpload } from "lucide-react";
+import EditableSelect from "@/components/editable-select";
 
 interface InventoryFormProps {
   open: boolean;
@@ -30,13 +31,13 @@ const manufacturerCategories: Record<string, string[]> = {
   "هيونداي": ["النترا", "سوناتا", "توسان", "سانتا في", "أكسنت"]
 };
 
-const manufacturers = Object.keys(manufacturerCategories);
-const engineCapacities = ["2.0L", "1.5L", "3.0L", "4.0L", "5.0L", "V6", "V8"];
-const years = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018];
-const statuses = ["متوفر", "في الطريق", "قيد الصيانة"];
-const importTypes = ["شخصي", "شركة", "مستعمل شخصي"];
-const locations = ["المستودع الرئيسي", "المعرض", "الورشة", "الميناء", "مستودع فرعي"];
-const colors = ["أسود", "أبيض", "رمادي", "أزرق", "أحمر", "بني", "فضي", "ذهبي", "بيج"];
+const initialManufacturers = Object.keys(manufacturerCategories);
+const initialEngineCapacities = ["2.0L", "1.5L", "3.0L", "4.0L", "5.0L", "V6", "V8"];
+const initialYears = [2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018];
+const initialStatuses = ["متوفر", "في الطريق", "قيد الصيانة"];
+const initialImportTypes = ["شخصي", "شركة", "مستعمل شخصي"];
+const initialLocations = ["المستودع الرئيسي", "المعرض", "الورشة", "الميناء", "مستودع فرعي"];
+const initialColors = ["أسود", "أبيض", "رمادي", "أزرق", "أحمر", "بني", "فضي", "ذهبي", "بيج"];
 
 export default function InventoryForm({ open, onOpenChange, editItem }: InventoryFormProps) {
   const { toast } = useToast();
@@ -46,6 +47,16 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
   const [availableCategories, setAvailableCategories] = useState<string[]>(
     editItem?.manufacturer ? manufacturerCategories[editItem.manufacturer] || [] : []
   );
+
+  // Dynamic option state
+  const [manufacturers, setManufacturers] = useState<string[]>(initialManufacturers);
+  const [engineCapacities, setEngineCapacities] = useState<string[]>(initialEngineCapacities);
+  const [years] = useState<number[]>(initialYears);
+  const [statuses, setStatuses] = useState<string[]>(initialStatuses);
+  const [importTypes, setImportTypes] = useState<string[]>(initialImportTypes);
+  const [locations, setLocations] = useState<string[]>(initialLocations);
+  const [exteriorColors, setExteriorColors] = useState<string[]>(initialColors);
+  const [interiorColors, setInteriorColors] = useState<string[]>(initialColors);
 
   const form = useForm<InsertInventoryItem>({
     resolver: zodResolver(insertInventoryItemSchema),
@@ -160,24 +171,19 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>الصانع</FormLabel>
                     <FormControl>
-                      <Select 
+                      <EditableSelect
+                        options={manufacturers}
+                        value={field.value}
                         onValueChange={(value) => {
                           handleManufacturerChange(value);
                           field.onChange(value);
-                        }} 
-                        value={field.value}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الصانع" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {manufacturers.map((manufacturer) => (
-                            <SelectItem key={manufacturer} value={manufacturer}>
-                              {manufacturer}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        }}
+                        onAddOption={(newManufacturer) => {
+                          setManufacturers([...manufacturers, newManufacturer]);
+                        }}
+                        placeholder="اختر الصانع"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -222,43 +228,16 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>سعة المحرك</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر سعة المحرك" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {engineCapacities.map((capacity) => (
-                            <SelectItem key={capacity} value={capacity}>
-                              {capacity}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="manufacturer"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الصانع</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الصانع" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {manufacturers.map((manufacturer) => (
-                            <SelectItem key={manufacturer} value={manufacturer}>
-                              {manufacturer}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <EditableSelect
+                        options={engineCapacities}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onAddOption={(newCapacity) => {
+                          setEngineCapacities([...engineCapacities, newCapacity]);
+                        }}
+                        placeholder="اختر سعة المحرك"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -298,18 +277,16 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>اللون الخارجي</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر اللون الخارجي" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {colors.map((color) => (
-                            <SelectItem key={color} value={color}>
-                              {color}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <EditableSelect
+                        options={exteriorColors}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onAddOption={(newColor) => {
+                          setExteriorColors([...exteriorColors, newColor]);
+                        }}
+                        placeholder="اختر اللون الخارجي"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -323,18 +300,16 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>اللون الداخلي</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر اللون الداخلي" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {colors.map((color) => (
-                            <SelectItem key={color} value={color}>
-                              {color}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <EditableSelect
+                        options={interiorColors}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onAddOption={(newColor) => {
+                          setInteriorColors([...interiorColors, newColor]);
+                        }}
+                        placeholder="اختر اللون الداخلي"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -348,18 +323,16 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>الاستيراد</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر نوع الاستيراد" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {importTypes.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <EditableSelect
+                        options={importTypes}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onAddOption={(newType) => {
+                          setImportTypes([...importTypes, newType]);
+                        }}
+                        placeholder="اختر نوع الاستيراد"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -373,43 +346,16 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>الموقع</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الموقع" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {locations.map((location) => (
-                            <SelectItem key={location} value={location}>
-                              {location}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="manufacturer"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>الصانع</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الصانع" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {manufacturers.map((manufacturer) => (
-                            <SelectItem key={manufacturer} value={manufacturer}>
-                              {manufacturer}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <EditableSelect
+                        options={locations}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onAddOption={(newLocation) => {
+                          setLocations([...locations, newLocation]);
+                        }}
+                        placeholder="اختر الموقع"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -423,18 +369,16 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                   <FormItem>
                     <FormLabel>الحالة</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الحالة" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {statuses.map((status) => (
-                            <SelectItem key={status} value={status}>
-                              {status}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <EditableSelect
+                        options={statuses}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        onAddOption={(newStatus) => {
+                          setStatuses([...statuses, newStatus]);
+                        }}
+                        placeholder="اختر الحالة"
+                        className="w-full"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

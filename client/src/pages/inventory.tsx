@@ -92,7 +92,7 @@ export default function InventoryPage() {
             </div>
             <div className="flex items-center space-x-4 space-x-reverse">
               <div className="flex items-center space-x-2 space-x-reverse border border-slate-200 rounded-lg p-1">
-                <Button variant="default" size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-white">
                   <Table size={16} className="ml-1" />
                   جدول
                 </Button>

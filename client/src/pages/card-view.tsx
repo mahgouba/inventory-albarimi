@@ -61,7 +61,7 @@ export default function CardViewPage() {
                     جدول
                   </Button>
                 </Link>
-                <Button variant="default" size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-white">
                   <LayoutGrid size={16} className="ml-1" />
                   بطاقات
                 </Button>

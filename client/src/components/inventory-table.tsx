@@ -247,6 +247,14 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                       عرض
                     </Button>
                   </TableCell>
+                  <TableCell className="text-sm text-slate-600 font-latin">
+                    {new Date(item.entryDate).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    })}
+                  </TableCell>
+                  <TableCell className="text-sm text-slate-600">{item.notes || '-'}</TableCell>
                   <TableCell>
                     <div className="flex items-center space-x-2 space-x-reverse">
                       <Button
