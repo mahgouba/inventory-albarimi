@@ -14,16 +14,21 @@
   --card-foreground: hsl(222.2, 84%, 4.9%);
   --border: hsl(214.3, 31.8%, 91.4%);
   --input: hsl(214.3, 31.8%, 91.4%);
-  --primary: hsl(195, 100%, 25%);
+  --primary: var(--dynamic-primary, hsl(195, 100%, 25%));
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: hsl(210, 40%, 96%);
+  --secondary: var(--dynamic-secondary, hsl(210, 40%, 96%));
   --secondary-foreground: hsl(222.2, 84%, 4.9%);
-  --accent: hsl(42, 60%, 47%);
+  --accent: var(--dynamic-accent, hsl(42, 60%, 47%));
   --accent-foreground: hsl(222.2, 84%, 4.9%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(210, 40%, 98%);
-  --ring: hsl(195, 100%, 25%);
+  --ring: var(--dynamic-primary, hsl(195, 100%, 25%));
   --radius: 0.5rem;
+  
+  /* Dynamic theme variables that can be updated from appearance settings */
+  --dynamic-primary: hsl(195, 100%, 25%);
+  --dynamic-secondary: hsl(190, 76%, 40%);
+  --dynamic-accent: hsl(42, 60%, 47%);
   
   /* Custom colors for the inventory system */
   --teal-50: hsl(166, 76%, 97%);

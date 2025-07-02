@@ -65,6 +65,11 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
     }
   }, [appearanceSettings]);
 
+  // Apply theme changes when values change
+  useEffect(() => {
+    applyThemeChanges();
+  }, [primaryColor, secondaryColor, accentColor, darkMode, rtlLayout, companyName]);
+
   // Fetch manufacturers for logo management
   const { data: manufacturers = [] } = useQuery<Manufacturer[]>({
     queryKey: ["/api/manufacturers"],
@@ -112,12 +117,47 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
     }
   });
 
+  // Function to convert hex color to HSL
+  const hexToHsl = (hex: string): string => {
+    hex = hex.replace('#', '');
+    
+    const r = parseInt(hex.substr(0, 2), 16) / 255;
+    const g = parseInt(hex.substr(2, 2), 16) / 255;
+    const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0;
+    let s = 0;
+    const l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      
+      switch (max) {
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
+      }
+      h /= 6;
+    }
+
+    return `${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%`;
+  };
+
   // Apply theme changes to current page
   const applyThemeChanges = () => {
     const root = document.documentElement;
-    root.style.setProperty('--primary', primaryColor);
-    root.style.setProperty('--secondary', secondaryColor);
-    root.style.setProperty('--accent', accentColor);
+    
+    // Apply colors using CSS variables
+    const primaryHsl = hexToHsl(primaryColor);
+    const secondaryHsl = hexToHsl(secondaryColor);
+    const accentHsl = hexToHsl(accentColor);
+    
+    root.style.setProperty('--dynamic-primary', `hsl(${primaryHsl})`);
+    root.style.setProperty('--dynamic-secondary', `hsl(${secondaryHsl})`);
+    root.style.setProperty('--dynamic-accent', `hsl(${accentHsl})`);
     
     if (darkMode) {
       root.classList.add('dark');
@@ -125,7 +165,18 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
       root.classList.remove('dark');
     }
     
-    document.dir = rtlLayout ? 'rtl' : 'ltr';
+    if (rtlLayout) {
+      root.setAttribute('dir', 'rtl');
+      document.body.style.fontFamily = "'Noto Sans Arabic', sans-serif";
+    } else {
+      root.setAttribute('dir', 'ltr');
+      document.body.style.fontFamily = "'Inter', sans-serif";
+    }
+
+    // Update page title
+    if (companyName) {
+      document.title = companyName;
+    }
   };
 
   // Handle file upload for company logo

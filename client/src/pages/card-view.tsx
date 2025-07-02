@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp, Eye, Edit, DollarSign, Table, LayoutGrid, Bell, UserCircle, Settings, LogOut, Palette, Users } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/hooks/useTheme";
 import { getStatusColor } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
 
@@ -17,6 +18,9 @@ interface CardViewPageProps {
 
 export default function CardViewPage({ userRole }: CardViewPageProps) {
   const [expandedManufacturers, setExpandedManufacturers] = useState<Set<string>>(new Set());
+
+  // Get theme settings
+  const { companyName, companyLogo } = useTheme();
 
   const { data: items = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -93,7 +97,7 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
                 <span className="text-white font-bold text-lg sm:text-xl">ش</span>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg sm:text-xl font-bold text-slate-800">إدارة المخزون</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-slate-800">{companyName}</h1>
                 <span className="text-xs text-slate-500 font-latin">Inventory System</span>
               </div>
             </div>

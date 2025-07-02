@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign, Settings, LogOut, Palette, Users } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/hooks/useTheme";
 import InventoryStats from "@/components/inventory-stats";
 import InventoryTable from "@/components/inventory-table";
 import InventoryFormSimple from "@/components/inventory-form-simple";
@@ -32,6 +33,9 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
   const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Get theme settings
+  const { companyName, companyLogo } = useTheme();
 
   const { data: items = [] } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -104,7 +108,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                 <span className="text-white font-bold text-lg sm:text-xl">ش</span>
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg sm:text-xl font-bold text-slate-800">إدارة المخزون</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-slate-800">{companyName}</h1>
                 <span className="text-xs text-slate-500 font-latin">Inventory System</span>
               </div>
             </div>

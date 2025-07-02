@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useTheme } from "@/hooks/useTheme";
 import InventoryPage from "@/pages/inventory";
 import CardViewPage from "@/pages/card-view";
 import ManufacturersPage from "@/pages/manufacturers";
@@ -15,6 +16,12 @@ interface User {
   username: string;
   role: string;
   id: number;
+}
+
+function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // This component loads and applies theme settings
+  useTheme();
+  return <>{children}</>;
 }
 
 function Router({ user }: { user: User }) {
@@ -66,16 +73,18 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div dir="rtl" className="font-arabic">
-          <Toaster />
-          {!user ? (
-            <LoginPage onLogin={handleLogin} />
-          ) : (
-            <Router user={user} />
-          )}
-        </div>
-      </TooltipProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <div dir="rtl" className="font-arabic">
+            <Toaster />
+            {!user ? (
+              <LoginPage onLogin={handleLogin} />
+            ) : (
+              <Router user={user} />
+            )}
+          </div>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
