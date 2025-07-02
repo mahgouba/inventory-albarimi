@@ -13,6 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { insertInventoryItemSchema, type InsertInventoryItem, type InventoryItem } from "@shared/schema";
 import { CloudUpload, Settings } from "lucide-react";
 import ListManager from "@/components/list-manager";
+import ManufacturerCategoriesButton from "@/components/manufacturer-categories-button";
 
 interface InventoryFormProps {
   open: boolean;
@@ -64,6 +65,9 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
   
   // List manager state
   const [showListManager, setShowListManager] = useState(false);
+  
+  // Manufacturer categories state
+  const [localManufacturerCategories, setLocalManufacturerCategories] = useState<Record<string, string[]>>(manufacturerCategories);
 
   const form = useForm<InsertInventoryItem>({
     resolver: zodResolver(insertInventoryItemSchema),
@@ -87,7 +91,7 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
 
   const handleManufacturerChange = (manufacturer: string) => {
     setSelectedManufacturer(manufacturer);
-    setAvailableCategories(manufacturerCategories[manufacturer] || []);
+    setAvailableCategories(localManufacturerCategories[manufacturer] || []);
     form.setValue("category", "");
   };
 
@@ -238,31 +242,48 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
                   )}
                 />
 
-                {/* Category Field */}
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>الفئة</FormLabel>
-                      <FormControl>
-                        <Select value={field.value} onValueChange={field.onChange} disabled={!selectedManufacturer}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="اختر الفئة" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {availableCategories.map((category) => (
-                              <SelectItem key={category} value={category}>
-                                {category}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                {/* Category Field with Categories Manager */}
+                <div className="space-y-2">
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>الفئة</FormLabel>
+                        <FormControl>
+                          <Select value={field.value} onValueChange={field.onChange} disabled={!selectedManufacturer}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="اختر الفئة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableCategories.map((category) => (
+                                <SelectItem key={category} value={category}>
+                                  {category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {/* Manufacturer Categories Management Button */}
+                  {selectedManufacturer && (
+                    <ManufacturerCategoriesButton
+                      manufacturer={selectedManufacturer}
+                      categories={localManufacturerCategories[selectedManufacturer] || []}
+                      onCategoriesChange={(newCategories) => {
+                        setLocalManufacturerCategories(prev => ({
+                          ...prev,
+                          [selectedManufacturer]: newCategories
+                        }));
+                        setAvailableCategories(newCategories);
+                      }}
+                    />
                   )}
-                />
+                </div>
 
                 {/* Engine Capacity */}
                 <FormField
