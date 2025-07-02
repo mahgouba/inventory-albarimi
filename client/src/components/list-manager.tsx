@@ -5,7 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Edit2, Plus, Check, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Trash2, Edit2, Plus, Check, X, Settings, Car, Factory } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -23,6 +26,7 @@ interface ListManagerProps {
   onOpenChange: (open: boolean) => void;
   listsData: {
     manufacturers: string[];
+    manufacturerCategories: Record<string, string[]>; // { "مرسيدس": ["E200", "C200"], "بي ام دبليو": ["X5", "X3"] }
     engineCapacities: string[];
     statuses: string[];
     importTypes: string[];
@@ -30,7 +34,7 @@ interface ListManagerProps {
     exteriorColors: string[];
     interiorColors: string[];
   };
-  onSave: (type: string, newList: string[]) => void;
+  onSave: (type: string, newList: string[] | Record<string, string[]>) => void;
 }
 
 export default function ListManager({ open, onOpenChange, listsData, onSave }: ListManagerProps) {
@@ -38,9 +42,12 @@ export default function ListManager({ open, onOpenChange, listsData, onSave }: L
   const [editingItem, setEditingItem] = useState<{type: string, index: number, value: string} | null>(null);
   const [newItem, setNewItem] = useState("");
   const [showDeleteDialog, setShowDeleteDialog] = useState<{type: string, index: number, value: string} | null>(null);
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string>("");
+  const [newCategory, setNewCategory] = useState("");
 
   const listConfigs = [
     { key: "manufacturers", label: "الشركات المصنعة", color: "bg-blue-100 text-blue-800" },
+    { key: "manufacturerCategories", label: "فئات الشركات المصنعة", color: "bg-indigo-100 text-indigo-800" },
     { key: "engineCapacities", label: "سعات المحرك", color: "bg-green-100 text-green-800" },
     { key: "statuses", label: "حالات المركبة", color: "bg-purple-100 text-purple-800" },
     { key: "importTypes", label: "أنواع الاستيراد", color: "bg-orange-100 text-orange-800" },

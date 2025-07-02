@@ -28,9 +28,13 @@ import {
   UserCircle,
   Table,
   LayoutGrid,
-  ArrowLeft
+  ArrowLeft,
+  LogOut,
+  Shield,
+  Activity
 } from "lucide-react";
 import { Link } from "wouter";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
 interface AppearancePageProps {
@@ -229,7 +233,7 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                 <p className="text-slate-600">تخصيص الألوان والأيقونات واللوجوهات</p>
               </div>
             </div>
-            <div className="flex space-x-3 space-x-reverse">
+            <div className="flex items-center space-x-3 space-x-reverse">
               <Button variant="outline" onClick={resetToDefault}>
                 <RotateCcw className="h-4 w-4 ml-2" />
                 إعادة تعيين
@@ -238,6 +242,43 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                 <Save className="h-4 w-4 ml-2" />
                 حفظ التغييرات
               </Button>
+              
+              {/* User Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                    <UserCircle className="h-5 w-5 ml-2" />
+                    المستخدم
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem>
+                    <Shield className="h-4 w-4 ml-2" />
+                    الصلاحيات: {userRole === "admin" ? "مدير" : "بائع"}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  {userRole === "admin" && (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/users" className="cursor-pointer">
+                          <Users className="h-4 w-4 ml-2" />
+                          إدارة المستخدمين
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                    </>
+                  )}
+                  <DropdownMenuItem>
+                    <Activity className="h-4 w-4 ml-2" />
+                    سجل النشاط
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => window.location.href = "/login"}>
+                    <LogOut className="h-4 w-4 ml-2" />
+                    تسجيل الخروج
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>

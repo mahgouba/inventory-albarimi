@@ -186,60 +186,45 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
                   onOpenChange={() => toggleManufacturer(manufacturer)}
                 >
                   <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-slate-50 transition-colors py-4">
+                    <CardHeader className="cursor-pointer hover:bg-slate-50 transition-colors py-6">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4 space-x-reverse">
+                        <div className="flex items-center space-x-6 space-x-reverse">
                           {/* Manufacturer Logo */}
-                          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200">
+                          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200 shadow-sm">
                             {logo ? (
                               <img 
                                 src={logo} 
                                 alt={manufacturer}
-                                className="w-12 h-12 object-contain rounded-full"
+                                className="w-16 h-16 object-contain rounded-full"
                               />
                             ) : (
-                              <span className="text-xl font-bold text-slate-600">
+                              <span className="text-2xl font-bold text-slate-600">
                                 {manufacturer.charAt(0)}
                               </span>
                             )}
                           </div>
                           
-                          {/* Manufacturer Info */}
-                          <div className="flex-1">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                              <CardTitle className="text-xl text-slate-800 mb-2 sm:mb-1">{manufacturer}</CardTitle>
-                              
-                              {/* Categories dropdown and available count */}
-                              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 sm:space-x-reverse gap-2 sm:gap-0">
-                                <Select>
-                                  <SelectTrigger className="w-40 text-sm">
-                                    <SelectValue placeholder="الفئات المتوفرة" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {Object.keys(data.categories).map((category) => (
-                                      <SelectItem key={category} value={category}>
-                                        {category}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <div className="text-center min-w-[60px] bg-teal-50 rounded-md p-2 sm:bg-transparent sm:p-0">
-                                  <div className="text-base sm:text-lg font-bold text-teal-600">{availableCount}</div>
-                                  <div className="text-xs text-slate-500">متوفر</div>
-                                </div>
-                              </div>
+                          {/* Manufacturer Name and Count */}
+                          <div className="flex flex-col">
+                            <CardTitle className="text-2xl text-slate-800 mb-2">{manufacturer}</CardTitle>
+                            <div className="flex items-center space-x-3 space-x-reverse">
+                              <Badge variant="secondary" className="bg-teal-50 text-teal-700 px-4 py-2 text-base font-semibold">
+                                {totalCount} مركبة
+                              </Badge>
+                              <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-4 py-2 text-base font-semibold">
+                                {availableCount} متوفر
+                              </Badge>
                             </div>
-                            
-                            <p className="text-sm text-slate-600 mt-2">
-                              {totalCount} مركبة إجمالي • {availableCount} متوفر
-                            </p>
                           </div>
                         </div>
-                        {expandedManufacturers.has(manufacturer) ? (
-                          <ChevronUp className="h-5 w-5 text-slate-500" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5 text-slate-500" />
-                        )}
+                        
+                        <div className="flex items-center">
+                          {expandedManufacturers.has(manufacturer) ? (
+                            <ChevronUp className="h-6 w-6 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="h-6 w-6 text-slate-400" />
+                          )}
+                        </div>
                       </div>
                     </CardHeader>
                   </CollapsibleTrigger>

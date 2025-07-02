@@ -88,6 +88,40 @@ export const insertLocationTransferSchema = createInsertSchema(locationTransfers
   transferDate: true,
 });
 
+// User sessions table for tracking login/logout times
+export const userSessions = pgTable("user_sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  loginTime: timestamp("login_time").defaultNow().notNull(),
+  logoutTime: timestamp("logout_time"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  isActive: boolean("is_active").default(true).notNull(),
+});
+
+// Activity logs table for tracking user actions
+export const activityLogs = pgTable("activity_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  action: text("action").notNull(), // 'add', 'edit', 'delete', 'sell'
+  entityType: text("entity_type").notNull(), // 'inventory', 'user', 'manufacturer'
+  entityId: integer("entity_id"),
+  details: text("details"), // JSON string with action details
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  ipAddress: text("ip_address"),
+});
+
+export const insertUserSessionSchema = createInsertSchema(userSessions).omit({
+  id: true,
+  loginTime: true,
+  isActive: true,
+});
+
+export const insertActivityLogSchema = createInsertSchema(activityLogs).omit({
+  id: true,
+  timestamp: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertInventoryItem = z.infer<typeof insertInventoryItemSchema>;
@@ -98,3 +132,7 @@ export type InsertLocation = z.infer<typeof insertLocationSchema>;
 export type Location = typeof locations.$inferSelect;
 export type InsertLocationTransfer = z.infer<typeof insertLocationTransferSchema>;
 export type LocationTransfer = typeof locationTransfers.$inferSelect;
+export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
+export type UserSession = typeof userSessions.$inferSelect;
+export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
+export type ActivityLog = typeof activityLogs.$inferSelect;
