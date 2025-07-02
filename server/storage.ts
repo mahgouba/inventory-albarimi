@@ -1,4 +1,6 @@
 import { users, inventoryItems, type User, type InsertUser, type InventoryItem, type InsertInventoryItem } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
@@ -180,4 +182,90 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
+    return user;
+  }
+
+  async getAllInventoryItems(): Promise<InventoryItem[]> {
+    return await db.select().from(inventoryItems);
+  }
+
+  async getInventoryItem(id: number): Promise<InventoryItem | undefined> {
+    const [item] = await db.select().from(inventoryItems).where(eq(inventoryItems.id, id));
+    return item || undefined;
+  }
+
+  async createInventoryItem(insertItem: InsertInventoryItem): Promise<InventoryItem> {
+    const [item] = await db
+      .insert(inventoryItems)
+      .values(insertItem)
+      .returning();
+    return item;
+  }
+
+  async updateInventoryItem(id: number, updateData: Partial<InsertInventoryItem>): Promise<InventoryItem | undefined> {
+    const [item] = await db
+      .update(inventoryItems)
+      .set(updateData)
+      .where(eq(inventoryItems.id, id))
+      .returning();
+    return item || undefined;
+  }
+
+  async deleteInventoryItem(id: number): Promise<boolean> {
+    const result = await db.delete(inventoryItems).where(eq(inventoryItems.id, id));
+    return result.rowCount > 0;
+  }
+
+  async searchInventoryItems(query: string): Promise<InventoryItem[]> {
+    const lowerQuery = `%${query.toLowerCase()}%`;
+    const items = await db.select().from(inventoryItems);
+    return items.filter(item =>
+      item.category.toLowerCase().includes(query.toLowerCase()) ||
+      item.engineCapacity.toLowerCase().includes(query.toLowerCase()) ||
+      item.exteriorColor.toLowerCase().includes(query.toLowerCase()) ||
+      item.interiorColor.toLowerCase().includes(query.toLowerCase()) ||
+      item.status.toLowerCase().includes(query.toLowerCase()) ||
+      item.importType.toLowerCase().includes(query.toLowerCase()) ||
+      item.manufacturer.toLowerCase().includes(query.toLowerCase()) ||
+      item.chassisNumber.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+
+  async filterInventoryItems(filters: { category?: string; status?: string; year?: number }): Promise<InventoryItem[]> {
+    const items = await db.select().from(inventoryItems);
+    return items.filter(item => {
+      if (filters.category && item.category !== filters.category) return false;
+      if (filters.status && item.status !== filters.status) return false;
+      if (filters.year && item.year !== filters.year) return false;
+      return true;
+    });
+  }
+
+  async getInventoryStats(): Promise<{ total: number; available: number; inTransit: number; maintenance: number }> {
+    const items = await db.select().from(inventoryItems);
+    return {
+      total: items.length,
+      available: items.filter(item => item.status === "متوفر").length,
+      inTransit: items.filter(item => item.status === "في الطريق").length,
+      maintenance: items.filter(item => item.status === "قيد الصيانة").length
+    };
+  }
+}
+
+export const storage = new DatabaseStorage();

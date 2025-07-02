@@ -24,9 +24,10 @@ This is a full-stack inventory management system built with React, Express, and 
 
 ### Data Layer
 - **ORM**: Drizzle ORM for type-safe database operations
-- **Database**: PostgreSQL (configured but using in-memory storage for development)
+- **Database**: PostgreSQL with DatabaseStorage implementation
 - **Schema Validation**: Zod schemas for runtime type checking
 - **Migrations**: Drizzle Kit for database schema management
+- **Connection**: Neon serverless PostgreSQL with connection pooling
 
 ## Key Components
 
@@ -61,11 +62,11 @@ This is a full-stack inventory management system built with React, Express, and 
 
 1. **Client Request**: React components make API calls using TanStack Query
 2. **API Processing**: Express routes handle requests and validate data
-3. **Data Storage**: Currently uses in-memory storage (MemStorage class)
+3. **Data Storage**: PostgreSQL database accessed through DatabaseStorage class
 4. **Response**: JSON responses sent back to client
 5. **UI Update**: Query client automatically updates UI state
 
-The application supports real-time updates through query invalidation and provides optimistic updates for better user experience.
+The application supports real-time updates through query invalidation and provides optimistic updates for better user experience. Database operations are handled through Drizzle ORM with proper connection pooling.
 
 ## External Dependencies
 
@@ -94,9 +95,10 @@ The system is designed with a clear separation of concerns:
 - **Shared Schema**: Common TypeScript types and Zod schemas in `/shared`
 - **Client Code**: React application in `/client` with component-based architecture  
 - **Server Code**: Express API in `/server` with modular route handling
+- **Database Layer**: PostgreSQL with Drizzle ORM and connection pooling
 - **Configuration**: Centralized config files for build tools and frameworks
 
-The application uses a temporary in-memory storage solution for development, with the database configuration ready for PostgreSQL deployment. The Arabic-first design supports RTL layout and includes proper font loading for Arabic text.
+The application uses PostgreSQL for persistent data storage with proper database seeding. The Arabic-first design supports RTL layout and includes proper font loading for Arabic text.
 
 ## Deployment Strategy
 
@@ -119,7 +121,9 @@ The application uses a temporary in-memory storage solution for development, wit
 
 ```
 Changelog:
-- July 02, 2025. Initial setup
+- July 02, 2025: Initial setup with Arabic inventory management system
+- July 02, 2025: Updated field structure - changed المهنشي to الاستيراد, added الصانع field, split colors into interior/exterior, changed الإصدار to سعة المحرك
+- July 02, 2025: Added PostgreSQL database with DatabaseStorage implementation, seeded with sample data
 ```
 
 ## User Preferences
