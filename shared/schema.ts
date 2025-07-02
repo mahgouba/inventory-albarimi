@@ -136,3 +136,47 @@ export type InsertUserSession = z.infer<typeof insertUserSessionSchema>;
 export type UserSession = typeof userSessions.$inferSelect;
 export type InsertActivityLog = z.infer<typeof insertActivityLogSchema>;
 export type ActivityLog = typeof activityLogs.$inferSelect;
+
+// Low stock alerts table
+export const lowStockAlerts = pgTable("low_stock_alerts", {
+  id: serial("id").primaryKey(),
+  manufacturer: text("manufacturer").notNull(),
+  category: text("category").notNull(),
+  currentStock: integer("current_stock").notNull(),
+  minStockLevel: integer("min_stock_level").default(5).notNull(),
+  alertLevel: text("alert_level").notNull(), // "low", "critical", "out_of_stock"
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Stock level settings table
+export const stockSettings = pgTable("stock_settings", {
+  id: serial("id").primaryKey(),
+  manufacturer: text("manufacturer").notNull(),
+  category: text("category").notNull(),
+  minStockLevel: integer("min_stock_level").default(5).notNull(),
+  lowStockThreshold: integer("low_stock_threshold").default(3).notNull(),
+  criticalStockThreshold: integer("critical_stock_threshold").default(1).notNull(),
+  autoReorderEnabled: boolean("auto_reorder_enabled").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertLowStockAlertSchema = createInsertSchema(lowStockAlerts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertStockSettingsSchema = createInsertSchema(stockSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type LowStockAlert = typeof lowStockAlerts.$inferSelect;
+export type InsertLowStockAlert = z.infer<typeof insertLowStockAlertSchema>;
+
+export type StockSettings = typeof stockSettings.$inferSelect;
+export type InsertStockSettings = z.infer<typeof insertStockSettingsSchema>;

@@ -1,4 +1,14 @@
-import { users, inventoryItems, manufacturers, locations, locationTransfers, type User, type InsertUser, type InventoryItem, type InsertInventoryItem, type Manufacturer, type InsertManufacturer, type Location, type InsertLocation, type LocationTransfer, type InsertLocationTransfer } from "@shared/schema";
+import { 
+  users, inventoryItems, manufacturers, locations, locationTransfers, 
+  lowStockAlerts, stockSettings,
+  type User, type InsertUser, 
+  type InventoryItem, type InsertInventoryItem, 
+  type Manufacturer, type InsertManufacturer, 
+  type Location, type InsertLocation, 
+  type LocationTransfer, type InsertLocationTransfer,
+  type LowStockAlert, type InsertLowStockAlert,
+  type StockSettings, type InsertStockSettings
+} from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
@@ -67,6 +77,21 @@ export interface IStorage {
   createManufacturer(manufacturer: InsertManufacturer): Promise<Manufacturer>;
   updateManufacturer(id: number, manufacturer: Partial<InsertManufacturer>): Promise<Manufacturer | undefined>;
   deleteManufacturer(id: number): Promise<boolean>;
+  
+  // Low stock alerts methods
+  getLowStockAlerts(): Promise<LowStockAlert[]>;
+  getUnreadLowStockAlerts(): Promise<LowStockAlert[]>;
+  createLowStockAlert(alert: InsertLowStockAlert): Promise<LowStockAlert>;
+  markAlertAsRead(id: number): Promise<boolean>;
+  deleteAlert(id: number): Promise<boolean>;
+  checkStockLevels(): Promise<void>;
+  
+  // Stock settings methods
+  getStockSettings(): Promise<StockSettings[]>;
+  getStockSettingsByCategory(manufacturer: string, category: string): Promise<StockSettings | undefined>;
+  createStockSettings(settings: InsertStockSettings): Promise<StockSettings>;
+  updateStockSettings(id: number, settings: Partial<InsertStockSettings>): Promise<StockSettings | undefined>;
+  deleteStockSettings(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -769,6 +794,140 @@ export class DatabaseStorage implements IStorage {
   async deleteManufacturer(id: number): Promise<boolean> {
     const result = await db.delete(manufacturers).where(eq(manufacturers.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  // Low stock alerts methods
+  async getLowStockAlerts(): Promise<LowStockAlert[]> {
+    const alerts = await db.select().from(lowStockAlerts).orderBy(lowStockAlerts.createdAt);
+    return alerts;
+  }
+
+  async getUnreadLowStockAlerts(): Promise<LowStockAlert[]> {
+    const alerts = await db.select().from(lowStockAlerts)
+      .where(eq(lowStockAlerts.isRead, false))
+      .orderBy(lowStockAlerts.createdAt);
+    return alerts;
+  }
+
+  async createLowStockAlert(alertData: InsertLowStockAlert): Promise<LowStockAlert> {
+    const [alert] = await db.insert(lowStockAlerts).values(alertData).returning();
+    return alert;
+  }
+
+  async markAlertAsRead(id: number): Promise<boolean> {
+    try {
+      await db.update(lowStockAlerts)
+        .set({ isRead: true, updatedAt: new Date() })
+        .where(eq(lowStockAlerts.id, id));
+      return true;
+    } catch (error) {
+      console.error('Mark alert as read error:', error);
+      return false;
+    }
+  }
+
+  async deleteAlert(id: number): Promise<boolean> {
+    try {
+      await db.delete(lowStockAlerts).where(eq(lowStockAlerts.id, id));
+      return true;
+    } catch (error) {
+      console.error('Delete alert error:', error);
+      return false;
+    }
+  }
+
+  async checkStockLevels(): Promise<void> {
+    try {
+      const items = await this.getAllInventoryItems();
+      const stockCounts = new Map<string, number>();
+
+      // Count items by manufacturer + category
+      items.forEach(item => {
+        if (!item.isSold) {
+          const key = `${item.manufacturer}-${item.category}`;
+          stockCounts.set(key, (stockCounts.get(key) || 0) + 1);
+        }
+      });
+
+      // Get stock settings
+      const settings = await this.getStockSettings();
+      
+      for (const setting of settings) {
+        const key = `${setting.manufacturer}-${setting.category}`;
+        const currentStock = stockCounts.get(key) || 0;
+        
+        let alertLevel = '';
+        if (currentStock === 0) {
+          alertLevel = 'out_of_stock';
+        } else if (currentStock <= setting.criticalStockThreshold) {
+          alertLevel = 'critical';
+        } else if (currentStock <= setting.lowStockThreshold) {
+          alertLevel = 'low';
+        }
+
+        if (alertLevel) {
+          // Check if alert already exists
+          const existingAlerts = await db.select().from(lowStockAlerts)
+            .where(eq(lowStockAlerts.manufacturer, setting.manufacturer))
+            .where(eq(lowStockAlerts.category, setting.category))
+            .where(eq(lowStockAlerts.isRead, false));
+
+          if (existingAlerts.length === 0) {
+            await this.createLowStockAlert({
+              manufacturer: setting.manufacturer,
+              category: setting.category,
+              currentStock,
+              minStockLevel: setting.minStockLevel,
+              alertLevel,
+              isRead: false,
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Check stock levels error:', error);
+    }
+  }
+
+  // Stock settings methods
+  async getStockSettings(): Promise<StockSettings[]> {
+    const settings = await db.select().from(stockSettings).orderBy(stockSettings.manufacturer, stockSettings.category);
+    return settings;
+  }
+
+  async getStockSettingsByCategory(manufacturer: string, category: string): Promise<StockSettings | undefined> {
+    const [setting] = await db.select().from(stockSettings)
+      .where(eq(stockSettings.manufacturer, manufacturer))
+      .where(eq(stockSettings.category, category));
+    return setting;
+  }
+
+  async createStockSettings(settingsData: InsertStockSettings): Promise<StockSettings> {
+    const [setting] = await db.insert(stockSettings).values(settingsData).returning();
+    return setting;
+  }
+
+  async updateStockSettings(id: number, settingsData: Partial<InsertStockSettings>): Promise<StockSettings | undefined> {
+    try {
+      const [setting] = await db.update(stockSettings)
+        .set({ ...settingsData, updatedAt: new Date() })
+        .where(eq(stockSettings.id, id))
+        .returning();
+      return setting;
+    } catch (error) {
+      console.error('Update stock settings error:', error);
+      return undefined;
+    }
+  }
+
+  async deleteStockSettings(id: number): Promise<boolean> {
+    try {
+      await db.delete(stockSettings).where(eq(stockSettings.id, id));
+      return true;
+    } catch (error) {
+      console.error('Delete stock settings error:', error);
+      return false;
+    }
   }
 }
 

@@ -133,6 +133,10 @@ Changelog:
 - July 02, 2025: Created comprehensive appearance management page with theme colors, company branding, manufacturer logos, and UI customization options
 - July 02, 2025: Integrated ListManager component for better list options management with tabbed interface
 - July 02, 2025: Added appearance management to admin navigation with back-to-home button for better user navigation
+- July 02, 2025: Added admin dropdown menu next to logout button with options for appearance management, user management, and manufacturer settings
+- July 02, 2025: Implemented sell vehicle functionality with status update to "مباع" and automatic sale date recording using Gregorian calendar
+- July 02, 2025: Created CategoryManager component for managing manufacturer-linked categories with hierarchical organization
+- July 02, 2025: Updated card view to display only manufacturer logo and count without "متوفر" text for cleaner appearance
 ```
 
 ## User Preferences
