@@ -36,6 +36,7 @@ import {
 import { Link } from "wouter";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import CategoryManager from "@/components/category-manager";
 
 interface AppearancePageProps {
   userRole: string;
@@ -94,6 +95,23 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
       "تسلا": "",
       "لوسيد": ""
     }
+  });
+
+  // حالة إدارة الفئات
+  const [manufacturerCategories, setManufacturerCategories] = useState<Record<string, string[]>>({
+    "مرسيدس": ["E200", "C200", "C300", "S500", "GLC"],
+    "بي ام دبليو": ["X5", "X3", "X1", "320i", "520i"],
+    "رولز رويز": ["Ghost", "Phantom", "Cullinan"],
+    "بنتلي": ["Continental", "Bentayga", "Mulsanne"],
+    "رنج روفر": ["Sport", "Evoque", "Vogue", "Velar"],
+    "دفندر": ["90", "110", "130"],
+    "بورش": ["Cayenne", "Macan", "911", "Panamera"],
+    "لكزس": ["LX570", "RX350", "ES350", "LS500"],
+    "لينكون": ["Navigator", "Aviator", "Continental"],
+    "شوفولية": ["Tahoe", "Suburban", "Camaro"],
+    "تويوتا": ["Land Cruiser", "Prado", "Camry", "Corolla"],
+    "تسلا": ["Model S", "Model 3", "Model X", "Model Y"],
+    "لوسيد": ["Air Dream", "Air Touring", "Air Pure"]
   });
 
   // حالة إدارة الأيقونات
@@ -289,9 +307,10 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
           {/* عمود الإعدادات */}
           <div className="lg:col-span-2 space-y-6">
             <Tabs defaultValue="colors" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="colors">الألوان</TabsTrigger>
                 <TabsTrigger value="logos">اللوجوهات</TabsTrigger>
+                <TabsTrigger value="categories">إدارة الفئات</TabsTrigger>
                 <TabsTrigger value="icons">الأيقونات</TabsTrigger>
               </TabsList>
 
@@ -487,6 +506,24 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* تبويب إدارة الفئات */}
+              <TabsContent value="categories" className="space-y-6">
+                <CategoryManager 
+                  open={true}
+                  onOpenChange={() => {}}
+                  manufacturers={Object.keys(logoSettings.manufacturers)}
+                  manufacturerCategories={manufacturerCategories}
+                  onSave={(updatedCategories) => {
+                    setManufacturerCategories(updatedCategories);
+                    console.log("حفظ الفئات:", updatedCategories);
+                    toast({
+                      title: "تم الحفظ",
+                      description: "تم حفظ إعدادات الفئات بنجاح",
+                    });
+                  }}
+                />
               </TabsContent>
 
               {/* تبويب الأيقونات */}
