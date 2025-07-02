@@ -144,6 +144,36 @@ export class MemStorage implements IStorage {
         location: "المستودع الرئيسي",
         chassisNumber: "WASSBER0098765",
         images: []
+      },
+      {
+        category: "E200",
+        engineCapacity: "2.0L",
+        year: 2023,
+        exteriorColor: "أحمر",
+        interiorColor: "بيج",
+        status: "مباع",
+        importType: "شخصي",
+        manufacturer: "مرسيدس",
+        location: "المعرض",
+        chassisNumber: "WDB4566001234",
+        images: [],
+        isSold: true,
+        soldDate: new Date("2024-12-15")
+      },
+      {
+        category: "320i",
+        engineCapacity: "2.0L",
+        year: 2022,
+        exteriorColor: "أزرق",
+        interiorColor: "أسود",
+        status: "مباع",
+        importType: "شركة",
+        manufacturer: "بي ام دبليو",
+        location: "المعرض",
+        chassisNumber: "WBA5566005678",
+        images: [],
+        isSold: true,
+        soldDate: new Date("2024-11-20")
       }
     ];
 

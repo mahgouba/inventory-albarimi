@@ -117,6 +117,8 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
       const matchesYear = !yearFilter || yearFilter === "جميع السنوات" || item.year.toString() === yearFilter;
       const matchesImportType = !importTypeFilter || importTypeFilter === "جميع الأنواع" || item.importType === importTypeFilter;
       const matchesEngineCapacity = !engineCapacityFilter || engineCapacityFilter === "جميع السعات" || item.engineCapacity === engineCapacityFilter;
+      // إذا كان إظهار السيارات المباعة مفعلاً، اعرض جميع السيارات
+      // إذا كان مطفياً، اعرض فقط السيارات غير المباعة
       const matchesSoldFilter = showSoldCars ? true : !item.isSold;
       
       return matchesSearch && matchesCategory && matchesManufacturer && matchesYear && matchesImportType && matchesEngineCapacity && matchesSoldFilter;
@@ -146,7 +148,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
   return (
     <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
       <div className="overflow-x-auto">
-        <Table>
+        <Table data-table="inventory-table">
           <TableHeader className="bg-teal-600">
             <TableRow>
               <TableHead className="text-white text-right">

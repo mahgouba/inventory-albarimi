@@ -111,6 +111,14 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
               <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
                 <UserCircle size={20} />
               </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-red-300 text-red-600 hover:bg-red-50"
+                onClick={() => window.location.href = '/login'}
+              >
+                تسجيل الخروج
+              </Button>
             </div>
           </div>
         </div>
@@ -187,39 +195,7 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
 
                   <CollapsibleContent>
                     <CardContent className="pt-0 pb-4">
-                      {/* Category breakdown */}
-                      <div className="mb-4 p-4 bg-slate-50 rounded-lg">
-                        <h4 className="font-semibold text-slate-700 mb-3">تفاصيل الفئات</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {Object.entries(data.categories).map(([category, stats]) => (
-                            <div key={category} className="bg-white p-3 rounded border border-slate-200">
-                              <h5 className="font-medium text-slate-800 mb-2">{category}</h5>
-                              <div className="space-y-1 text-sm">
-                                <div className="flex justify-between">
-                                  <span className="text-green-600">متوفر:</span>
-                                  <span className="font-medium">{stats.available}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-blue-600">في الطريق:</span>
-                                  <span className="font-medium">{stats.inTransit}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-yellow-600">صيانة:</span>
-                                  <span className="font-medium">{stats.maintenance}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                  <span className="text-red-600">مباع:</span>
-                                  <span className="font-medium">{stats.sold}</span>
-                                </div>
-                                <div className="flex justify-between border-t pt-1 mt-1">
-                                  <span className="font-medium">الإجمالي:</span>
-                                  <span className="font-bold">{stats.total}</span>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+
 
                       {/* Individual vehicles */}
                       <div>

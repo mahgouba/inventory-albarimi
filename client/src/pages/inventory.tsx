@@ -10,7 +10,7 @@ import InventoryStats from "@/components/inventory-stats";
 import InventoryTable from "@/components/inventory-table";
 import InventoryForm from "@/components/inventory-form";
 import ExcelImport from "@/components/excel-import";
-import { exportToCSV, printTable } from "@/lib/utils";
+import { exportToCSV, exportToExcel, printTable } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
 
 interface InventoryPageProps {
@@ -38,8 +38,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
 
   const manufacturers = ["جميع الصناع", "مرسيدس", "بي ام دبليو", "اودي", "تويوتا", "نيسان", "هوندا", "فورد", "هيونداي"];
   
-  // Generate categories based on all possible categories from manufacturers
-  const allCategories = ["جميع الفئات"];
+  // Generate categories based on selected manufacturer
   const manufacturerCategories: Record<string, string[]> = {
     "مرسيدس": ["E200", "C200", "C300", "S500", "GLE", "CLA", "A200"],
     "بي ام دبليو": ["X5", "X3", "X6", "320i", "520i", "730i", "M3"],
@@ -51,22 +50,23 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
     "هيونداي": ["النترا", "سوناتا", "توسان", "سانتا في", "أكسنت"]
   };
   
-  Object.values(manufacturerCategories).forEach(cats => {
-    cats.forEach(cat => {
-      if (!allCategories.includes(cat)) {
-        allCategories.push(cat);
-      }
-    });
-  });
+  // Get categories based on selected manufacturer
+  const getAvailableCategories = () => {
+    if (!manufacturerFilter || manufacturerFilter === "جميع الصناع") {
+      return ["جميع الفئات"];
+    }
+    const manufacturerCats = manufacturerCategories[manufacturerFilter] || [];
+    return ["جميع الفئات", ...manufacturerCats];
+  };
   
-  const categories = allCategories;
+  const categories = getAvailableCategories();
   const years = ["جميع السنوات", "2025", "2024", "2023", "2022", "2021"];
   const importTypes = ["جميع الأنواع", "شخصي", "شركة", "مستعمل شخصي"];
   const locations = ["المستودع الرئيسي", "المعرض", "الورشة", "الميناء", "مستودع فرعي"];
   const engineCapacities = ["جميع السعات", "2.0L", "1.5L", "3.0L", "4.0L", "5.0L", "V6", "V8"];
 
   const handleExport = () => {
-    exportToCSV(items, "inventory-export.csv");
+    exportToExcel(items, "تصدير-المخزون.xlsx");
   };
 
   const handlePrint = () => {
@@ -81,6 +81,12 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
   const handleFormClose = () => {
     setFormOpen(false);
     setEditItem(undefined);
+  };
+
+  // Reset category filter when manufacturer changes
+  const handleManufacturerChange = (value: string) => {
+    setManufacturerFilter(value);
+    setCategoryFilter("جميع الفئات");
   };
 
   const totalPages = Math.ceil(items.length / itemsPerPage);
@@ -113,6 +119,14 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
               </Button>
               <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
                 <UserCircle size={20} />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-red-300 text-red-600 hover:bg-red-50"
+                onClick={() => window.location.href = '/login'}
+              >
+                تسجيل الخروج
               </Button>
             </div>
           </div>
@@ -158,7 +172,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                     ))}
                   </SelectContent>
                 </Select>
-                <Select value={manufacturerFilter} onValueChange={setManufacturerFilter}>
+                <Select value={manufacturerFilter} onValueChange={handleManufacturerChange}>
                   <SelectTrigger className="w-full">
                     <SelectValue />
                   </SelectTrigger>
@@ -268,12 +282,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
         />
 
         {/* Pagination */}
-        <div className="flex items-center justify-between mt-8">
-          <p className="text-sm text-slate-600">
-            عرض <span className="font-medium">1</span> إلى{" "}
-            <span className="font-medium">{Math.min(itemsPerPage, items.length)}</span> من{" "}
-            <span className="font-medium">{items.length}</span> نتيجة
-          </p>
+        <div className="flex items-center justify-end mt-8">
           <div className="flex items-center space-x-2 space-x-reverse">
             <Button
               variant="outline"
