@@ -49,19 +49,21 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
   // Fetch current appearance settings
   const { data: appearanceSettings } = useQuery<AppearanceSettings>({
     queryKey: ["/api/appearance"],
-    onSuccess: (data) => {
-      if (data) {
-        setCompanyName(data.companyName || "إدارة المخزون");
-        setCompanyNameEn(data.companyNameEn || "Inventory System");
-        setCompanyLogo(data.companyLogo);
-        setPrimaryColor(data.primaryColor || "#0f766e");
-        setSecondaryColor(data.secondaryColor || "#0891b2");
-        setAccentColor(data.accentColor || "#BF9231");
-        setDarkMode(data.darkMode || false);
-        setRtlLayout(data.rtlLayout !== false);
-      }
-    }
   });
+
+  // Update state when data is fetched
+  useEffect(() => {
+    if (appearanceSettings) {
+      setCompanyName(appearanceSettings.companyName || "إدارة المخزون");
+      setCompanyNameEn(appearanceSettings.companyNameEn || "Inventory System");
+      setCompanyLogo(appearanceSettings.companyLogo);
+      setPrimaryColor(appearanceSettings.primaryColor || "#0f766e");
+      setSecondaryColor(appearanceSettings.secondaryColor || "#0891b2");
+      setAccentColor(appearanceSettings.accentColor || "#BF9231");
+      setDarkMode(appearanceSettings.darkMode || false);
+      setRtlLayout(appearanceSettings.rtlLayout !== false);
+    }
+  }, [appearanceSettings]);
 
   // Fetch manufacturers for logo management
   const { data: manufacturers = [] } = useQuery<Manufacturer[]>({

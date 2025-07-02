@@ -1,13 +1,14 @@
 import { 
   users, inventoryItems, manufacturers, locations, locationTransfers, 
-  lowStockAlerts, stockSettings,
+  lowStockAlerts, stockSettings, appearanceSettings,
   type User, type InsertUser, 
   type InventoryItem, type InsertInventoryItem, 
   type Manufacturer, type InsertManufacturer, 
   type Location, type InsertLocation, 
   type LocationTransfer, type InsertLocationTransfer,
   type LowStockAlert, type InsertLowStockAlert,
-  type StockSettings, type InsertStockSettings
+  type StockSettings, type InsertStockSettings,
+  type AppearanceSettings, type InsertAppearanceSettings
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -932,6 +933,55 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Delete stock settings error:', error);
       return false;
+    }
+  }
+
+  // Appearance settings methods
+  async getAppearanceSettings(): Promise<AppearanceSettings | undefined> {
+    try {
+      const [settings] = await db.select().from(appearanceSettings).limit(1);
+      return settings;
+    } catch (error) {
+      console.error('Get appearance settings error:', error);
+      return undefined;
+    }
+  }
+
+  async updateAppearanceSettings(settingsData: Partial<InsertAppearanceSettings>): Promise<AppearanceSettings> {
+    try {
+      // Check if settings exist
+      const [existingSettings] = await db.select().from(appearanceSettings).limit(1);
+      
+      if (existingSettings) {
+        // Update existing settings
+        const [updated] = await db.update(appearanceSettings)
+          .set({ ...settingsData, updatedAt: new Date() })
+          .where(eq(appearanceSettings.id, existingSettings.id))
+          .returning();
+        return updated;
+      } else {
+        // Create new settings
+        const [created] = await db.insert(appearanceSettings)
+          .values({ ...settingsData, createdAt: new Date(), updatedAt: new Date() })
+          .returning();
+        return created;
+      }
+    } catch (error) {
+      console.error('Update appearance settings error:', error);
+      throw error;
+    }
+  }
+
+  async updateManufacturerLogo(id: number, logo: string): Promise<Manufacturer | undefined> {
+    try {
+      const [manufacturer] = await db.update(manufacturers)
+        .set({ logo })
+        .where(eq(manufacturers.id, id))
+        .returning();
+      return manufacturer;
+    } catch (error) {
+      console.error('Update manufacturer logo error:', error);
+      return undefined;
     }
   }
 }
