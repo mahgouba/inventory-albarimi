@@ -174,6 +174,7 @@ export class MemStorage implements IStorage {
       entryDate: new Date(),
       isSold: insertItem.isSold || false,
       images: insertItem.images || [],
+      logo: insertItem.logo || null,
       notes: insertItem.notes || null
     };
     this.inventoryItems.set(id, item);

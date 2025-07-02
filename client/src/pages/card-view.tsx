@@ -9,7 +9,11 @@ import { ChevronDown, ChevronUp, Eye, Edit, DollarSign, Table, LayoutGrid, Bell,
 import { getStatusColor } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
 
-export default function CardViewPage() {
+interface CardViewPageProps {
+  userRole: string;
+}
+
+export default function CardViewPage({ userRole }: CardViewPageProps) {
   const [expandedManufacturers, setExpandedManufacturers] = useState<Set<string>>(new Set());
 
   const { data: items = [], isLoading } = useQuery<InventoryItem[]>({

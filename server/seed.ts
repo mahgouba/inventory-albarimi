@@ -1,5 +1,6 @@
 import { db } from "./db";
-import { inventoryItems, type InsertInventoryItem } from "@shared/schema";
+import { inventoryItems, users, type InsertInventoryItem } from "@shared/schema";
+import bcrypt from "bcryptjs";
 
 async function seedDatabase() {
   console.log("Seeding database...");
@@ -113,14 +114,36 @@ async function seedDatabase() {
   ];
 
   try {
-    // Check if data already exists
+    // Seed users first
+    const existingUsers = await db.select().from(users);
+    
+    if (existingUsers.length === 0) {
+      const hashedAdminPassword = await bcrypt.hash("admin123", 10);
+      const hashedSellerPassword = await bcrypt.hash("seller123", 10);
+      
+      await db.insert(users).values([
+        {
+          username: "admin",
+          password: hashedAdminPassword,
+          role: "admin"
+        },
+        {
+          username: "seller",
+          password: hashedSellerPassword,
+          role: "seller"
+        }
+      ]);
+      console.log("Database seeded with users.");
+    }
+
+    // Check if inventory data already exists
     const existingItems = await db.select().from(inventoryItems);
     
     if (existingItems.length === 0) {
       await db.insert(inventoryItems).values(sampleItems);
       console.log("Database seeded with sample inventory items.");
     } else {
-      console.log("Database already contains data, skipping seed.");
+      console.log("Database already contains data, skipping inventory seed.");
     }
   } catch (error) {
     console.error("Error seeding database:", error);

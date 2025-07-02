@@ -6,6 +6,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  role: text("role").notNull().default("seller"), // 'admin' or 'seller'
 });
 
 export const inventoryItems = pgTable("inventory_items", {
@@ -21,6 +22,7 @@ export const inventoryItems = pgTable("inventory_items", {
   location: text("location").notNull(), // الموقع (المستودع الرئيسي، المعرض، الورشة، الميناء)
   chassisNumber: text("chassis_number").notNull().unique(), // رقم الهيكل
   images: text("images").array().default([]), // الصور
+  logo: text("logo"), // اللوجو
   notes: text("notes"), // الملاحظات
   entryDate: timestamp("entry_date").defaultNow().notNull(), // تاريخ الدخول
   isSold: boolean("is_sold").default(false).notNull(), // مباع

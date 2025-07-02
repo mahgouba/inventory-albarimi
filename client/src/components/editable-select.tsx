@@ -2,13 +2,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, X, Edit } from "lucide-react";
 
 interface EditableSelectProps {
   options: string[];
   value: string;
   onValueChange: (value: string) => void;
   onAddOption?: (option: string) => void;
+  onDeleteOption?: (option: string) => void;
+  onEditOption?: (oldOption: string, newOption: string) => void;
   placeholder: string;
   className?: string;
 }
@@ -17,12 +19,16 @@ export default function EditableSelect({
   options, 
   value, 
   onValueChange, 
-  onAddOption, 
+  onAddOption,
+  onDeleteOption,
+  onEditOption,
   placeholder,
   className 
 }: EditableSelectProps) {
   const [isAdding, setIsAdding] = useState(false);
+  const [editingOption, setEditingOption] = useState<string | null>(null);
   const [newOption, setNewOption] = useState("");
+  const [editValue, setEditValue] = useState("");
 
   const handleAddOption = () => {
     if (newOption.trim() && onAddOption) {
@@ -30,6 +36,26 @@ export default function EditableSelect({
       onValueChange(newOption.trim());
       setNewOption("");
       setIsAdding(false);
+    }
+  };
+
+  const handleEditOption = () => {
+    if (editValue.trim() && onEditOption && editingOption) {
+      onEditOption(editingOption, editValue.trim());
+      if (value === editingOption) {
+        onValueChange(editValue.trim());
+      }
+      setEditingOption(null);
+      setEditValue("");
+    }
+  };
+
+  const handleDeleteOption = (option: string) => {
+    if (onDeleteOption) {
+      onDeleteOption(option);
+      if (value === option) {
+        onValueChange("");
+      }
     }
   };
 
@@ -85,9 +111,84 @@ export default function EditableSelect({
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={option} value={option}>
-              {option}
-            </SelectItem>
+            <div key={option} className="flex items-center justify-between p-2 hover:bg-slate-100">
+              {editingOption === option ? (
+                <div className="flex items-center space-x-2 space-x-reverse w-full">
+                  <Input
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleEditOption();
+                      } else if (e.key === 'Escape') {
+                        setEditingOption(null);
+                        setEditValue("");
+                      }
+                    }}
+                    className="flex-1 h-8"
+                    autoFocus
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleEditOption}
+                    className="h-8 w-8 p-0"
+                  >
+                    ✓
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingOption(null);
+                      setEditValue("");
+                    }}
+                    className="h-8 w-8 p-0"
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <SelectItem value={option} className="flex-1 border-none">
+                    {option}
+                  </SelectItem>
+                  <div className="flex items-center space-x-1 space-x-reverse">
+                    {onEditOption && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingOption(option);
+                          setEditValue(option);
+                        }}
+                        className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {onDeleteOption && options.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteOption(option);
+                        }}
+                        className="h-6 w-6 p-0 text-red-600 hover:text-red-800"
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           ))}
         </SelectContent>
       </Select>

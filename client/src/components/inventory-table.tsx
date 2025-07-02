@@ -224,9 +224,17 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                 <TableRow key={item.id} className="hover:bg-slate-50">
                   <TableCell className="text-sm text-slate-800">{item.manufacturer}</TableCell>
                   <TableCell className="text-center">
-                    <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-xs text-slate-600">
-                      {item.manufacturer.charAt(0)}
-                    </div>
+                    {item.logo ? (
+                      <img
+                        src={item.logo}
+                        alt={`${item.manufacturer} logo`}
+                        className="w-8 h-8 object-contain rounded-full border border-slate-200"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-xs text-slate-600">
+                        {item.manufacturer.charAt(0)}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell className="text-sm text-slate-800">{item.category}</TableCell>
                   <TableCell className="text-sm text-slate-800 font-latin">{item.engineCapacity}</TableCell>
@@ -285,14 +293,6 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                         disabled={sellMutation.isPending || item.isSold}
                       >
                         <DollarSign className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-slate-600 hover:text-slate-800 p-1"
-                        title="تفاصيل"
-                      >
-                        <Eye className="h-4 w-4" />
                       </Button>
                     </div>
                   </TableCell>

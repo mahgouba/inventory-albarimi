@@ -13,7 +13,11 @@ import ExcelImport from "@/components/excel-import";
 import { exportToCSV, printTable } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
 
-export default function InventoryPage() {
+interface InventoryPageProps {
+  userRole: string;
+}
+
+export default function InventoryPage({ userRole }: InventoryPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("جميع الفئات");
   const [manufacturerFilter, setManufacturerFilter] = useState("جميع الصناع");

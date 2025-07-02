@@ -13,6 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { insertInventoryItemSchema, type InsertInventoryItem, type InventoryItem } from "@shared/schema";
 import { CloudUpload } from "lucide-react";
 import EditableSelect from "@/components/editable-select";
+import LogoUpload from "@/components/logo-upload";
 
 interface InventoryFormProps {
   open: boolean;
@@ -72,6 +73,7 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
       location: "",
       chassisNumber: "",
       images: [],
+      logo: "",
       notes: "",
       isSold: false,
     },
@@ -180,6 +182,12 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                         }}
                         onAddOption={(newManufacturer) => {
                           setManufacturers([...manufacturers, newManufacturer]);
+                        }}
+                        onDeleteOption={(deletedManufacturer) => {
+                          setManufacturers(manufacturers.filter(m => m !== deletedManufacturer));
+                        }}
+                        onEditOption={(oldManufacturer, newManufacturer) => {
+                          setManufacturers(manufacturers.map(m => m === oldManufacturer ? newManufacturer : m));
                         }}
                         placeholder="اختر الصانع"
                         className="w-full"
@@ -410,6 +418,22 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                         placeholder="https://example.com/image.jpg" 
                         value={Array.isArray(field.value) ? field.value.join(', ') : field.value || ''}
                         onChange={(e) => field.onChange(e.target.value ? [e.target.value] : [])}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="logo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <LogoUpload
+                        value={field.value || ""}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
