@@ -1,0 +1,171 @@
+import { users, inventoryItems, type User, type InsertUser, type InventoryItem, type InsertInventoryItem } from "@shared/schema";
+
+export interface IStorage {
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  
+  // Inventory methods
+  getAllInventoryItems(): Promise<InventoryItem[]>;
+  getInventoryItem(id: number): Promise<InventoryItem | undefined>;
+  createInventoryItem(item: InsertInventoryItem): Promise<InventoryItem>;
+  updateInventoryItem(id: number, item: Partial<InsertInventoryItem>): Promise<InventoryItem | undefined>;
+  deleteInventoryItem(id: number): Promise<boolean>;
+  searchInventoryItems(query: string): Promise<InventoryItem[]>;
+  filterInventoryItems(filters: { category?: string; status?: string; year?: number }): Promise<InventoryItem[]>;
+  getInventoryStats(): Promise<{ total: number; available: number; inTransit: number; maintenance: number }>;
+}
+
+export class MemStorage implements IStorage {
+  private users: Map<number, User>;
+  private inventoryItems: Map<number, InventoryItem>;
+  private currentUserId: number;
+  private currentInventoryId: number;
+
+  constructor() {
+    this.users = new Map();
+    this.inventoryItems = new Map();
+    this.currentUserId = 1;
+    this.currentInventoryId = 1;
+    
+    // Initialize with some sample data
+    this.initializeInventoryData();
+  }
+
+  private initializeInventoryData() {
+    const sampleItems: InsertInventoryItem[] = [
+      {
+        category: "لاتوبيغرافي",
+        version: "V6",
+        year: 2025,
+        color: "أسود أبيض",
+        status: "في الطريق",
+        engineer: "المهنشي",
+        chassisNumber: "WASSBER0056464",
+        images: []
+      },
+      {
+        category: "لاتوبيغرافي",
+        version: "V6",
+        year: 2024,
+        color: "أسود أبيض",
+        status: "في الطريق",
+        engineer: "المهنشي",
+        chassisNumber: "WASSBER0056465",
+        images: []
+      },
+      {
+        category: "لاتوبيغرافي",
+        version: "V8",
+        year: 2025,
+        color: "أسود أبيض",
+        status: "متوفر",
+        engineer: "المهنشي",
+        chassisNumber: "WASSBER0056466",
+        images: []
+      },
+      {
+        category: "أوتوماتيكي",
+        version: "V6",
+        year: 2024,
+        color: "أسود",
+        status: "قيد الصيانة",
+        engineer: "الفني",
+        chassisNumber: "WASSBER0087523",
+        images: []
+      },
+      {
+        category: "يدوي",
+        version: "V8",
+        year: 2025,
+        color: "أبيض",
+        status: "متوفر",
+        engineer: "المهنشي",
+        chassisNumber: "WASSBER0098765",
+        images: []
+      }
+    ];
+
+    sampleItems.forEach(item => {
+      this.createInventoryItem(item);
+    });
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username,
+    );
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentUserId++;
+    const user: User = { ...insertUser, id };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async getAllInventoryItems(): Promise<InventoryItem[]> {
+    return Array.from(this.inventoryItems.values());
+  }
+
+  async getInventoryItem(id: number): Promise<InventoryItem | undefined> {
+    return this.inventoryItems.get(id);
+  }
+
+  async createInventoryItem(insertItem: InsertInventoryItem): Promise<InventoryItem> {
+    const id = this.currentInventoryId++;
+    const item: InventoryItem = { ...insertItem, id };
+    this.inventoryItems.set(id, item);
+    return item;
+  }
+
+  async updateInventoryItem(id: number, updateData: Partial<InsertInventoryItem>): Promise<InventoryItem | undefined> {
+    const existingItem = this.inventoryItems.get(id);
+    if (!existingItem) return undefined;
+    
+    const updatedItem: InventoryItem = { ...existingItem, ...updateData };
+    this.inventoryItems.set(id, updatedItem);
+    return updatedItem;
+  }
+
+  async deleteInventoryItem(id: number): Promise<boolean> {
+    return this.inventoryItems.delete(id);
+  }
+
+  async searchInventoryItems(query: string): Promise<InventoryItem[]> {
+    const lowerQuery = query.toLowerCase();
+    return Array.from(this.inventoryItems.values()).filter(item =>
+      item.category.toLowerCase().includes(lowerQuery) ||
+      item.version.toLowerCase().includes(lowerQuery) ||
+      item.color.toLowerCase().includes(lowerQuery) ||
+      item.status.toLowerCase().includes(lowerQuery) ||
+      item.engineer.toLowerCase().includes(lowerQuery) ||
+      item.chassisNumber.toLowerCase().includes(lowerQuery)
+    );
+  }
+
+  async filterInventoryItems(filters: { category?: string; status?: string; year?: number }): Promise<InventoryItem[]> {
+    return Array.from(this.inventoryItems.values()).filter(item => {
+      if (filters.category && item.category !== filters.category) return false;
+      if (filters.status && item.status !== filters.status) return false;
+      if (filters.year && item.year !== filters.year) return false;
+      return true;
+    });
+  }
+
+  async getInventoryStats(): Promise<{ total: number; available: number; inTransit: number; maintenance: number }> {
+    const items = Array.from(this.inventoryItems.values());
+    return {
+      total: items.length,
+      available: items.filter(item => item.status === "متوفر").length,
+      inTransit: items.filter(item => item.status === "في الطريق").length,
+      maintenance: items.filter(item => item.status === "قيد الصيانة").length
+    };
+  }
+}
+
+export const storage = new MemStorage();
