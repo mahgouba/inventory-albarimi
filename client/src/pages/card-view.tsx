@@ -87,38 +87,55 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 sm:py-0 sm:h-16 gap-3 sm:gap-0">
+            {/* Title section */}
             <div className="flex items-center space-x-4 space-x-reverse">
-              <h1 className="text-2xl font-bold text-slate-800">نظام إدارة المخزون</h1>
-              <span className="text-sm text-slate-500 font-latin">Inventory Management</span>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800">نظام إدارة المخزون</h1>
+              <span className="hidden sm:inline text-sm text-slate-500 font-latin">Inventory Management</span>
             </div>
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <div className="flex items-center space-x-2 space-x-reverse border border-slate-200 rounded-lg p-1">
-                <Link href="/">
-                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
-                    <Table size={16} className="ml-1" />
-                    جدول
+            
+            {/* Actions section */}
+            <div className="flex flex-wrap items-center justify-between sm:justify-end space-x-2 space-x-reverse gap-2 sm:gap-0 sm:space-x-4">
+              {/* View toggle */}
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <div className="flex items-center space-x-2 space-x-reverse border border-slate-200 rounded-lg p-1">
+                  <Link href="/">
+                    <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800 text-xs sm:text-sm">
+                      <Table size={14} className="ml-1" />
+                      جدول
+                    </Button>
+                  </Link>
+                  <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm">
+                    <LayoutGrid size={14} className="ml-1" />
+                    بطاقات
                   </Button>
-                </Link>
-                <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-white">
-                  <LayoutGrid size={16} className="ml-1" />
-                  بطاقات
+                </div>
+                {userRole === "admin" && (
+                  <Link href="/manufacturers">
+                    <Button variant="outline" size="sm" className="text-slate-600 hover:text-slate-800 text-xs sm:text-sm">
+                      الشركات المصنعة
+                    </Button>
+                  </Link>
+                )}
+              </div>
+              
+              {/* Action buttons */}
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800 hidden sm:inline-flex">
+                  <Bell size={18} />
+                </Button>
+                <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800 hidden sm:inline-flex">
+                  <UserCircle size={18} />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="border-red-300 text-red-600 hover:bg-red-50 text-xs sm:text-sm px-2 sm:px-4"
+                  onClick={() => window.location.href = '/login'}
+                >
+                  خروج
                 </Button>
               </div>
-              <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
-                <Bell size={20} />
-              </Button>
-              <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
-                <UserCircle size={20} />
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="border-red-300 text-red-600 hover:bg-red-50"
-                onClick={() => window.location.href = '/login'}
-              >
-                تسجيل الخروج
-              </Button>
             </div>
           </div>
         </div>
@@ -130,7 +147,7 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
           <p className="text-slate-600">عرض المركبات مجمعة حسب الصانع</p>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {Object.entries(groupedData).map(([manufacturer, data]) => {
             const logo = getManufacturerLogo(manufacturer);
             const totalCount = data.items.length;
@@ -163,23 +180,25 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
                           
                           {/* Manufacturer Info */}
                           <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <CardTitle className="text-xl text-slate-800 mb-1">{manufacturer}</CardTitle>
-                              <div className="flex items-center space-x-4 space-x-reverse">
-                                {/* Category counts */}
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                              <CardTitle className="text-xl text-slate-800 mb-2 sm:mb-1">{manufacturer}</CardTitle>
+                              
+                              {/* Category counts - responsive grid */}
+                              <div className="grid grid-cols-3 sm:flex sm:items-center sm:space-x-4 sm:space-x-reverse gap-2 sm:gap-0">
                                 {Object.entries(data.categories).map(([category, stats]) => (
-                                  <div key={category} className="text-center min-w-[60px]">
-                                    <div className="text-lg font-bold text-slate-700">{stats.total}</div>
+                                  <div key={category} className="text-center min-w-[60px] bg-slate-50 rounded-md p-2 sm:bg-transparent sm:p-0">
+                                    <div className="text-base sm:text-lg font-bold text-slate-700">{stats.total}</div>
                                     <div className="text-xs text-slate-500">{category}</div>
                                   </div>
                                 ))}
-                                <div className="text-center min-w-[60px] mr-4">
-                                  <div className="text-lg font-bold text-teal-600">{availableCount}</div>
+                                <div className="text-center min-w-[60px] bg-teal-50 rounded-md p-2 sm:bg-transparent sm:p-0 sm:mr-4 col-span-3 sm:col-span-1">
+                                  <div className="text-base sm:text-lg font-bold text-teal-600">{availableCount}</div>
                                   <div className="text-xs text-slate-500">متوفر</div>
                                 </div>
                               </div>
                             </div>
-                            <p className="text-sm text-slate-600">
+                            
+                            <p className="text-sm text-slate-600 mt-2">
                               {totalCount} مركبة إجمالي • {availableCount} متوفر
                             </p>
                           </div>

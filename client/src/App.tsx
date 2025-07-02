@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import InventoryPage from "@/pages/inventory";
 import CardViewPage from "@/pages/card-view";
+import ManufacturersPage from "@/pages/manufacturers";
 import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
@@ -20,6 +21,7 @@ function Router({ user }: { user: User }) {
     <Switch>
       <Route path="/" component={() => <InventoryPage userRole={user.role} />} />
       <Route path="/cards" component={() => <CardViewPage userRole={user.role} />} />
+      <Route path="/manufacturers" component={() => <ManufacturersPage userRole={user.role} />} />
       <Route component={NotFound} />
     </Switch>
   );

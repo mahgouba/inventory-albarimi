@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { inventoryItems, users, type InsertInventoryItem } from "@shared/schema";
+import { inventoryItems, users, manufacturers, type InsertInventoryItem } from "@shared/schema";
 import bcrypt from "bcryptjs";
 
 async function seedDatabase() {
@@ -113,7 +113,32 @@ async function seedDatabase() {
     }
   ];
 
+  // الشركات المصنعة الأساسية
+  const baseManufacturers = [
+    { name: "مرسيدس" },
+    { name: "بي ام دبليو" },
+    { name: "رولز رويز" },
+    { name: "بنتلي" },
+    { name: "رنج روفر" },
+    { name: "دفندر" },
+    { name: "بورش" },
+    { name: "لكزس" },
+    { name: "لينكون" },
+    { name: "شوفولية" },
+    { name: "تويوتا" },
+    { name: "تسلا" },
+    { name: "لوسيد" }
+  ];
+
   try {
+    // Seed manufacturers first
+    const existingManufacturers = await db.select().from(manufacturers);
+    
+    if (existingManufacturers.length === 0) {
+      await db.insert(manufacturers).values(baseManufacturers);
+      console.log("Database seeded with manufacturers.");
+    }
+
     // Seed users first
     const existingUsers = await db.select().from(users);
     

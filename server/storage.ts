@@ -60,19 +60,38 @@ export interface IStorage {
   getLocationTransfers(inventoryItemId?: number): Promise<LocationTransfer[]>;
   createLocationTransfer(transfer: InsertLocationTransfer): Promise<LocationTransfer>;
   markAsSold(id: number): Promise<boolean>;
+  
+  // Manufacturer methods
+  getAllManufacturers(): Promise<Manufacturer[]>;
+  getManufacturer(id: number): Promise<Manufacturer | undefined>;
+  createManufacturer(manufacturer: InsertManufacturer): Promise<Manufacturer>;
+  updateManufacturer(id: number, manufacturer: Partial<InsertManufacturer>): Promise<Manufacturer | undefined>;
+  deleteManufacturer(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private inventoryItems: Map<number, InventoryItem>;
+  private manufacturers: Map<number, Manufacturer>;
+  private locations: Map<number, Location>;
+  private locationTransfers: Map<number, LocationTransfer>;
   private currentUserId: number;
   private currentInventoryId: number;
+  private currentManufacturerId: number;
+  private currentLocationId: number;
+  private currentLocationTransferId: number;
 
   constructor() {
     this.users = new Map();
     this.inventoryItems = new Map();
+    this.manufacturers = new Map();
+    this.locations = new Map();
+    this.locationTransfers = new Map();
     this.currentUserId = 1;
     this.currentInventoryId = 1;
+    this.currentManufacturerId = 1;
+    this.currentLocationId = 1;
+    this.currentLocationTransferId = 1;
     
     // Initialize with some sample data
     this.initializeInventoryData();
@@ -410,6 +429,39 @@ export class MemStorage implements IStorage {
       transferDate: new Date(),
     };
   }
+
+  // Manufacturer methods
+  async getAllManufacturers(): Promise<Manufacturer[]> {
+    return Array.from(this.manufacturers.values());
+  }
+
+  async getManufacturer(id: number): Promise<Manufacturer | undefined> {
+    return this.manufacturers.get(id);
+  }
+
+  async createManufacturer(manufacturer: InsertManufacturer): Promise<Manufacturer> {
+    const id = this.currentManufacturerId++;
+    const newManufacturer: Manufacturer = {
+      ...manufacturer,
+      id,
+      createdAt: new Date()
+    };
+    this.manufacturers.set(id, newManufacturer);
+    return newManufacturer;
+  }
+
+  async updateManufacturer(id: number, manufacturerData: Partial<InsertManufacturer>): Promise<Manufacturer | undefined> {
+    const manufacturer = this.manufacturers.get(id);
+    if (!manufacturer) return undefined;
+
+    const updatedManufacturer: Manufacturer = { ...manufacturer, ...manufacturerData };
+    this.manufacturers.set(id, updatedManufacturer);
+    return updatedManufacturer;
+  }
+
+  async deleteManufacturer(id: number): Promise<boolean> {
+    return this.manufacturers.delete(id);
+  }
 }
 
 export class DatabaseStorage implements IStorage {
@@ -685,6 +737,38 @@ export class DatabaseStorage implements IStorage {
       .values(transfer)
       .returning();
     return newTransfer;
+  }
+
+  // Manufacturer methods
+  async getAllManufacturers(): Promise<Manufacturer[]> {
+    return await db.select().from(manufacturers);
+  }
+
+  async getManufacturer(id: number): Promise<Manufacturer | undefined> {
+    const [manufacturer] = await db.select().from(manufacturers).where(eq(manufacturers.id, id));
+    return manufacturer || undefined;
+  }
+
+  async createManufacturer(manufacturer: InsertManufacturer): Promise<Manufacturer> {
+    const [newManufacturer] = await db
+      .insert(manufacturers)
+      .values(manufacturer)
+      .returning();
+    return newManufacturer;
+  }
+
+  async updateManufacturer(id: number, manufacturerData: Partial<InsertManufacturer>): Promise<Manufacturer | undefined> {
+    const [updatedManufacturer] = await db
+      .update(manufacturers)
+      .set(manufacturerData)
+      .where(eq(manufacturers.id, id))
+      .returning();
+    return updatedManufacturer || undefined;
+  }
+
+  async deleteManufacturer(id: number): Promise<boolean> {
+    const result = await db.delete(manufacturers).where(eq(manufacturers.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 

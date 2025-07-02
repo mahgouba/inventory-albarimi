@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInventoryItemSchema } from "@shared/schema";
+import { insertInventoryItemSchema, insertManufacturerSchema } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
@@ -222,6 +222,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Item deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete inventory item" });
+    }
+  });
+
+  // Manufacturers endpoints
+  app.get("/api/manufacturers", async (req, res) => {
+    try {
+      const manufacturers = await storage.getAllManufacturers();
+      res.json(manufacturers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch manufacturers" });
+    }
+  });
+
+  app.post("/api/manufacturers", async (req, res) => {
+    try {
+      const manufacturerData = insertManufacturerSchema.parse(req.body);
+      const manufacturer = await storage.createManufacturer(manufacturerData);
+      res.status(201).json(manufacturer);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid manufacturer data" });
+    }
+  });
+
+  app.put("/api/manufacturers/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const manufacturerData = insertManufacturerSchema.parse(req.body);
+      const manufacturer = await storage.updateManufacturer(id, manufacturerData);
+      if (manufacturer) {
+        res.json(manufacturer);
+      } else {
+        res.status(404).json({ message: "Manufacturer not found" });
+      }
+    } catch (error) {
+      res.status(400).json({ message: "Invalid manufacturer data" });
     }
   });
 

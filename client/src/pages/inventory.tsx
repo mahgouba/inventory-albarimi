@@ -102,17 +102,26 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
               <span className="text-sm text-slate-500 font-latin">Inventory Management</span>
             </div>
             <div className="flex items-center space-x-4 space-x-reverse">
-              <div className="flex items-center space-x-2 space-x-reverse border border-slate-200 rounded-lg p-1">
-                <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-white">
-                  <Table size={16} className="ml-1" />
-                  جدول
-                </Button>
-                <Link href="/cards">
-                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
-                    <LayoutGrid size={16} className="ml-1" />
-                    بطاقات
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <div className="flex items-center space-x-2 space-x-reverse border border-slate-200 rounded-lg p-1">
+                  <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-white">
+                    <Table size={16} className="ml-1" />
+                    جدول
                   </Button>
-                </Link>
+                  <Link href="/cards">
+                    <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                      <LayoutGrid size={16} className="ml-1" />
+                      بطاقات
+                    </Button>
+                  </Link>
+                </div>
+                {userRole === "admin" && (
+                  <Link href="/manufacturers">
+                    <Button variant="outline" size="sm" className="text-slate-600 hover:text-slate-800">
+                      الشركات المصنعة
+                    </Button>
+                  </Link>
+                )}
               </div>
               <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
                 <Bell size={20} />
