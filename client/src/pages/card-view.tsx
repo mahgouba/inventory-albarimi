@@ -84,56 +84,84 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
     <div className="bg-slate-50 min-h-screen">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 sm:py-0 sm:h-16 gap-3 sm:gap-0">
-            {/* Title section */}
-            <div className="flex items-center space-x-4 space-x-reverse">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-800">نظام إدارة المخزون</h1>
-              <span className="hidden sm:inline text-sm text-slate-500 font-latin">Inventory Management</span>
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+          <div className="flex justify-between items-center h-14 sm:h-16">
+            {/* Logo and Company Name */}
+            <div className="flex items-center space-x-3 space-x-reverse">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+                <span className="text-white font-bold text-lg sm:text-xl">ش</span>
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg sm:text-xl font-bold text-slate-800">إدارة المخزون</h1>
+                <span className="text-xs text-slate-500 font-latin">Inventory System</span>
+              </div>
             </div>
             
-            {/* Actions section */}
-            <div className="flex flex-wrap items-center justify-between sm:justify-end space-x-2 space-x-reverse gap-2 sm:gap-0 sm:space-x-4">
-              {/* View toggle */}
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <div className="flex items-center space-x-2 space-x-reverse border border-slate-200 rounded-lg p-1">
-                  <Link href="/">
-                    <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800 text-xs sm:text-sm">
-                      <Table size={14} className="ml-1" />
-                      جدول
-                    </Button>
-                  </Link>
-                  <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90 text-white text-xs sm:text-sm">
-                    <LayoutGrid size={14} className="ml-1" />
-                    بطاقات
+            {/* Mobile and Desktop Navigation */}
+            <div className="flex items-center space-x-2 sm:space-x-4 space-x-reverse">
+              {/* Navigation Tabs - Hidden on mobile */}
+              <div className="hidden md:flex items-center space-x-2 space-x-reverse border border-slate-200 rounded-lg p-1">
+                <Link href="/">
+                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800">
+                    <Table size={14} className="ml-1" />
+                    <span className="hidden lg:inline">جدول</span>
                   </Button>
-                </div>
-                {userRole === "admin" && (
-                  <Link href="/manufacturers">
-                    <Button variant="outline" size="sm" className="text-slate-600 hover:text-slate-800 text-xs sm:text-sm">
-                      الشركات المصنعة
-                    </Button>
-                  </Link>
-                )}
+                </Link>
+                <Button variant="default" size="sm" className="bg-teal-600 hover:bg-teal-700 text-white">
+                  <LayoutGrid size={14} className="ml-1" />
+                  <span className="hidden lg:inline">بطاقات</span>
+                </Button>
               </div>
               
-              {/* Action buttons */}
-              <div className="flex items-center space-x-2 space-x-reverse">
-                <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800 hidden sm:inline-flex">
-                  <Bell size={18} />
-                </Button>
-                <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800 hidden sm:inline-flex">
-                  <UserCircle size={18} />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="border-red-300 text-red-600 hover:bg-red-50 text-xs sm:text-sm px-2 sm:px-4"
-                  onClick={() => window.location.href = '/login'}
-                >
-                  خروج
+              {/* Mobile Navigation Icons */}
+              <div className="flex md:hidden items-center space-x-1 space-x-reverse">
+                <Link href="/">
+                  <Button variant="ghost" size="sm" className="text-slate-600 hover:text-slate-800 p-2">
+                    <Table size={16} />
+                  </Button>
+                </Link>
+                <Button variant="default" size="sm" className="bg-teal-600 hover:bg-teal-700 text-white p-2">
+                  <LayoutGrid size={16} />
                 </Button>
               </div>
+
+              {/* Admin Links */}
+              {userRole === "admin" && (
+                <div className="flex items-center space-x-2 space-x-reverse">
+                  <Link href="/manufacturers">
+                    <Button variant="outline" size="sm" className="text-slate-600 hover:text-slate-800 hidden sm:flex">
+                      <span className="hidden lg:inline">الشركات المصنعة</span>
+                      <span className="lg:hidden">الشركات</span>
+                    </Button>
+                  </Link>
+                  <Link href="/appearance">
+                    <Button variant="outline" size="sm" className="text-slate-600 hover:text-slate-800 hidden sm:flex">
+                      <span className="hidden lg:inline">إدارة المظهر</span>
+                      <span className="lg:hidden">المظهر</span>
+                    </Button>
+                  </Link>
+                </div>
+              )}
+
+              {/* User Actions */}
+              <div className="flex items-center space-x-1 space-x-reverse">
+                <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800 hidden sm:flex">
+                  <Bell size={18} />
+                </Button>
+                <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
+                  <UserCircle size={18} />
+                </Button>
+              </div>
+              
+              {/* Logout Button */}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-red-300 text-red-600 hover:bg-red-50 hidden sm:flex"
+                onClick={() => window.location.href = '/login'}
+              >
+                تسجيل الخروج
+              </Button>
             </div>
           </div>
         </div>

@@ -129,6 +129,7 @@ Changelog:
 - July 02, 2025: Added 13 base manufacturers (مرسيدس، بي ام دبليو، رولز رويز، بنتلي، رنج روفر، دفندر، بورش، لكزس، لينكون، شوفولية، تويوتا، تسلا، لوسيد)
 - July 02, 2025: Modified card view to exclude sold cars from display and calculations, replaced category counts with dropdown list
 - July 02, 2025: Updated Excel import template with all new fields (manufacturer, category, engine capacity, colors, status, import type, location, chassis number, price, notes) and added comprehensive instructions with valid values for each field
+- July 02, 2025: Redesigned navigation header with company logo placeholder, improved mobile responsiveness, and removed system title text for cleaner look
 ```
 
 ## User Preferences

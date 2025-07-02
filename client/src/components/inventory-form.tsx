@@ -12,8 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertInventoryItemSchema, type InsertInventoryItem, type InventoryItem } from "@shared/schema";
 import { CloudUpload } from "lucide-react";
-import EditableSelect from "@/components/editable-select";
-import LogoUpload from "@/components/logo-upload";
+import { Settings } from "lucide-react";
+import OptionsEditor from "@/components/options-editor";
 
 interface InventoryFormProps {
   open: boolean;
@@ -48,16 +48,19 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
   const [availableCategories, setAvailableCategories] = useState<string[]>(
     editItem?.manufacturer ? manufacturerCategories[editItem.manufacturer] || [] : []
   );
-
-  // Dynamic option state
-  const [manufacturers, setManufacturers] = useState<string[]>(initialManufacturers);
-  const [engineCapacities, setEngineCapacities] = useState<string[]>(initialEngineCapacities);
-  const [years] = useState<number[]>(initialYears);
-  const [statuses, setStatuses] = useState<string[]>(initialStatuses);
-  const [importTypes, setImportTypes] = useState<string[]>(initialImportTypes);
-  const [locations, setLocations] = useState<string[]>(initialLocations);
-  const [exteriorColors, setExteriorColors] = useState<string[]>(initialColors);
-  const [interiorColors, setInteriorColors] = useState<string[]>(initialColors);
+  const [isEditingOptions, setIsEditingOptions] = useState(false);
+  
+  // Local state for editable lists
+  const [editableManufacturers, setEditableManufacturers] = useState<string[]>(initialManufacturers);
+  const [editableEngineCapacities, setEditableEngineCapacities] = useState<string[]>(initialEngineCapacities);
+  const [editableStatuses, setEditableStatuses] = useState<string[]>(initialStatuses);
+  const [editableImportTypes, setEditableImportTypes] = useState<string[]>(initialImportTypes);
+  const [editableLocations, setEditableLocations] = useState<string[]>(initialLocations);
+  const [editableExteriorColors, setEditableExteriorColors] = useState<string[]>(initialColors);
+  const [editableInteriorColors, setEditableInteriorColors] = useState<string[]>(initialColors);
+  
+  // Options editor state
+  const [editingOptionType, setEditingOptionType] = useState<string | null>(null);
 
   const form = useForm<InsertInventoryItem>({
     resolver: zodResolver(insertInventoryItemSchema),
@@ -157,9 +160,21 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-screen overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold text-slate-800">
-            {editItem ? "تحرير العنصر" : "إضافة عنصر جديد"}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-lg font-semibold text-slate-800">
+              {editItem ? "تحرير العنصر" : "إضافة عنصر جديد"}
+            </DialogTitle>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditingOptions(!isEditingOptions)}
+              className="text-xs"
+            >
+              <Settings className="h-4 w-4 ml-1" />
+              {isEditingOptions ? "حفظ التعديلات" : "تحرير القوائم"}
+            </Button>
+          </div>
         </DialogHeader>
 
         <Form {...form}>
@@ -443,21 +458,7 @@ export default function InventoryForm({ open, onOpenChange, editItem }: Inventor
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="logo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <LogoUpload
-                        value={field.value || ""}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
 
               <FormField
                 control={form.control}
