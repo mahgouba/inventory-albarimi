@@ -71,6 +71,13 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export const insertInventoryItemSchema = createInsertSchema(inventoryItems).omit({
   id: true,
   entryDate: true,
+}).extend({
+  manufacturer: z.string().min(1, "الصانع مطلوب"),
+  category: z.string().min(1, "الفئة مطلوبة"),
+  engineCapacity: z.string().min(1, "الموديل مطلوب"),
+  chassisNumber: z.string().min(1, "رقم الهيكل مطلوب"),
+  exteriorColor: z.string().min(1, "اللون الخارجي مطلوب"),
+  importType: z.string().min(1, "نوع الاستيراد مطلوب"),
 });
 
 export const insertManufacturerSchema = createInsertSchema(manufacturers).omit({

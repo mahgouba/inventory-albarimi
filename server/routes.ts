@@ -186,8 +186,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const item = await storage.createInventoryItem(validation.data);
       res.status(201).json(item);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Create inventory item error:", error);
+      
+      // Check if it's a duplicate chassis number error
+      if (error.code === '23505' && error.constraint === 'inventory_items_chassis_number_unique') {
+        return res.status(400).json({ 
+          message: "رقم الهيكل موجود مسبقاً",
+          error: "DUPLICATE_CHASSIS_NUMBER"
+        });
+      }
+      
       res.status(500).json({ message: "Failed to create inventory item", error: error.message });
     }
   });
@@ -483,6 +492,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error extracting chassis number:", error);
       res.status(500).json({ message: "Failed to extract chassis number from image" });
+    }
+  });
+
+  // Voice processing endpoint
+  app.post("/api/voice/process", async (req, res) => {
+    try {
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // For now, simulate voice processing - in production you'd handle file upload
+      const { text } = req.body;
+      
+      if (!text) {
+        return res.status(400).json({ message: "Text is required" });
+      }
+
+      // Process command with GPT
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "system",
+            content: `أنت مساعد ذكي لإدارة مخزون المركبات. يمكنك فهم الأوامر الصوتية باللغة العربية وتنفيذها.
+
+الأوامر المتاحة:
+1. إضافة مركبة: "أضف مركبة [الصانع] [الفئة] [الموديل]"
+2. بيع مركبة: "بيع المركبة رقم [رقم الهيكل]" أو "بيع السيارة [رقم]"
+3. البحث: "ابحث عن [نص البحث]" أو "أظهر مركبات [الصانع]"
+4. الإحصائيات: "أظهر الإحصائيات" أو "كم مركبة متوفرة"
+
+أرجع الرد بتنسيق JSON:
+{
+  "response": "الرد النصي للمستخدم باللغة العربية",
+  "action": "نوع العملية (add_vehicle, sell_vehicle, search_inventory, show_stats)",
+  "data": "البيانات المطلوبة للعملية"
+}
+
+إذا كان الأمر غير واضح أو غير مدعوم، أرجع action: null`
+          },
+          {
+            role: "user",
+            content: text
+          }
+        ],
+        response_format: { type: "json_object" }
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || "{}");
+
+      res.json({
+        transcription: text,
+        response: result.response || "لم أفهم الأمر بشكل صحيح",
+        action: result.action || null,
+        data: result.data || null
+      });
+
+    } catch (error: any) {
+      console.error("Voice processing error:", error);
+      res.status(500).json({ message: "Failed to process voice command" });
     }
   });
 

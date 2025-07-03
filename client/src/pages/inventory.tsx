@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign, Settings, LogOut, Palette, Users, MapPin, Building2 } from "lucide-react";
+import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign, Settings, LogOut, Palette, Users, MapPin, Building2, MessageSquare } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/hooks/useTheme";
 import InventoryStats from "@/components/inventory-stats";
@@ -13,6 +13,7 @@ import InventoryTable from "@/components/inventory-table";
 import InventoryFormSimple from "@/components/inventory-form-simple";
 import ExcelImport from "@/components/excel-import";
 import VehicleTransfer from "@/components/vehicle-transfer";
+import VoiceChat from "@/components/voice-chat";
 import { exportToCSV, exportToExcel, printTable } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
 
@@ -34,6 +35,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
   const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferVehicle, setTransferVehicle] = useState<InventoryItem | null>(null);
+  const [voiceChatOpen, setVoiceChatOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -337,6 +339,14 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                   إضافة عنصر
                 </Button>
                 <Button 
+                  onClick={() => setVoiceChatOpen(true)}
+                  variant="outline"
+                  className="border-green-600 text-green-600 hover:bg-green-50 w-full sm:w-auto"
+                >
+                  <MessageSquare className="w-4 h-4 ml-2" />
+                  المساعد الصوتي
+                </Button>
+                <Button 
                   onClick={() => setIsExcelImportOpen(true)}
                   variant="outline"
                   className="border-teal-600 text-teal-600 hover:bg-teal-50 w-full sm:w-auto"
@@ -457,6 +467,12 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
         open={transferOpen}
         onOpenChange={handleTransferClose}
         vehicle={transferVehicle}
+      />
+
+      {/* Voice Chat Dialog */}
+      <VoiceChat
+        open={voiceChatOpen}
+        onOpenChange={setVoiceChatOpen}
       />
     </div>
   );
