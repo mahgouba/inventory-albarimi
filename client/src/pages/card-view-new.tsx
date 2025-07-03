@@ -13,7 +13,12 @@ import {
   LogOut,
   Home,
   MessageSquare,
-  Filter
+  Filter,
+  Edit3,
+  ShoppingCart,
+  Trash2,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
@@ -31,6 +36,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   const { companyName } = useTheme();
   const [voiceChatOpen, setVoiceChatOpen] = useState(false);
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>("الكل");
+  const [expandedManufacturer, setExpandedManufacturer] = useState<string | null>(null);
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -64,6 +70,11 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   const getManufacturerLogo = (manufacturerName: string) => {
     const manufacturer = manufacturerStats.find((m: any) => m.manufacturer === manufacturerName);
     return manufacturer?.logo;
+  };
+
+  // Toggle manufacturer expansion
+  const toggleManufacturer = (manufacturerName: string) => {
+    setExpandedManufacturer(expandedManufacturer === manufacturerName ? null : manufacturerName);
   };
 
   // Status color mapping
@@ -224,41 +235,58 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
             
             return (
               <div key={manufacturer} className="space-y-4">
-                {/* Manufacturer Header */}
-                <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-                  <div className="flex items-center space-x-6 space-x-reverse">
-                    {/* Manufacturer Logo */}
-                    <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200 shadow-sm">
-                      {logo ? (
-                        <img 
-                          src={logo} 
-                          alt={manufacturer}
-                          className="w-12 h-12 object-contain"
-                        />
-                      ) : (
-                        <span className="text-xl font-bold text-slate-600">
-                          {manufacturer.charAt(0)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Manufacturer Name and Count */}
-                    <div className="flex flex-col">
-                      <h2 className="text-2xl font-bold text-slate-800 mb-2">{manufacturer}</h2>
-                      <div className="flex items-center space-x-3 space-x-reverse">
-                        <Badge variant="secondary" className="bg-teal-50 text-teal-700 px-3 py-1 text-sm font-semibold">
-                          {data.items.length} مركبة
-                        </Badge>
-                        <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-3 py-1 text-sm font-semibold">
-                          {data.items.filter(item => item.status === "متوفر").length} متوفر
-                        </Badge>
+                {/* Manufacturer Header - Clickable */}
+                <div 
+                  className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all duration-200"
+                  onClick={() => toggleManufacturer(manufacturer)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-6 space-x-reverse">
+                      {/* Manufacturer Logo */}
+                      <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200 shadow-sm">
+                        {logo ? (
+                          <img 
+                            src={logo} 
+                            alt={manufacturer}
+                            className="w-12 h-12 object-contain"
+                          />
+                        ) : (
+                          <span className="text-xl font-bold text-slate-600">
+                            {manufacturer.charAt(0)}
+                          </span>
+                        )}
                       </div>
+                      
+                      {/* Manufacturer Name and Count */}
+                      <div className="flex flex-col">
+                        <h2 className="text-2xl font-bold text-slate-800 mb-2">{manufacturer}</h2>
+                        <div className="flex items-center space-x-3 space-x-reverse">
+                          <Badge variant="secondary" className="bg-teal-50 text-teal-700 px-3 py-1 text-sm font-semibold">
+                            {data.items.length} مركبة
+                          </Badge>
+                          <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-3 py-1 text-sm font-semibold">
+                            {data.items.filter(item => item.status === "متوفر").length} متوفر
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Expand/Collapse Icon */}
+                    <div className="text-slate-400">
+                      {expandedManufacturer === manufacturer ? (
+                        <ChevronUp size={24} className="text-teal-600" />
+                      ) : (
+                        <ChevronDown size={24} />
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Vehicle Cards Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {/* Vehicle Cards Grid - Conditionally Rendered with Animation */}
+                {expandedManufacturer === manufacturer && (
+                  <div 
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-in slide-in-from-top-2 fade-in duration-300"
+                  >
                   {data.items.map((item) => (
                     <Card key={item.id} className="border border-slate-200 hover:shadow-lg hover:border-teal-300 transition-all duration-200">
                       <CardHeader className="pb-3">
@@ -325,11 +353,39 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                               <p className="text-xs text-slate-700 mt-1">{item.notes}</p>
                             </div>
                           )}
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-2 pt-3 mt-3 border-t border-slate-200">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 h-8 text-xs"
+                            >
+                              <Edit3 size={12} className="ml-1" />
+                              تعديل
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 h-8 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                            >
+                              <ShoppingCart size={12} className="ml-1" />
+                              بيع
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                            >
+                              <Trash2 size={12} />
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
-                </div>
+                  </div>
+                )}
               </div>
             );
           })}
