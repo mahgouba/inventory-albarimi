@@ -225,7 +225,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo and Company Name */}
             <div className="flex items-center space-x-3 space-x-reverse">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-dynamic-gradient rounded-lg flex items-center justify-center shadow-md">
                 <span className="text-white font-bold text-lg sm:text-xl">ش</span>
               </div>
               <div className="hidden sm:block">
@@ -245,7 +245,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
 
               {/* Appearance Management Button */}
               <Link href="/appearance">
-                <Button variant="outline" size="sm" className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 border-teal-200">
+                <Button variant="outline" size="sm" className="text-dynamic-primary hover:text-dynamic-primary-hover hover:bg-dynamic-card border-dynamic hover:border-dynamic">
                   <Palette size={16} className="ml-1" />
                   <span className="hidden sm:inline">إدارة المظهر</span>
                   <span className="sm:hidden">المظهر</span>
@@ -341,15 +341,15 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                                 alt={stat.manufacturer}
                                 className="w-6 h-6 object-contain rounded transition-all duration-200 group-hover:scale-110 group-hover:drop-shadow-sm"
                               />
-                              <div className="absolute inset-0 rounded bg-teal-400 opacity-0 scale-125 transition-all duration-200 group-hover:opacity-10 group-hover:scale-110"></div>
+                              <div className="absolute inset-0 rounded bg-dynamic-primary opacity-0 scale-125 transition-all duration-200 group-hover:opacity-10 group-hover:scale-110"></div>
                             </div>
                           ) : (
-                            <div className="w-6 h-6 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600 transition-all duration-200 group-hover:bg-teal-100 group-hover:text-teal-700 group-hover:scale-110">
+                            <div className="w-6 h-6 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600 transition-all duration-200 group-hover:bg-dynamic-card group-hover:text-dynamic-primary group-hover:scale-110">
                               {stat.manufacturer.charAt(0)}
                             </div>
                           )}
-                          <span className="transition-colors duration-200 group-hover:text-teal-700">{stat.manufacturer}</span>
-                          <Badge variant="secondary" className="text-xs transition-all duration-200 group-hover:bg-teal-100 group-hover:text-teal-700">
+                          <span className="transition-colors duration-200 group-hover:text-dynamic-primary">{stat.manufacturer}</span>
+                          <Badge variant="secondary" className="text-xs transition-all duration-200 group-hover:bg-dynamic-card group-hover:text-dynamic-primary">
                             {stat.total}
                           </Badge>
                         </div>
@@ -364,8 +364,8 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
 
         {/* Search Results Indicator */}
         {searchQuery.trim() !== "" && (
-          <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
-            <div className="flex items-center gap-2 text-teal-700">
+          <div className="mb-6 p-4 bg-dynamic-card border border-dynamic rounded-lg">
+            <div className="flex items-center gap-2 text-dynamic-primary">
               <Search size={18} />
               <span className="font-medium">
                 نتائج البحث عن "{searchQuery}": {filteredItems.length} نتيجة
@@ -418,17 +418,17 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                         </div>
                         
                         {/* Hover Ring Effect */}
-                        <div className="absolute inset-0 rounded-full border-2 border-teal-400 opacity-0 scale-125 transition-all duration-300 group-hover:opacity-50 group-hover:scale-110 pointer-events-none"></div>
+                        <div className="absolute inset-0 rounded-full border-2 border-dynamic-primary opacity-0 scale-125 transition-all duration-300 group-hover:opacity-50 group-hover:scale-110 pointer-events-none"></div>
                         
                         {/* Pulse Effect */}
-                        <div className="absolute inset-0 rounded-full bg-teal-400 opacity-0 scale-150 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125 group-hover:animate-pulse pointer-events-none"></div>
+                        <div className="absolute inset-0 rounded-full bg-dynamic-primary opacity-0 scale-150 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125 group-hover:animate-pulse pointer-events-none"></div>
                       </div>
                       
                       {/* Manufacturer Name and Count */}
                       <div className="flex flex-col">
                         <h2 className="text-2xl font-bold text-slate-800 mb-2">{manufacturer}</h2>
                         <div className="flex items-center space-x-3 space-x-reverse">
-                          <Badge variant="secondary" className="bg-teal-50 text-teal-700 px-3 py-1 text-sm font-semibold">
+                          <Badge variant="secondary" className="bg-dynamic-card text-dynamic-primary px-3 py-1 text-sm font-semibold">
                             {data.items.filter(item => item.status !== "مباع").length} مركبة
                           </Badge>
                           <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-3 py-1 text-sm font-semibold">
@@ -441,7 +441,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                     {/* Expand/Collapse Icon */}
                     <div className="text-slate-400">
                       {expandedManufacturer === manufacturer ? (
-                        <ChevronUp size={24} className="text-teal-600" />
+                        <ChevronUp size={24} className="text-dynamic-primary" />
                       ) : (
                         <ChevronDown size={24} />
                       )}
@@ -455,7 +455,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-in slide-in-from-top-2 fade-in duration-300"
                   >
                   {data.items.map((item) => (
-                    <Card key={item.id} className="border border-slate-200 hover:shadow-lg hover:border-teal-300 transition-all duration-200">
+                    <Card key={item.id} className="card-dynamic">
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                           <CardTitle className="text-lg font-bold text-slate-800">{item.category}</CardTitle>

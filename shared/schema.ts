@@ -195,8 +195,17 @@ export const appearanceSettings = pgTable("appearance_settings", {
   companyNameEn: varchar("company_name_en", { length: 255 }).default("Inventory System"),
   companyLogo: text("company_logo"), // Base64 encoded image
   primaryColor: varchar("primary_color", { length: 7 }).default("#0f766e"), // Teal-700
+  primaryHoverColor: varchar("primary_hover_color", { length: 7 }).default("#134e4a"), // Teal-900
   secondaryColor: varchar("secondary_color", { length: 7 }).default("#0891b2"), // Sky-600
+  secondaryHoverColor: varchar("secondary_hover_color", { length: 7 }).default("#0c4a6e"), // Sky-900
   accentColor: varchar("accent_color", { length: 7 }).default("#BF9231"), // Custom golden
+  accentHoverColor: varchar("accent_hover_color", { length: 7 }).default("#a67c27"), // Custom golden dark
+  gradientStart: varchar("gradient_start", { length: 7 }).default("#0f766e"), // Teal-700
+  gradientEnd: varchar("gradient_end", { length: 7 }).default("#0891b2"), // Sky-600
+  cardBackgroundColor: varchar("card_background_color", { length: 7 }).default("#ffffff"), // White
+  cardHoverColor: varchar("card_hover_color", { length: 7 }).default("#f8fafc"), // Slate-50
+  borderColor: varchar("border_color", { length: 7 }).default("#e2e8f0"), // Slate-200
+  borderHoverColor: varchar("border_hover_color", { length: 7 }).default("#0f766e"), // Teal-700
   darkMode: boolean("dark_mode").default(false),
   rtlLayout: boolean("rtl_layout").default(true),
   createdAt: timestamp("created_at").defaultNow(),

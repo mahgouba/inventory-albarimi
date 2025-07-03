@@ -160,6 +160,90 @@
 
 @layer utilities {
   /* Dynamic color utilities that respond to theme changes */
+  
+  /* Primary Colors */
+  .bg-dynamic-primary { background-color: var(--dynamic-primary); }
+  .text-dynamic-primary { color: var(--dynamic-primary); }
+  .border-dynamic-primary { border-color: var(--dynamic-primary); }
+  .hover\:bg-dynamic-primary:hover { background-color: var(--dynamic-primary-hover); }
+  .hover\:text-dynamic-primary:hover { color: var(--dynamic-primary-hover); }
+  .hover\:border-dynamic-primary:hover { border-color: var(--dynamic-primary-hover); }
+  
+  /* Secondary Colors */
+  .bg-dynamic-secondary { background-color: var(--dynamic-secondary); }
+  .text-dynamic-secondary { color: var(--dynamic-secondary); }
+  .border-dynamic-secondary { border-color: var(--dynamic-secondary); }
+  .hover\:bg-dynamic-secondary:hover { background-color: var(--dynamic-secondary-hover); }
+  .hover\:text-dynamic-secondary:hover { color: var(--dynamic-secondary-hover); }
+  .hover\:border-dynamic-secondary:hover { border-color: var(--dynamic-secondary-hover); }
+  
+  /* Accent Colors */
+  .bg-dynamic-accent { background-color: var(--dynamic-accent); }
+  .text-dynamic-accent { color: var(--dynamic-accent); }
+  .border-dynamic-accent { border-color: var(--dynamic-accent); }
+  .hover\:bg-dynamic-accent:hover { background-color: var(--dynamic-accent-hover); }
+  .hover\:text-dynamic-accent:hover { color: var(--dynamic-accent-hover); }
+  .hover\:border-dynamic-accent:hover { border-color: var(--dynamic-accent-hover); }
+  
+  /* Card Colors */
+  .bg-dynamic-card { background-color: var(--dynamic-card-bg); }
+  .hover\:bg-dynamic-card:hover { background-color: var(--dynamic-card-hover); }
+  
+  /* Border Colors */
+  .border-dynamic { border-color: var(--dynamic-border); }
+  .hover\:border-dynamic:hover { border-color: var(--dynamic-border-hover); }
+  
+  /* Gradient Background */
+  .bg-dynamic-gradient { background: var(--dynamic-gradient); }
+  
+  /* Button Variations */
+  .btn-dynamic-primary {
+    background-color: var(--dynamic-primary);
+    color: white;
+    transition: all 0.2s ease;
+  }
+  .btn-dynamic-primary:hover {
+    background-color: var(--dynamic-primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+  
+  .btn-dynamic-secondary {
+    background-color: var(--dynamic-secondary);
+    color: white;
+    transition: all 0.2s ease;
+  }
+  .btn-dynamic-secondary:hover {
+    background-color: var(--dynamic-secondary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+  
+  .btn-dynamic-accent {
+    background-color: var(--dynamic-accent);
+    color: white;
+    transition: all 0.2s ease;
+  }
+  .btn-dynamic-accent:hover {
+    background-color: var(--dynamic-accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  }
+  
+  /* Card Variations */
+  .card-dynamic {
+    background-color: var(--dynamic-card-bg);
+    border-color: var(--dynamic-border);
+    transition: all 0.3s ease;
+  }
+  .card-dynamic:hover {
+    background-color: var(--dynamic-card-hover);
+    border-color: var(--dynamic-border-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Legacy support for existing utilities */
   .bg-primary { background-color: hsl(var(--primary)); }
   .text-primary { color: hsl(var(--primary)); }
   .border-primary { border-color: hsl(var(--primary)); }

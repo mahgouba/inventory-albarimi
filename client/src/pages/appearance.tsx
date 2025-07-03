@@ -75,8 +75,17 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
   const [companyNameEn, setCompanyNameEn] = useState("Inventory System");
   const [companyLogo, setCompanyLogo] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState("#0f766e");
+  const [primaryHoverColor, setPrimaryHoverColor] = useState("#134e4a");
   const [secondaryColor, setSecondaryColor] = useState("#0891b2");
+  const [secondaryHoverColor, setSecondaryHoverColor] = useState("#0c4a6e");
   const [accentColor, setAccentColor] = useState("#BF9231");
+  const [accentHoverColor, setAccentHoverColor] = useState("#a67c27");
+  const [gradientStart, setGradientStart] = useState("#0f766e");
+  const [gradientEnd, setGradientEnd] = useState("#0891b2");
+  const [cardBackgroundColor, setCardBackgroundColor] = useState("#ffffff");
+  const [cardHoverColor, setCardHoverColor] = useState("#f8fafc");
+  const [borderColor, setBorderColor] = useState("#e2e8f0");
+  const [borderHoverColor, setBorderHoverColor] = useState("#0f766e");
   const [darkMode, setDarkMode] = useState(false);
   const [rtlLayout, setRtlLayout] = useState(true);
   
@@ -102,8 +111,17 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
       setCompanyNameEn(appearanceSettings.companyNameEn || "Inventory System");
       setCompanyLogo(appearanceSettings.companyLogo);
       setPrimaryColor(appearanceSettings.primaryColor || "#0f766e");
+      setPrimaryHoverColor(appearanceSettings.primaryHoverColor || "#134e4a");
       setSecondaryColor(appearanceSettings.secondaryColor || "#0891b2");
+      setSecondaryHoverColor(appearanceSettings.secondaryHoverColor || "#0c4a6e");
       setAccentColor(appearanceSettings.accentColor || "#BF9231");
+      setAccentHoverColor(appearanceSettings.accentHoverColor || "#a67c27");
+      setGradientStart(appearanceSettings.gradientStart || "#0f766e");
+      setGradientEnd(appearanceSettings.gradientEnd || "#0891b2");
+      setCardBackgroundColor(appearanceSettings.cardBackgroundColor || "#ffffff");
+      setCardHoverColor(appearanceSettings.cardHoverColor || "#f8fafc");
+      setBorderColor(appearanceSettings.borderColor || "#e2e8f0");
+      setBorderHoverColor(appearanceSettings.borderHoverColor || "#0f766e");
       setDarkMode(appearanceSettings.darkMode || false);
       setRtlLayout(appearanceSettings.rtlLayout !== false);
     }
@@ -306,14 +324,36 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
   const applyThemeChanges = () => {
     const root = document.documentElement;
     
-    // Apply colors using CSS variables
+    // Apply all color variations using CSS variables
     const primaryHsl = hexToHsl(primaryColor);
+    const primaryHoverHsl = hexToHsl(primaryHoverColor);
     const secondaryHsl = hexToHsl(secondaryColor);
+    const secondaryHoverHsl = hexToHsl(secondaryHoverColor);
     const accentHsl = hexToHsl(accentColor);
+    const accentHoverHsl = hexToHsl(accentHoverColor);
+    const gradientStartHsl = hexToHsl(gradientStart);
+    const gradientEndHsl = hexToHsl(gradientEnd);
+    const cardBgHsl = hexToHsl(cardBackgroundColor);
+    const cardHoverHsl = hexToHsl(cardHoverColor);
+    const borderHsl = hexToHsl(borderColor);
+    const borderHoverHsl = hexToHsl(borderHoverColor);
     
+    // Set all CSS custom properties
     root.style.setProperty('--dynamic-primary', `hsl(${primaryHsl})`);
+    root.style.setProperty('--dynamic-primary-hover', `hsl(${primaryHoverHsl})`);
     root.style.setProperty('--dynamic-secondary', `hsl(${secondaryHsl})`);
+    root.style.setProperty('--dynamic-secondary-hover', `hsl(${secondaryHoverHsl})`);
     root.style.setProperty('--dynamic-accent', `hsl(${accentHsl})`);
+    root.style.setProperty('--dynamic-accent-hover', `hsl(${accentHoverHsl})`);
+    root.style.setProperty('--dynamic-gradient-start', `hsl(${gradientStartHsl})`);
+    root.style.setProperty('--dynamic-gradient-end', `hsl(${gradientEndHsl})`);
+    root.style.setProperty('--dynamic-card-bg', `hsl(${cardBgHsl})`);
+    root.style.setProperty('--dynamic-card-hover', `hsl(${cardHoverHsl})`);
+    root.style.setProperty('--dynamic-border', `hsl(${borderHsl})`);
+    root.style.setProperty('--dynamic-border-hover', `hsl(${borderHoverHsl})`);
+    
+    // Set gradient as a combined property
+    root.style.setProperty('--dynamic-gradient', `linear-gradient(135deg, hsl(${gradientStartHsl}), hsl(${gradientEndHsl}))`);
     
     if (darkMode) {
       root.classList.add('dark');
@@ -367,8 +407,17 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
       companyNameEn,
       companyLogo,
       primaryColor,
+      primaryHoverColor,
       secondaryColor,
+      secondaryHoverColor,
       accentColor,
+      accentHoverColor,
+      gradientStart,
+      gradientEnd,
+      cardBackgroundColor,
+      cardHoverColor,
+      borderColor,
+      borderHoverColor,
       darkMode,
       rtlLayout
     };
@@ -521,116 +570,501 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="primaryColor">اللون الأساسي</Label>
-                    <div className="flex items-center space-x-3 space-x-reverse">
-                      <input
-                        type="color"
-                        id="primaryColor"
-                        value={primaryColor}
-                        onChange={(e) => {
-                          setPrimaryColor(e.target.value);
-                          // Apply color immediately for preview
-                          const hsl = hexToHsl(e.target.value);
-                          document.documentElement.style.setProperty('--dynamic-primary', `hsl(${hsl})`);
-                        }}
-                        className="w-12 h-10 rounded border border-slate-300"
-                      />
-                      <Input
-                        value={primaryColor}
-                        onChange={(e) => {
-                          setPrimaryColor(e.target.value);
-                          if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
-                            const hsl = hexToHsl(e.target.value);
-                            document.documentElement.style.setProperty('--dynamic-primary', `hsl(${hsl})`);
-                          }
-                        }}
-                        className="flex-1"
-                      />
+                {/* Primary Colors Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2">الألوان الأساسية</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryColor">اللون الأساسي</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="primaryColor"
+                          value={primaryColor}
+                          onChange={(e) => {
+                            setPrimaryColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={primaryColor}
+                          onChange={(e) => {
+                            setPrimaryColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="secondaryColor">اللون الثانوي</Label>
-                    <div className="flex items-center space-x-3 space-x-reverse">
-                      <input
-                        type="color"
-                        id="secondaryColor"
-                        value={secondaryColor}
-                        onChange={(e) => {
-                          setSecondaryColor(e.target.value);
-                          // Apply color immediately for preview
-                          const hsl = hexToHsl(e.target.value);
-                          document.documentElement.style.setProperty('--dynamic-secondary', `hsl(${hsl})`);
-                        }}
-                        className="w-12 h-10 rounded border border-slate-300"
-                      />
-                      <Input
-                        value={secondaryColor}
-                        onChange={(e) => {
-                          setSecondaryColor(e.target.value);
-                          if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
-                            const hsl = hexToHsl(e.target.value);
-                            document.documentElement.style.setProperty('--dynamic-secondary', `hsl(${hsl})`);
-                          }
-                        }}
-                        className="flex-1"
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="primaryHoverColor">لون الأساسي عند التمرير</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="primaryHoverColor"
+                          value={primaryHoverColor}
+                          onChange={(e) => {
+                            setPrimaryHoverColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={primaryHoverColor}
+                          onChange={(e) => {
+                            setPrimaryHoverColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="accentColor">لون التمييز</Label>
-                    <div className="flex items-center space-x-3 space-x-reverse">
-                      <input
-                        type="color"
-                        id="accentColor"
-                        value={accentColor}
-                        onChange={(e) => {
-                          setAccentColor(e.target.value);
-                          // Apply color immediately for preview
-                          const hsl = hexToHsl(e.target.value);
-                          document.documentElement.style.setProperty('--dynamic-accent', `hsl(${hsl})`);
-                        }}
-                        className="w-12 h-10 rounded border border-slate-300"
-                      />
-                      <Input
-                        value={accentColor}
-                        onChange={(e) => {
-                          setAccentColor(e.target.value);
-                          if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
-                            const hsl = hexToHsl(e.target.value);
-                            document.documentElement.style.setProperty('--dynamic-accent', `hsl(${hsl})`);
-                          }
-                        }}
-                        className="flex-1"
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="secondaryColor">اللون الثانوي</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="secondaryColor"
+                          value={secondaryColor}
+                          onChange={(e) => {
+                            setSecondaryColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={secondaryColor}
+                          onChange={(e) => {
+                            setSecondaryColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="secondaryHoverColor">اللون الثانوي عند التمرير</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="secondaryHoverColor"
+                          value={secondaryHoverColor}
+                          onChange={(e) => {
+                            setSecondaryHoverColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={secondaryHoverColor}
+                          onChange={(e) => {
+                            setSecondaryHoverColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="accentColor">لون التمييز</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="accentColor"
+                          value={accentColor}
+                          onChange={(e) => {
+                            setAccentColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={accentColor}
+                          onChange={(e) => {
+                            setAccentColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="accentHoverColor">لون التمييز عند التمرير</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="accentHoverColor"
+                          value={accentHoverColor}
+                          onChange={(e) => {
+                            setAccentHoverColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={accentHoverColor}
+                          onChange={(e) => {
+                            setAccentHoverColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Color Preview */}
+                {/* Gradient Colors Section */}
                 <div className="space-y-4">
-                  <Label>معاينة الألوان</Label>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div 
-                      className="h-20 rounded-lg flex items-center justify-center text-white font-semibold"
-                      style={{ backgroundColor: primaryColor }}
-                    >
-                      أساسي
+                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2">ألوان التدرج</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="gradientStart">بداية التدرج</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="gradientStart"
+                          value={gradientStart}
+                          onChange={(e) => {
+                            setGradientStart(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={gradientStart}
+                          onChange={(e) => {
+                            setGradientStart(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
                     </div>
-                    <div 
-                      className="h-20 rounded-lg flex items-center justify-center text-white font-semibold"
-                      style={{ backgroundColor: secondaryColor }}
-                    >
-                      ثانوي
+
+                    <div className="space-y-2">
+                      <Label htmlFor="gradientEnd">نهاية التدرج</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="gradientEnd"
+                          value={gradientEnd}
+                          onChange={(e) => {
+                            setGradientEnd(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={gradientEnd}
+                          onChange={(e) => {
+                            setGradientEnd(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
                     </div>
+                  </div>
+                  {/* Gradient Preview */}
+                  <div className="mt-4">
+                    <Label>معاينة التدرج</Label>
                     <div 
-                      className="h-20 rounded-lg flex items-center justify-center text-white font-semibold"
-                      style={{ backgroundColor: accentColor }}
-                    >
-                      تمييز
+                      className="mt-2 h-16 rounded-lg border border-slate-300"
+                      style={{
+                        background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* UI Element Colors Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2">ألوان عناصر الواجهة</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="cardBackgroundColor">خلفية البطاقات</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="cardBackgroundColor"
+                          value={cardBackgroundColor}
+                          onChange={(e) => {
+                            setCardBackgroundColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={cardBackgroundColor}
+                          onChange={(e) => {
+                            setCardBackgroundColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="cardHoverColor">خلفية البطاقات عند التمرير</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="cardHoverColor"
+                          value={cardHoverColor}
+                          onChange={(e) => {
+                            setCardHoverColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={cardHoverColor}
+                          onChange={(e) => {
+                            setCardHoverColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="borderColor">لون الحدود</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="borderColor"
+                          value={borderColor}
+                          onChange={(e) => {
+                            setBorderColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={borderColor}
+                          onChange={(e) => {
+                            setBorderColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="borderHoverColor">لون الحدود عند التمرير</Label>
+                      <div className="flex items-center space-x-3 space-x-reverse">
+                        <input
+                          type="color"
+                          id="borderHoverColor"
+                          value={borderHoverColor}
+                          onChange={(e) => {
+                            setBorderHoverColor(e.target.value);
+                            applyThemeChanges();
+                          }}
+                          className="w-12 h-10 rounded border border-slate-300"
+                        />
+                        <Input
+                          value={borderHoverColor}
+                          onChange={(e) => {
+                            setBorderHoverColor(e.target.value);
+                            if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                              applyThemeChanges();
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live Preview Section */}
+                <div className="space-y-6">
+                  <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2">معاينة فورية للألوان</h3>
+                  
+                  {/* Button Previews */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-slate-700">الأزرار</h4>
+                    <div className="flex flex-wrap gap-3">
+                      <button 
+                        className="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                        style={{
+                          backgroundColor: primaryColor,
+                          color: 'white',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = primaryHoverColor;
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.12)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = primaryColor;
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        زر أساسي
+                      </button>
+                      
+                      <button 
+                        className="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                        style={{
+                          backgroundColor: secondaryColor,
+                          color: 'white',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = secondaryHoverColor;
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.12)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = secondaryColor;
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        زر ثانوي
+                      </button>
+                      
+                      <button 
+                        className="px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                        style={{
+                          backgroundColor: accentColor,
+                          color: 'white',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = accentHoverColor;
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.12)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = accentColor;
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        زر مميز
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Card Previews */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-slate-700">البطاقات والحدود</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div 
+                        className="p-4 rounded-lg transition-all duration-300 cursor-pointer"
+                        style={{
+                          backgroundColor: cardBackgroundColor,
+                          borderColor: borderColor,
+                          border: '2px solid',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = cardHoverColor;
+                          e.currentTarget.style.borderColor = borderHoverColor;
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = cardBackgroundColor;
+                          e.currentTarget.style.borderColor = borderColor;
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
+                        }}
+                      >
+                        <h5 className="font-semibold text-slate-800 mb-2">بطاقة تفاعلية</h5>
+                        <p className="text-slate-600 text-sm">مرر الماوس لرؤية التأثير</p>
+                      </div>
+
+                      <div 
+                        className="h-20 rounded-lg flex items-center justify-center text-white font-medium"
+                        style={{
+                          background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`
+                        }}
+                      >
+                        خلفية متدرجة
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Color Swatches */}
+                  <div className="space-y-4">
+                    <h4 className="font-medium text-slate-700">عينات الألوان</h4>
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                      <div className="text-center">
+                        <div 
+                          className="h-12 w-full rounded-lg mb-2"
+                          style={{ backgroundColor: primaryColor }}
+                        ></div>
+                        <span className="text-xs text-slate-600">أساسي</span>
+                      </div>
+                      <div className="text-center">
+                        <div 
+                          className="h-12 w-full rounded-lg mb-2"
+                          style={{ backgroundColor: primaryHoverColor }}
+                        ></div>
+                        <span className="text-xs text-slate-600">أساسي مُمرر</span>
+                      </div>
+                      <div className="text-center">
+                        <div 
+                          className="h-12 w-full rounded-lg mb-2"
+                          style={{ backgroundColor: secondaryColor }}
+                        ></div>
+                        <span className="text-xs text-slate-600">ثانوي</span>
+                      </div>
+                      <div className="text-center">
+                        <div 
+                          className="h-12 w-full rounded-lg mb-2"
+                          style={{ backgroundColor: secondaryHoverColor }}
+                        ></div>
+                        <span className="text-xs text-slate-600">ثانوي مُمرر</span>
+                      </div>
+                      <div className="text-center">
+                        <div 
+                          className="h-12 w-full rounded-lg mb-2"
+                          style={{ backgroundColor: accentColor }}
+                        ></div>
+                        <span className="text-xs text-slate-600">تمييز</span>
+                      </div>
+                      <div className="text-center">
+                        <div 
+                          className="h-12 w-full rounded-lg mb-2"
+                          style={{ backgroundColor: accentHoverColor }}
+                        ></div>
+                        <span className="text-xs text-slate-600">تمييز مُمرر</span>
+                      </div>
                     </div>
                   </div>
                 </div>
