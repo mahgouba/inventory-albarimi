@@ -21,8 +21,10 @@ import {
   Moon,
   Image as ImageIcon,
   Check,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -76,6 +78,11 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
   const [accentColor, setAccentColor] = useState("#BF9231");
   const [darkMode, setDarkMode] = useState(false);
   const [rtlLayout, setRtlLayout] = useState(true);
+  
+  // State for new manufacturer dialog
+  const [showNewManufacturerDialog, setShowNewManufacturerDialog] = useState(false);
+  const [newManufacturerName, setNewManufacturerName] = useState("");
+  const [newManufacturerLogo, setNewManufacturerLogo] = useState<string | null>(null);
 
   // Fetch current appearance settings
   const { data: appearanceSettings } = useQuery<AppearanceSettings>({
@@ -147,6 +154,52 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
       });
     }
   });
+
+  // Create new manufacturer mutation
+  const createManufacturerMutation = useMutation({
+    mutationFn: (data: { name: string; logo?: string | null }) =>
+      apiRequest("POST", "/api/manufacturers", data),
+    onSuccess: () => {
+      toast({
+        title: "تم الإنشاء بنجاح",
+        description: "تمت إضافة الشركة المصنعة الجديدة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/manufacturers"] });
+      setShowNewManufacturerDialog(false);
+      setNewManufacturerName("");
+      setNewManufacturerLogo(null);
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في إنشاء الشركة المصنعة",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Handle new manufacturer logo upload
+  const handleNewManufacturerLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setNewManufacturerLogo(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle create manufacturer
+  const handleCreateManufacturer = () => {
+    if (newManufacturerName.trim()) {
+      createManufacturerMutation.mutate({
+        name: newManufacturerName.trim(),
+        logo: newManufacturerLogo
+      });
+    }
+  };
 
   // Function to convert hex color to HSL
   const hexToHsl = (hex: string): string => {
@@ -527,15 +580,8 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                     <ul className="text-sm text-blue-800 space-y-1">
                       <li>• ارفع شعارات الشركات المصنعة لتظهر في عرض البطاقات</li>
                       <li>• الشعارات تظهر تلقائياً في القائمة المنسدلة للتصفية</li>
-                      <li>• يمكن إضافة شركات جديدة من صفحة "إدارة الشركات المصنعة"</li>
+                      <li>• يمكن إضافة شركات جديدة باستخدام الزر أسفل</li>
                     </ul>
-                    <div className="mt-3">
-                      <Link href="/manufacturers">
-                        <Button variant="outline" size="sm" className="text-blue-700 border-blue-300">
-                          إدارة الشركات المصنعة
-                        </Button>
-                      </Link>
-                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -549,6 +595,85 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {/* Add New Manufacturer Button */}
+                <div className="mb-6">
+                  <Dialog open={showNewManufacturerDialog} onOpenChange={setShowNewManufacturerDialog}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full border-dashed border-2 h-20 text-slate-600">
+                        <Plus size={20} className="ml-2" />
+                        إضافة شركة مصنعة جديدة
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md" dir="rtl">
+                      <DialogHeader>
+                        <DialogTitle>إضافة شركة مصنعة جديدة</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="newManufacturerName">اسم الشركة المصنعة</Label>
+                          <Input
+                            id="newManufacturerName"
+                            value={newManufacturerName}
+                            onChange={(e) => setNewManufacturerName(e.target.value)}
+                            placeholder="مرسيدس"
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>الشعار (اختياري)</Label>
+                          <div className="flex items-center space-x-4 space-x-reverse">
+                            {newManufacturerLogo && (
+                              <div className="w-16 h-16 border rounded-lg overflow-hidden bg-white flex items-center justify-center">
+                                <img 
+                                  src={newManufacturerLogo} 
+                                  alt="شعار الشركة الجديدة" 
+                                  className="max-w-full max-h-full object-contain"
+                                />
+                              </div>
+                            )}
+                            <div>
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleNewManufacturerLogoUpload}
+                                className="hidden"
+                                id="newManufacturerLogoUpload"
+                              />
+                              <label htmlFor="newManufacturerLogoUpload">
+                                <Button variant="outline" size="sm" className="cursor-pointer" asChild>
+                                  <span>
+                                    <Upload size={16} className="ml-2" />
+                                    رفع شعار
+                                  </span>
+                                </Button>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end space-x-2 space-x-reverse pt-4">
+                          <Button 
+                            variant="outline" 
+                            onClick={() => {
+                              setShowNewManufacturerDialog(false);
+                              setNewManufacturerName("");
+                              setNewManufacturerLogo(null);
+                            }}
+                          >
+                            إلغاء
+                          </Button>
+                          <Button 
+                            onClick={handleCreateManufacturer}
+                            disabled={!newManufacturerName.trim() || createManufacturerMutation.isPending}
+                          >
+                            {createManufacturerMutation.isPending ? "جاري الإنشاء..." : "إنشاء"}
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {manufacturers.map((manufacturer) => (
                     <div key={manufacturer.id} className="border rounded-lg p-4 space-y-4">

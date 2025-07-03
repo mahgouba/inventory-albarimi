@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useTheme } from "@/hooks/useTheme";
 import InventoryPage from "@/pages/inventory";
 import CardViewPage from "@/pages/card-view-new";
-import ManufacturersPage from "@/pages/manufacturers";
+
 import AppearancePage from "@/pages/appearance";
 import LocationPage from "@/pages/locations";
 import LoginPage from "@/pages/login";
@@ -31,7 +31,7 @@ function Router({ user, onLogout }: { user: User; onLogout: () => void }) {
       <Route path="/" component={() => <InventoryPage userRole={user.role} />} />
       <Route path="/cards" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/card-view" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
-      <Route path="/manufacturers" component={() => <ManufacturersPage userRole={user.role} />} />
+
       <Route path="/locations" component={() => <LocationPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/appearance" component={() => <AppearancePage userRole={user.role} />} />
       <Route component={NotFound} />
