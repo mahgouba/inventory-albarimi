@@ -1,7 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertInventoryItemSchema, insertManufacturerSchema } from "@shared/schema";
+import { 
+  insertInventoryItemSchema, 
+  insertManufacturerSchema,
+  insertLocationSchema,
+  insertLocationTransferSchema 
+} from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 
@@ -327,6 +332,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating manufacturer logo:", error);
       res.status(500).json({ message: "Failed to update manufacturer logo" });
+    }
+  });
+
+  // Location endpoints
+  app.get("/api/locations", async (req, res) => {
+    try {
+      const locations = await storage.getAllLocations();
+      res.json(locations);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch locations" });
+    }
+  });
+
+  app.post("/api/locations", async (req, res) => {
+    try {
+      const locationData = insertLocationSchema.parse(req.body);
+      const location = await storage.createLocation(locationData);
+      res.status(201).json(location);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid location data" });
+    }
+  });
+
+  app.put("/api/locations/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const locationData = req.body;
+      const location = await storage.updateLocation(id, locationData);
+      if (location) {
+        res.json(location);
+      } else {
+        res.status(404).json({ message: "Location not found" });
+      }
+    } catch (error) {
+      res.status(400).json({ message: "Invalid location data" });
+    }
+  });
+
+  app.delete("/api/locations/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteLocation(id);
+      if (success) {
+        res.json({ message: "Location deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Location not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete location" });
+    }
+  });
+
+  // Location transfer endpoints
+  app.get("/api/location-transfers", async (req, res) => {
+    try {
+      const transfers = await storage.getLocationTransfers();
+      res.json(transfers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch location transfers" });
+    }
+  });
+
+  app.post("/api/location-transfers", async (req, res) => {
+    try {
+      const transferData = insertLocationTransferSchema.parse(req.body);
+      const transfer = await storage.createLocationTransfer(transferData);
+      res.status(201).json(transfer);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid transfer data" });
+    }
+  });
+
+  // Transfer item to new location endpoint
+  app.post("/api/inventory/:id/transfer", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { newLocation, reason, transferredBy } = req.body;
+      
+      if (!newLocation) {
+        return res.status(400).json({ message: "New location is required" });
+      }
+
+      const success = await storage.transferItem(id, newLocation, reason, transferredBy);
+      if (success) {
+        res.json({ message: "Item transferred successfully" });
+      } else {
+        res.status(404).json({ message: "Item not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to transfer item" });
     }
   });
 

@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign, Settings, LogOut, Palette, Users } from "lucide-react";
+import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign, Settings, LogOut, Palette, Users, MapPin, Building2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/hooks/useTheme";
 import InventoryStats from "@/components/inventory-stats";
 import InventoryTable from "@/components/inventory-table";
 import InventoryFormSimple from "@/components/inventory-form-simple";
 import ExcelImport from "@/components/excel-import";
+import VehicleTransfer from "@/components/vehicle-transfer";
 import { exportToCSV, exportToExcel, printTable } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
 
@@ -31,6 +32,8 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<InventoryItem | undefined>(undefined);
   const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [transferVehicle, setTransferVehicle] = useState<InventoryItem | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -86,6 +89,16 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
   const handleFormClose = () => {
     setFormOpen(false);
     setEditItem(undefined);
+  };
+
+  const handleTransfer = (item: InventoryItem) => {
+    setTransferVehicle(item);
+    setTransferOpen(true);
+  };
+
+  const handleTransferClose = () => {
+    setTransferOpen(false);
+    setTransferVehicle(null);
   };
 
   // Reset category filter when manufacturer changes
@@ -191,8 +204,14 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                       <DropdownMenuSeparator />
                       <Link href="/manufacturers">
                         <DropdownMenuItem>
-                          <Settings className="mr-2 h-4 w-4" />
+                          <Building2 className="mr-2 h-4 w-4" />
                           الشركات المصنعة
+                        </DropdownMenuItem>
+                      </Link>
+                      <Link href="/locations">
+                        <DropdownMenuItem>
+                          <MapPin className="mr-2 h-4 w-4" />
+                          إدارة المواقع
                         </DropdownMenuItem>
                       </Link>
                     </DropdownMenuContent>
@@ -365,6 +384,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
           showSoldCars={showSoldCars}
           userRole={userRole}
           onEdit={handleEdit}
+          onTransfer={handleTransfer}
         />
 
         {/* Pagination */}
@@ -430,6 +450,13 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
       <ExcelImport 
         open={isExcelImportOpen} 
         onOpenChange={setIsExcelImportOpen} 
+      />
+
+      {/* Vehicle Transfer Dialog */}
+      <VehicleTransfer
+        open={transferOpen}
+        onOpenChange={handleTransferClose}
+        vehicle={transferVehicle}
       />
     </div>
   );
