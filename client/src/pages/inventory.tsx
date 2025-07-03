@@ -13,7 +13,7 @@ import InventoryTable from "@/components/inventory-table";
 import InventoryFormSimple from "@/components/inventory-form-simple";
 import ExcelImport from "@/components/excel-import";
 import VehicleTransfer from "@/components/vehicle-transfer";
-import VoiceChat from "@/components/voice-chat";
+import VoiceAssistant from "@/components/voice-assistant";
 import { InventoryFAB } from "@/components/animated-fab";
 import { exportToCSV, exportToExcel, printTable } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
@@ -468,10 +468,26 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
         vehicle={transferVehicle}
       />
 
-      {/* Voice Chat Dialog */}
-      <VoiceChat
+      {/* Voice Assistant Dialog */}
+      <VoiceAssistant
         open={voiceChatOpen}
         onOpenChange={setVoiceChatOpen}
+        onAddItem={() => setFormOpen(true)}
+        onEditItem={(item) => {
+          setEditItem(item);
+          setFormOpen(true);
+        }}
+        onSellItem={async (itemId) => {
+          // Handle sell item
+          console.log('Selling item:', itemId);
+        }}
+        onDeleteItem={async (itemId) => {
+          // Handle delete item
+          console.log('Deleting item:', itemId);
+        }}
+        onExtractChassisNumber={(file) => {
+          console.log('Extracting chassis number from:', file);
+        }}
       />
     </div>
   );

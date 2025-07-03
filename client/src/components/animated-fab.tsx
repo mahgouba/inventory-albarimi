@@ -6,7 +6,7 @@ import {
   Search, 
   Download, 
   Printer, 
-  Volume2,
+  Bot,
   Settings,
   X,
   Car,
@@ -227,7 +227,7 @@ export function InventoryFAB({
     {
       id: "voice",
       label: "المساعد الصوتي",
-      icon: <Volume2 size={18} />,
+      icon: <Bot size={18} />,
       onClick: onVoiceChat,
       color: "bg-green-600 hover:bg-green-700"
     },
@@ -275,7 +275,7 @@ export function CardViewFAB({
     {
       id: "voice",
       label: "المساعد الصوتي",
-      icon: <Volume2 size={18} />,
+      icon: <Bot size={18} />,
       onClick: onVoiceChat,
       color: "bg-green-600 hover:bg-green-700"
     },

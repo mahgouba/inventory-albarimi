@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTheme } from "@/hooks/useTheme";
-import VoiceChat from "@/components/voice-chat";
+import VoiceAssistant from "@/components/voice-assistant";
 import { CardViewFAB } from "@/components/animated-fab";
 import type { InventoryItem } from "@shared/schema";
 
@@ -300,10 +300,26 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
         }}
       />
 
-      {/* Voice Chat Dialog */}
-      <VoiceChat
+      {/* Voice Assistant Dialog */}
+      <VoiceAssistant
         open={voiceChatOpen}
         onOpenChange={setVoiceChatOpen}
+        onAddItem={() => {
+          // Navigate to inventory page to add item
+          window.location.href = '/inventory';
+        }}
+        onEditItem={(item) => {
+          console.log('Editing item:', item);
+        }}
+        onSellItem={async (itemId) => {
+          console.log('Selling item:', itemId);
+        }}
+        onDeleteItem={async (itemId) => {
+          console.log('Deleting item:', itemId);
+        }}
+        onExtractChassisNumber={(file) => {
+          console.log('Extracting chassis number from:', file);
+        }}
       />
     </div>
   );

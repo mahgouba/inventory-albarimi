@@ -15,6 +15,102 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Voice command processing functions
+async function processVoiceCommand(command: string) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: `أنت مساعد ذكي لإدارة مخزون المركبات. قم بتحليل الأوامر الصوتية وإرجاع استجابة JSON تحتوي على:
+- intent: نوع الطلب (add_vehicle, search_vehicle, sell_vehicle, delete_vehicle, extract_chassis, get_stats)
+- entities: البيانات المستخرجة من الأمر
+- confidence: مستوى الثقة (0-1)
+- action: الإجراء المطلوب
+- content: الرد النصي للمستخدم
+
+أمثلة الأوامر:
+- "أضف مركبة جديدة" → add_vehicle
+- "ابحث عن مرسيدس" → search_vehicle مع entities: {searchTerm: "مرسيدس"}
+- "بع المركبة رقم ABC123" → sell_vehicle مع entities: {chassisNumber: "ABC123"}
+- "احذف المركبة رقم XYZ789" → delete_vehicle مع entities: {chassisNumber: "XYZ789"}
+- "استخرج رقم الهيكل من الصورة" → extract_chassis
+- "أعطني إحصائيات المخزون" → get_stats`
+        },
+        {
+          role: "user",
+          content: command
+        }
+      ],
+      response_format: { type: "json_object" }
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    return {
+      intent: result.intent || "unknown",
+      entities: result.entities || {},
+      confidence: result.confidence || 0.5,
+      action: result.action || result.intent,
+      content: result.content || "تم معالجة طلبك."
+    };
+  } catch (error) {
+    console.error("Error processing voice command:", error);
+    return {
+      intent: "error",
+      entities: {},
+      confidence: 0,
+      action: "error",
+      content: "عذراً، لم أتمكن من فهم طلبك. يرجى المحاولة مرة أخرى."
+    };
+  }
+}
+
+async function extractChassisNumberFromImage(imageData: string) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "استخرج رقم الهيكل من هذه الصورة. رقم الهيكل عادة ما يكون مكون من أرقام وحروف إنجليزية. يرجى إرجاع رقم الهيكل فقط بدون أي نص إضافي. إذا لم تجد رقم هيكل واضح، أرجع كلمة 'غير موجود'."
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageData.startsWith('data:') ? imageData : `data:image/jpeg;base64,${imageData}`
+              }
+            }
+          ]
+        }
+      ],
+      max_tokens: 100
+    });
+
+    const extractedText = response.choices[0]?.message?.content?.trim() || "";
+    
+    let chassisNumber = "";
+    if (extractedText && extractedText !== "غير موجود" && extractedText.length > 5) {
+      chassisNumber = extractedText.replace(/[^A-Za-z0-9\-]/g, "").toUpperCase();
+    }
+
+    return {
+      chassisNumber: chassisNumber || null,
+      rawText: extractedText
+    };
+  } catch (error) {
+    console.error("Error extracting chassis number:", error);
+    return {
+      chassisNumber: null,
+      rawText: "",
+      error: "Failed to process image"
+    };
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
@@ -495,8 +591,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Voice processing endpoint
+  // Voice Assistant Routes
   app.post("/api/voice/process", async (req, res) => {
+    try {
+      const { command } = req.body;
+      
+      if (!command) {
+        return res.status(400).json({ message: "Command is required" });
+      }
+
+      const processedCommand = await processVoiceCommand(command);
+      res.json(processedCommand);
+    } catch (error) {
+      console.error("Error processing voice command:", error);
+      res.status(500).json({ message: "Failed to process voice command" });
+    }
+  });
+
+  app.post("/api/voice/extract-chassis", async (req, res) => {
+    try {
+      const { imageData } = req.body;
+      
+      if (!imageData) {
+        return res.status(400).json({ message: "Image data is required" });
+      }
+
+      const result = await extractChassisNumberFromImage(imageData);
+      res.json(result);
+    } catch (error) {
+      console.error("Error extracting chassis number:", error);
+      res.status(500).json({ message: "Failed to extract chassis number" });
+    }
+  });
+
+  // Voice processing endpoint (legacy)
+  app.post("/api/voice/process-legacy", async (req, res) => {
     try {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
