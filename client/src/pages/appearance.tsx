@@ -28,6 +28,37 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Manufacturer, AppearanceSettings } from "@shared/schema";
 
+// Function to convert hex color to HSL
+function hexToHsl(hex: string): string {
+  // Remove # if present
+  hex = hex.replace('#', '');
+  
+  // Convert hex to RGB
+  const r = parseInt(hex.substr(0, 2), 16) / 255;
+  const g = parseInt(hex.substr(2, 2), 16) / 255;
+  const b = parseInt(hex.substr(4, 2), 16) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+
+  return `${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%`;
+}
+
 interface AppearancePageProps {
   userRole: string;
 }
@@ -345,6 +376,26 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Dark Mode Toggle */}
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="space-y-1">
+                    <Label className="text-base font-medium">النظام الليلي</Label>
+                    <p className="text-sm text-muted-foreground">تفعيل النظام الليلي للموقع</p>
+                  </div>
+                  <Switch
+                    checked={darkMode}
+                    onCheckedChange={(checked) => {
+                      setDarkMode(checked);
+                      // Apply dark mode immediately for preview
+                      if (checked) {
+                        document.documentElement.classList.add('dark');
+                      } else {
+                        document.documentElement.classList.remove('dark');
+                      }
+                    }}
+                  />
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="primaryColor">اللون الأساسي</Label>
@@ -353,12 +404,23 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                         type="color"
                         id="primaryColor"
                         value={primaryColor}
-                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        onChange={(e) => {
+                          setPrimaryColor(e.target.value);
+                          // Apply color immediately for preview
+                          const hsl = hexToHsl(e.target.value);
+                          document.documentElement.style.setProperty('--dynamic-primary', `hsl(${hsl})`);
+                        }}
                         className="w-12 h-10 rounded border border-slate-300"
                       />
                       <Input
                         value={primaryColor}
-                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        onChange={(e) => {
+                          setPrimaryColor(e.target.value);
+                          if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                            const hsl = hexToHsl(e.target.value);
+                            document.documentElement.style.setProperty('--dynamic-primary', `hsl(${hsl})`);
+                          }
+                        }}
                         className="flex-1"
                       />
                     </div>
@@ -371,12 +433,23 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                         type="color"
                         id="secondaryColor"
                         value={secondaryColor}
-                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        onChange={(e) => {
+                          setSecondaryColor(e.target.value);
+                          // Apply color immediately for preview
+                          const hsl = hexToHsl(e.target.value);
+                          document.documentElement.style.setProperty('--dynamic-secondary', `hsl(${hsl})`);
+                        }}
                         className="w-12 h-10 rounded border border-slate-300"
                       />
                       <Input
                         value={secondaryColor}
-                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        onChange={(e) => {
+                          setSecondaryColor(e.target.value);
+                          if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                            const hsl = hexToHsl(e.target.value);
+                            document.documentElement.style.setProperty('--dynamic-secondary', `hsl(${hsl})`);
+                          }
+                        }}
                         className="flex-1"
                       />
                     </div>
@@ -389,12 +462,23 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                         type="color"
                         id="accentColor"
                         value={accentColor}
-                        onChange={(e) => setAccentColor(e.target.value)}
+                        onChange={(e) => {
+                          setAccentColor(e.target.value);
+                          // Apply color immediately for preview
+                          const hsl = hexToHsl(e.target.value);
+                          document.documentElement.style.setProperty('--dynamic-accent', `hsl(${hsl})`);
+                        }}
                         className="w-12 h-10 rounded border border-slate-300"
                       />
                       <Input
                         value={accentColor}
-                        onChange={(e) => setAccentColor(e.target.value)}
+                        onChange={(e) => {
+                          setAccentColor(e.target.value);
+                          if (e.target.value.match(/^#[0-9A-F]{6}$/i)) {
+                            const hsl = hexToHsl(e.target.value);
+                            document.documentElement.style.setProperty('--dynamic-accent', `hsl(${hsl})`);
+                          }
+                        }}
                         className="flex-1"
                       />
                     </div>
