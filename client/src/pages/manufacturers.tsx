@@ -92,12 +92,14 @@ function ManufacturerForm({ open, onOpenChange, editManufacturer }: Manufacturer
           </div>
           
           <div className="space-y-2">
-            <Label>لوجو الشركة المصنعة</Label>
-            <LogoUpload
-              value={logo}
-              onChange={setLogo}
-              className="w-full"
-            />
+            <Label>شعار الشركة المصنعة</Label>
+            <div className="border rounded-lg p-4 bg-slate-50">
+              <LogoUpload
+                value={logo}
+                onChange={setLogo}
+                className="w-full"
+              />
+            </div>
           </div>
 
           <div className="flex gap-2 justify-end">

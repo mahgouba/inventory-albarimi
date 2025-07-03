@@ -142,6 +142,7 @@ Changelog:
 - July 02, 2025: Fixed dark mode system and added real-time color preview in appearance management with instant theme application, proper CSS variable handling for both light and dark modes, and immediate visual feedback for color changes
 - July 02, 2025: Fixed manufacturer logo upload system in appearance management to apply directly to manufacturer database with updated API endpoints and manufacturer-stats integration for real-time logo display in card view
 - July 03, 2025: Implemented comprehensive chassis number photo capture and OCR extraction system using OpenAI Vision API with camera support, image processing, and automatic text extraction integrated into inventory form with unique constraint validation
+- July 03, 2025: Enhanced manufacturer logo upload system with improved visual design - expanded upload area, clearer instructions, better preview display, and integrated logo upload directly into manufacturer creation form with dedicated upload box
 ```
 
 ## User Preferences

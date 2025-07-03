@@ -73,7 +73,7 @@ export default function LogoUpload({ value, onChange, className }: LogoUploadPro
           <img
             src={value}
             alt="Logo"
-            className="w-16 h-16 object-contain border border-slate-200 rounded-lg bg-white p-2"
+            className="w-24 h-24 object-contain border border-slate-200 rounded-lg bg-white p-3"
           />
           <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
             <label className="cursor-pointer">
@@ -98,25 +98,28 @@ export default function LogoUpload({ value, onChange, className }: LogoUploadPro
           </div>
         </div>
       ) : (
-        <label className="flex flex-col items-center justify-center w-16 h-16 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer hover:border-slate-400 transition-colors">
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            disabled={uploading}
-            className="hidden"
-          />
-          <div className="flex flex-col items-center">
-            {uploading ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-600"></div>
-            ) : (
-              <>
-                <Image className="h-6 w-6 text-slate-400 mb-1" />
-                <span className="text-xs text-slate-500">رفع</span>
-              </>
-            )}
-          </div>
-        </label>
+        <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center">
+          <label className="flex flex-col items-center justify-center w-full h-32 cursor-pointer hover:border-slate-400 transition-colors">
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              disabled={uploading}
+              className="hidden"
+            />
+            <div className="flex flex-col items-center">
+              {uploading ? (
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600"></div>
+              ) : (
+                <>
+                  <Upload className="h-8 w-8 text-slate-400 mb-2" />
+                  <span className="text-sm text-slate-600 font-medium">رفع شعار الشركة</span>
+                  <span className="text-xs text-slate-500 mt-1">PNG, JPG, SVG (أقل من 2MB)</span>
+                </>
+              )}
+            </div>
+          </label>
+        </div>
       )}
     </div>
   );
