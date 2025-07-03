@@ -296,20 +296,23 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                   </SelectItem>
                   {manufacturerStats.map((stat) => (
                     <SelectItem key={stat.manufacturer} value={stat.manufacturer}>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 group">
                         {stat.logo ? (
-                          <img 
-                            src={stat.logo} 
-                            alt={stat.manufacturer}
-                            className="w-6 h-6 object-contain rounded"
-                          />
+                          <div className="relative">
+                            <img 
+                              src={stat.logo} 
+                              alt={stat.manufacturer}
+                              className="w-6 h-6 object-contain rounded transition-all duration-200 group-hover:scale-110 group-hover:drop-shadow-sm"
+                            />
+                            <div className="absolute inset-0 rounded bg-teal-400 opacity-0 scale-125 transition-all duration-200 group-hover:opacity-10 group-hover:scale-110"></div>
+                          </div>
                         ) : (
-                          <div className="w-6 h-6 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600">
+                          <div className="w-6 h-6 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600 transition-all duration-200 group-hover:bg-teal-100 group-hover:text-teal-700 group-hover:scale-110">
                             {stat.manufacturer.charAt(0)}
                           </div>
                         )}
-                        <span>{stat.manufacturer}</span>
-                        <Badge variant="secondary" className="text-xs">
+                        <span className="transition-colors duration-200 group-hover:text-teal-700">{stat.manufacturer}</span>
+                        <Badge variant="secondary" className="text-xs transition-all duration-200 group-hover:bg-teal-100 group-hover:text-teal-700">
                           {stat.total}
                         </Badge>
                       </div>
@@ -337,19 +340,27 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-6 space-x-reverse">
-                      {/* Manufacturer Logo */}
-                      <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200 shadow-sm">
-                        {logo ? (
-                          <img 
-                            src={logo} 
-                            alt={manufacturer}
-                            className="w-12 h-12 object-contain"
-                          />
-                        ) : (
-                          <span className="text-xl font-bold text-slate-600">
-                            {manufacturer.charAt(0)}
-                          </span>
-                        )}
+                      {/* Manufacturer Logo with Interactive Hover Effect */}
+                      <div className="relative group">
+                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200 shadow-sm transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:border-teal-400 group-hover:bg-gradient-to-br group-hover:from-teal-50 group-hover:to-blue-50">
+                          {logo ? (
+                            <img 
+                              src={logo} 
+                              alt={manufacturer}
+                              className="w-12 h-12 object-contain transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-md"
+                            />
+                          ) : (
+                            <span className="text-xl font-bold text-slate-600 transition-all duration-300 group-hover:text-teal-700 group-hover:scale-110">
+                              {manufacturer.charAt(0)}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Hover Ring Effect */}
+                        <div className="absolute inset-0 rounded-full border-2 border-teal-400 opacity-0 scale-125 transition-all duration-300 group-hover:opacity-50 group-hover:scale-110 pointer-events-none"></div>
+                        
+                        {/* Pulse Effect */}
+                        <div className="absolute inset-0 rounded-full bg-teal-400 opacity-0 scale-150 transition-all duration-500 group-hover:opacity-20 group-hover:scale-125 group-hover:animate-pulse pointer-events-none"></div>
                       </div>
                       
                       {/* Manufacturer Name and Count */}

@@ -147,6 +147,7 @@ Changelog:
 - July 03, 2025: Upgraded voice assistant with comprehensive AI-powered inventory management - replaced basic voice chat with advanced VoiceAssistant component featuring natural language processing through OpenAI GPT-4o, complete vehicle management capabilities (add, edit, sell, delete), chassis number OCR extraction from photos, and intelligent command interpretation with Arabic language support
 - July 03, 2025: Enhanced manufacturer management system integration - improved appearance management page with dedicated manufacturer logo section and instructions, enhanced manufacturer management page with better visual design and upload areas, integrated manufacturer filtering in card view with dropdown selector showing logos and counts, and linked appearance management directly to manufacturer logo management for seamless workflow
 - July 03, 2025: Resolved manufacturer creation issue - removed standalone manufacturers management page and consolidated all manufacturer creation functionality into appearance page with dedicated "Add New Manufacturer" button, implemented duplicate name validation with clear error messages in Arabic, and enhanced API error handling for unique constraint violations with user-friendly messaging
+- July 03, 2025: Implemented interactive manufacturer logo hover effects with smooth animations, scaling effects, pulse animations, ring effects, and enhanced visual feedback in both main card view and filter dropdown for improved user experience
 ```
 
 ## User Preferences
