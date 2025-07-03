@@ -140,6 +140,7 @@ Changelog:
 - July 02, 2025: Implemented comprehensive appearance management system with database schema (appearance_settings table), API endpoints for settings and logo management, real-time theme application, and full UI controls for company branding, color schemes, manufacturer logos, and layout preferences
 - July 02, 2025: Integrated global theme control across entire website with useTheme hook, ThemeProvider component, and CSS variables for real-time theme updates in all pages including inventory and card views
 - July 02, 2025: Fixed dark mode system and added real-time color preview in appearance management with instant theme application, proper CSS variable handling for both light and dark modes, and immediate visual feedback for color changes
+- July 02, 2025: Fixed manufacturer logo upload system in appearance management to apply directly to manufacturer database with updated API endpoints and manufacturer-stats integration for real-time logo display in card view
 ```
 
 ## User Preferences

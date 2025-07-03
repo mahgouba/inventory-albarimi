@@ -49,6 +49,7 @@ export interface IStorage {
     personal: number;
     company: number;
     usedPersonal: number;
+    logo?: string | null;
   }>>;
   getLocationStats(): Promise<Array<{
     location: string;
@@ -345,19 +346,23 @@ export class MemStorage implements IStorage {
     personal: number;
     company: number;
     usedPersonal: number;
+    logo?: string | null;
   }>> {
     const items = Array.from(this.inventoryItems.values());
     const manufacturerSet = new Set(items.map(item => item.manufacturer));
-    const manufacturers = Array.from(manufacturerSet);
+    const manufacturerNames = Array.from(manufacturerSet);
     
-    return manufacturers.map(manufacturer => {
-      const manufacturerItems = items.filter(item => item.manufacturer === manufacturer);
+    return manufacturerNames.map(manufacturerName => {
+      const manufacturerItems = items.filter(item => item.manufacturer === manufacturerName);
+      const manufacturerEntity = Array.from(this.manufacturers.values()).find(m => m.name === manufacturerName);
+      
       return {
-        manufacturer,
+        manufacturer: manufacturerName,
         total: manufacturerItems.length,
         personal: manufacturerItems.filter(item => item.importType === "شخصي").length,
         company: manufacturerItems.filter(item => item.importType === "شركة").length,
         usedPersonal: manufacturerItems.filter(item => item.importType === "مستعمل شخصي").length,
+        logo: manufacturerEntity?.logo || null,
       };
     });
   }
@@ -607,19 +612,24 @@ export class DatabaseStorage implements IStorage {
     personal: number;
     company: number;
     usedPersonal: number;
+    logo?: string | null;
   }>> {
     const items = await db.select().from(inventoryItems);
+    const manufacturerEntities = await db.select().from(manufacturers);
     const manufacturerSet = new Set(items.map(item => item.manufacturer));
-    const manufacturers = Array.from(manufacturerSet);
+    const manufacturerNames = Array.from(manufacturerSet);
     
-    return manufacturers.map(manufacturer => {
-      const manufacturerItems = items.filter(item => item.manufacturer === manufacturer);
+    return manufacturerNames.map(manufacturerName => {
+      const manufacturerItems = items.filter(item => item.manufacturer === manufacturerName);
+      const manufacturerEntity = manufacturerEntities.find(m => m.name === manufacturerName);
+      
       return {
-        manufacturer,
+        manufacturer: manufacturerName,
         total: manufacturerItems.length,
         personal: manufacturerItems.filter(item => item.importType === "شخصي").length,
         company: manufacturerItems.filter(item => item.importType === "شركة").length,
         usedPersonal: manufacturerItems.filter(item => item.importType === "مستعمل شخصي").length,
+        logo: manufacturerEntity?.logo || null,
       };
     });
   }
