@@ -515,6 +515,32 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
 
           {/* Manufacturer Logos */}
           <TabsContent value="logos" className="space-y-6">
+            {/* Instructions Card */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <div className="flex items-start gap-3">
+                  <div className="bg-blue-100 rounded-full p-2 mt-1">
+                    <ImageIcon className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-blue-900 mb-2">إدارة شعارات الشركات المصنعة</h3>
+                    <ul className="text-sm text-blue-800 space-y-1">
+                      <li>• ارفع شعارات الشركات المصنعة لتظهر في عرض البطاقات</li>
+                      <li>• الشعارات تظهر تلقائياً في القائمة المنسدلة للتصفية</li>
+                      <li>• يمكن إضافة شركات جديدة من صفحة "إدارة الشركات المصنعة"</li>
+                    </ul>
+                    <div className="mt-3">
+                      <Link href="/manufacturers">
+                        <Button variant="outline" size="sm" className="text-blue-700 border-blue-300">
+                          إدارة الشركات المصنعة
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

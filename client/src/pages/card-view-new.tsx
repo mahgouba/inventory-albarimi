@@ -43,8 +43,13 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   // Filter out sold cars from display
   const availableItems = inventoryData.filter(item => !item.isSold);
 
+  // Apply manufacturer filter
+  const filteredItems = selectedManufacturer === "الكل" 
+    ? availableItems 
+    : availableItems.filter(item => item.manufacturer === selectedManufacturer);
+
   // Group items by manufacturer
-  const groupedData = availableItems.reduce((acc, item) => {
+  const groupedData = filteredItems.reduce((acc, item) => {
     if (!acc[item.manufacturer]) {
       acc[item.manufacturer] = {
         items: [],
@@ -177,10 +182,31 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                   <SelectValue placeholder="اختر الصانع" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="الكل">الكل</SelectItem>
-                  {Object.keys(groupedData).map((manufacturer) => (
-                    <SelectItem key={manufacturer} value={manufacturer}>
-                      {manufacturer}
+                  <SelectItem value="الكل">
+                    <div className="flex items-center gap-3">
+                      <Filter size={16} />
+                      <span>عرض جميع الشركات</span>
+                    </div>
+                  </SelectItem>
+                  {manufacturerStats.map((stat: any) => (
+                    <SelectItem key={stat.manufacturer} value={stat.manufacturer}>
+                      <div className="flex items-center gap-3">
+                        {stat.logo ? (
+                          <img 
+                            src={stat.logo} 
+                            alt={stat.manufacturer}
+                            className="w-6 h-6 object-contain rounded"
+                          />
+                        ) : (
+                          <div className="w-6 h-6 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600">
+                            {stat.manufacturer.charAt(0)}
+                          </div>
+                        )}
+                        <span>{stat.manufacturer}</span>
+                        <Badge variant="secondary" className="text-xs">
+                          {stat.total}
+                        </Badge>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
