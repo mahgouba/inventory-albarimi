@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Upload, Check } from "lucide-react";
+import { Plus, Edit, Upload, Check, ArrowRight } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import LogoUpload from "@/components/logo-upload";
+import { Link } from "wouter";
 
 interface Manufacturer {
   id: number;
@@ -169,6 +170,16 @@ export default function ManufacturersPage({ userRole }: ManufacturersPageProps) 
 
   return (
     <div className="container mx-auto p-6" dir="rtl">
+      {/* Back Button */}
+      <div className="mb-4">
+        <Link href="/">
+          <Button variant="outline" size="sm" className="text-slate-600 hover:text-slate-800 hover:bg-slate-50">
+            <ArrowRight className="h-4 w-4 ml-2" />
+            العودة للرئيسية
+          </Button>
+        </Link>
+      </div>
+
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold mb-2">إدارة الشركات المصنعة</h1>
