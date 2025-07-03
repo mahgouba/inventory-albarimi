@@ -18,6 +18,7 @@ import {
   Monitor,
   Smartphone,
   Sun,
+  Edit2,
   Moon,
   Image as ImageIcon,
   Check,
@@ -83,6 +84,11 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
   const [showNewManufacturerDialog, setShowNewManufacturerDialog] = useState(false);
   const [newManufacturerName, setNewManufacturerName] = useState("");
   const [newManufacturerLogo, setNewManufacturerLogo] = useState<string | null>(null);
+  
+  // State for edit manufacturer dialog
+  const [showEditManufacturerDialog, setShowEditManufacturerDialog] = useState(false);
+  const [editingManufacturer, setEditingManufacturer] = useState<any>(null);
+  const [editManufacturerName, setEditManufacturerName] = useState("");
 
   // Fetch current appearance settings
   const { data: appearanceSettings } = useQuery<AppearanceSettings>({
@@ -191,6 +197,42 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
     }
   });
 
+  // Edit manufacturer name mutation
+  const editManufacturerMutation = useMutation({
+    mutationFn: (data: { id: number; name: string }) => {
+      console.log("Editing manufacturer:", data);
+      return apiRequest("PUT", `/api/manufacturers/${data.id}`, { name: data.name });
+    },
+    onSuccess: () => {
+      toast({
+        title: "تم التحديث بنجاح",
+        description: "تم تحديث اسم الشركة المصنعة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/manufacturers"] });
+      setShowEditManufacturerDialog(false);
+      setEditingManufacturer(null);
+      setEditManufacturerName("");
+    },
+    onError: (error: any) => {
+      console.error("Error editing manufacturer:", error);
+      
+      // Check if it's a duplicate name error
+      if (error.message.includes("409")) {
+        toast({
+          title: "خطأ",
+          description: "الاسم موجود بالفعل! يرجى اختيار اسم آخر",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "خطأ",
+          description: "فشل في تحديث اسم الشركة المصنعة",
+          variant: "destructive",
+        });
+      }
+    }
+  });
+
   // Handle new manufacturer logo upload
   const handleNewManufacturerLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -210,6 +252,23 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
       createManufacturerMutation.mutate({
         name: newManufacturerName.trim(),
         logo: newManufacturerLogo
+      });
+    }
+  };
+
+  // Handle edit manufacturer name
+  const handleEditManufacturer = (manufacturer: any) => {
+    setEditingManufacturer(manufacturer);
+    setEditManufacturerName(manufacturer.name);
+    setShowEditManufacturerDialog(true);
+  };
+
+  // Handle save edited manufacturer name
+  const handleSaveEditedManufacturer = () => {
+    if (editingManufacturer && editManufacturerName.trim()) {
+      editManufacturerMutation.mutate({
+        id: editingManufacturer.id,
+        name: editManufacturerName.trim()
       });
     }
   };
@@ -690,8 +749,16 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {manufacturers.map((manufacturer) => (
                     <div key={manufacturer.id} className="border rounded-lg p-4 space-y-4">
-                      <div className="text-center">
+                      <div className="text-center relative">
                         <h3 className="font-semibold text-lg">{manufacturer.name}</h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditManufacturer(manufacturer)}
+                          className="absolute top-0 right-0 h-6 w-6 p-0"
+                        >
+                          <Edit2 size={14} />
+                        </Button>
                       </div>
                       
                       <div className="flex flex-col items-center space-y-3">
@@ -797,6 +864,45 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
             </Card>
           </TabsContent>
         </Tabs>
+        
+        {/* Edit Manufacturer Name Dialog */}
+        <Dialog open={showEditManufacturerDialog} onOpenChange={setShowEditManufacturerDialog}>
+          <DialogContent className="sm:max-w-md" dir="rtl">
+            <DialogHeader>
+              <DialogTitle>تعديل اسم الشركة المصنعة</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="editManufacturerName">اسم الشركة المصنعة</Label>
+                <Input
+                  id="editManufacturerName"
+                  value={editManufacturerName}
+                  onChange={(e) => setEditManufacturerName(e.target.value)}
+                  placeholder="مرسيدس"
+                />
+              </div>
+
+              <div className="flex justify-end space-x-2 space-x-reverse pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowEditManufacturerDialog(false);
+                    setEditingManufacturer(null);
+                    setEditManufacturerName("");
+                  }}
+                >
+                  إلغاء
+                </Button>
+                <Button 
+                  onClick={handleSaveEditedManufacturer}
+                  disabled={!editManufacturerName.trim() || editManufacturerMutation.isPending}
+                >
+                  {editManufacturerMutation.isPending ? "جاري التحديث..." : "حفظ"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
