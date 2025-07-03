@@ -65,14 +65,26 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   });
 
   // Filter out sold cars from display
-  const availableItems = inventoryData.filter(item => !item.isSold);
+  const availableItems = inventoryData.filter(item => item.status !== "مباع");
 
   // Apply manufacturer filter
   const filteredItems = selectedManufacturer === "الكل" 
     ? availableItems 
     : availableItems.filter(item => item.manufacturer === selectedManufacturer);
 
-  // Group items by manufacturer
+  // Group ALL items by manufacturer first (including sold cars for count calculation)
+  const allGroupedData = inventoryData.reduce((acc, item) => {
+    if (!acc[item.manufacturer]) {
+      acc[item.manufacturer] = {
+        items: [],
+        logo: null,
+      };
+    }
+    acc[item.manufacturer].items.push(item);
+    return acc;
+  }, {} as Record<string, { items: InventoryItem[], logo: string | null }>);
+
+  // Then filter for display (only available items)
   const groupedData = filteredItems.reduce((acc, item) => {
     if (!acc[item.manufacturer]) {
       acc[item.manufacturer] = {
@@ -345,7 +357,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                         <h2 className="text-2xl font-bold text-slate-800 mb-2">{manufacturer}</h2>
                         <div className="flex items-center space-x-3 space-x-reverse">
                           <Badge variant="secondary" className="bg-teal-50 text-teal-700 px-3 py-1 text-sm font-semibold">
-                            {data.items.length} مركبة
+                            {data.items.filter(item => item.status !== "مباع").length} مركبة
                           </Badge>
                           <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-3 py-1 text-sm font-semibold">
                             {data.items.filter(item => item.status === "متوفر").length} متوفر
