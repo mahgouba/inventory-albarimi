@@ -30,6 +30,7 @@ function Router({ user, onLogout }: { user: User; onLogout: () => void }) {
     <Switch>
       <Route path="/" component={() => <InventoryPage userRole={user.role} />} />
       <Route path="/cards" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
+      <Route path="/card-view" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/manufacturers" component={() => <ManufacturersPage userRole={user.role} />} />
       <Route path="/locations" component={() => <LocationPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/appearance" component={() => <AppearancePage userRole={user.role} />} />
