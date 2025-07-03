@@ -14,6 +14,7 @@ import InventoryFormSimple from "@/components/inventory-form-simple";
 import ExcelImport from "@/components/excel-import";
 import VehicleTransfer from "@/components/vehicle-transfer";
 import VoiceChat from "@/components/voice-chat";
+import { InventoryFAB } from "@/components/animated-fab";
 import { exportToCSV, exportToExcel, printTable } from "@/lib/utils";
 import type { InventoryItem } from "@shared/schema";
 
@@ -431,30 +432,21 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
         </div>
       </main>
 
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-6 left-6 flex flex-col space-y-2">
-        <Button
-          onClick={() => setVoiceChatOpen(true)}
-          className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg"
-          title="المساعد الصوتي"
-        >
-          <MessageSquare size={20} />
-        </Button>
-        <Button
-          onClick={handleExport}
-          className="bg-teal-600 hover:bg-teal-700 text-white p-3 rounded-full shadow-lg"
-          title="تصدير البيانات"
-        >
-          <Download size={20} />
-        </Button>
-        <Button
-          onClick={handlePrint}
-          className="bg-amber-600 hover:bg-amber-700 text-white p-3 rounded-full shadow-lg"
-          title="طباعة التقرير"
-        >
-          <Printer size={20} />
-        </Button>
-      </div>
+      {/* Animated Floating Action Button */}
+      <InventoryFAB
+        onAddItem={() => setFormOpen(true)}
+        onSearch={() => {
+          // Focus on search input if visible, or scroll to search area
+          const searchInput = document.querySelector('input[placeholder*="البحث"]') as HTMLInputElement;
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }}
+        onExport={handleExport}
+        onPrint={handlePrint}
+        onVoiceChat={() => setVoiceChatOpen(true)}
+      />
 
       {/* Add/Edit Form */}
       <InventoryFormSimple 

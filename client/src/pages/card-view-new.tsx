@@ -17,6 +17,7 @@ import {
 import { Link } from "wouter";
 import { useTheme } from "@/hooks/useTheme";
 import VoiceChat from "@/components/voice-chat";
+import { CardViewFAB } from "@/components/animated-fab";
 import type { InventoryItem } from "@shared/schema";
 
 interface CardViewPageProps {
@@ -290,16 +291,14 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
         )}
       </div>
 
-      {/* Floating Voice Assistant Button */}
-      <div className="fixed bottom-6 left-6">
-        <Button
-          onClick={() => setVoiceChatOpen(true)}
-          className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg"
-          title="المساعد الصوتي"
-        >
-          <MessageSquare size={20} />
-        </Button>
-      </div>
+      {/* Animated Floating Action Button */}
+      <CardViewFAB
+        onVoiceChat={() => setVoiceChatOpen(true)}
+        onSettings={() => {
+          // Could add settings dialog for card view preferences
+          console.log("Card view settings clicked");
+        }}
+      />
 
       {/* Voice Chat Dialog */}
       <VoiceChat

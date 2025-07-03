@@ -108,14 +108,54 @@
     @apply bg-background text-foreground;
     font-family: 'Noto Sans Arabic', sans-serif;
   }
+}
 
-  .font-arabic {
-    font-family: 'Noto Sans Arabic', sans-serif;
-  }
+/* Animated FAB Enhancements */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
 
-  .font-latin {
-    font-family: 'Inter', sans-serif;
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
   }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.fab-floating {
+  animation: float 3s ease-in-out infinite;
+}
+
+.fab-pulse-ring {
+  animation: pulse-ring 2s ease-out infinite;
+}
+
+.fab-ripple {
+  animation: ripple 0.6s ease-out;
+}
+
+.font-arabic {
+  font-family: 'Noto Sans Arabic', sans-serif;
+}
+
+.font-latin {
+  font-family: 'Inter', sans-serif;
 }
 
 @layer utilities {
