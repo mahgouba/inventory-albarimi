@@ -9,6 +9,11 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Authentication routes
@@ -422,6 +427,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to transfer item" });
+    }
+  });
+
+  // Extract chassis number from image using OpenAI Vision API
+  app.post("/api/extract-chassis-number", async (req, res) => {
+    try {
+      const { image } = req.body;
+      
+      if (!image) {
+        return res.status(400).json({ message: "Image is required" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ message: "OpenAI API key not configured" });
+      }
+
+      // Call OpenAI Vision API to extract text from image
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "استخرج رقم الهيكل من هذه الصورة. رقم الهيكل عادة ما يكون مكون من أرقام وحروف إنجليزية. يرجى إرجاع رقم الهيكل فقط بدون أي نص إضافي. إذا لم تجد رقم هيكل واضح، أرجع كلمة 'غير موجود'."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:image/jpeg;base64,${image}`
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 100
+      });
+
+      const extractedText = response.choices[0]?.message?.content?.trim() || "";
+      
+      // Clean up the extracted text and validate it looks like a chassis number
+      let chassisNumber = "";
+      if (extractedText && extractedText !== "غير موجود" && extractedText.length > 5) {
+        // Remove any non-alphanumeric characters except common chassis number separators
+        chassisNumber = extractedText.replace(/[^A-Za-z0-9\-]/g, "").toUpperCase();
+      }
+
+      res.json({ 
+        chassisNumber: chassisNumber || "",
+        rawText: extractedText
+      });
+
+    } catch (error) {
+      console.error("Error extracting chassis number:", error);
+      res.status(500).json({ message: "Failed to extract chassis number from image" });
     }
   });
 

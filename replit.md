@@ -141,6 +141,7 @@ Changelog:
 - July 02, 2025: Integrated global theme control across entire website with useTheme hook, ThemeProvider component, and CSS variables for real-time theme updates in all pages including inventory and card views
 - July 02, 2025: Fixed dark mode system and added real-time color preview in appearance management with instant theme application, proper CSS variable handling for both light and dark modes, and immediate visual feedback for color changes
 - July 02, 2025: Fixed manufacturer logo upload system in appearance management to apply directly to manufacturer database with updated API endpoints and manufacturer-stats integration for real-time logo display in card view
+- July 03, 2025: Implemented comprehensive chassis number photo capture and OCR extraction system using OpenAI Vision API with camera support, image processing, and automatic text extraction integrated into inventory form with unique constraint validation
 ```
 
 ## User Preferences

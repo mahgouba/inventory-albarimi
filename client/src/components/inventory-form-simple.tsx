@@ -11,9 +11,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertInventoryItemSchema, type InsertInventoryItem, type InventoryItem } from "@shared/schema";
-import { CloudUpload, Settings } from "lucide-react";
+import { CloudUpload, Settings, Camera } from "lucide-react";
 import ListManagerSimple from "@/components/list-manager-simple";
 import ManufacturerCategoriesButton from "@/components/manufacturer-categories-button";
+import ChassisNumberScanner from "@/components/chassis-number-scanner";
 
 interface InventoryFormProps {
   open: boolean;
@@ -68,6 +69,9 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
   
   // Manufacturer categories state
   const [localManufacturerCategories, setLocalManufacturerCategories] = useState<Record<string, string[]>>(manufacturerCategories);
+  
+  // Chassis number scanner state
+  const [showChassisScanner, setShowChassisScanner] = useState(false);
 
   const form = useForm<InsertInventoryItem>({
     resolver: zodResolver(insertInventoryItemSchema),
@@ -149,6 +153,15 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
   };
 
   const isLoading = createMutation.isPending || updateMutation.isPending;
+
+  // Handle chassis number extraction from image
+  const handleChassisNumberExtracted = (chassisNumber: string) => {
+    form.setValue("chassisNumber", chassisNumber);
+    toast({
+      title: "تم استخراج رقم الهيكل",
+      description: `رقم الهيكل: ${chassisNumber}`,
+    });
+  };
 
   const getOptionsForType = (type: string) => {
     switch (type) {
@@ -491,9 +504,20 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>رقم الهيكل</FormLabel>
-                      <FormControl>
-                        <Input placeholder="أدخل رقم الهيكل" {...field} />
-                      </FormControl>
+                      <div className="flex gap-2">
+                        <FormControl className="flex-1">
+                          <Input placeholder="أدخل رقم الهيكل" {...field} />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => setShowChassisScanner(true)}
+                          title="تصوير رقم الهيكل"
+                        >
+                          <Camera size={16} />
+                        </Button>
+                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -587,6 +611,13 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
           interiorColors,
         }}
         onSave={(type, newList) => setOptionsForType(type, newList as string[])}
+      />
+
+      {/* Chassis Number Scanner Dialog */}
+      <ChassisNumberScanner
+        open={showChassisScanner}
+        onOpenChange={setShowChassisScanner}
+        onChassisNumberExtracted={handleChassisNumberExtracted}
       />
     </>
   );
