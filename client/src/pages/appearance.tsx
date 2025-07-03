@@ -157,8 +157,10 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
 
   // Create new manufacturer mutation
   const createManufacturerMutation = useMutation({
-    mutationFn: (data: { name: string; logo?: string | null }) =>
-      apiRequest("POST", "/api/manufacturers", data),
+    mutationFn: (data: { name: string; logo?: string | null }) => {
+      console.log("Sending manufacturer data:", data);
+      return apiRequest("POST", "/api/manufacturers", data);
+    },
     onSuccess: () => {
       toast({
         title: "تم الإنشاء بنجاح",

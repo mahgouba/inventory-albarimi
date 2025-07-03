@@ -380,10 +380,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/manufacturers", async (req, res) => {
     try {
+      console.log("Received manufacturer data:", req.body);
       const manufacturerData = insertManufacturerSchema.parse(req.body);
+      console.log("Parsed manufacturer data:", manufacturerData);
       const manufacturer = await storage.createManufacturer(manufacturerData);
       res.status(201).json(manufacturer);
     } catch (error) {
+      console.error("Error creating manufacturer:", error);
       res.status(400).json({ message: "Invalid manufacturer data" });
     }
   });
