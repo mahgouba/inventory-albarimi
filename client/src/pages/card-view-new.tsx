@@ -29,6 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import VoiceAssistant from "@/components/voice-assistant";
 import { CardViewFAB } from "@/components/animated-fab";
+import InventoryFormSimple from "@/components/inventory-form-simple";
 import type { InventoryItem } from "@shared/schema";
 
 interface CardViewPageProps {
@@ -46,6 +47,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [sellingItemId, setSellingItemId] = useState<number | null>(null);
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -109,7 +111,10 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
 
   // Sell item mutation
   const sellItemMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("PUT", `/api/inventory/${id}/sell`),
+    mutationFn: (id: number) => {
+      setSellingItemId(id);
+      return apiRequest("PUT", `/api/inventory/${id}/sell`);
+    },
     onSuccess: () => {
       toast({
         title: "تم البيع بنجاح",
@@ -117,6 +122,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
       });
       queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+      setSellingItemId(null);
     },
     onError: () => {
       toast({
@@ -124,6 +130,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
         description: "فشل في تسجيل بيع المركبة",
         variant: "destructive",
       });
+      setSellingItemId(null);
     }
   });
 
@@ -134,6 +141,8 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
 
   // Handle sell item
   const handleSellItem = (item: InventoryItem) => {
+    // Prevent multiple calls by checking if already processing
+    if (sellingItemId !== null) return;
     sellItemMutation.mutate(item.id);
   };
 
@@ -436,10 +445,10 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                               variant="outline"
                               className="flex-1 h-8 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
                               onClick={() => handleSellItem(item)}
-                              disabled={sellItemMutation.isPending}
+                              disabled={sellingItemId === item.id}
                             >
                               <ShoppingCart size={12} className="ml-1" />
-                              {sellItemMutation.isPending ? "جاري البيع..." : "بيع"}
+                              {sellingItemId === item.id ? "جاري البيع..." : "بيع"}
                             </Button>
                             <Button
                               size="sm"
@@ -532,6 +541,13 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Edit Item Form */}
+      <InventoryFormSimple
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        editItem={editingItem || undefined}
+      />
     </div>
   );
 }
