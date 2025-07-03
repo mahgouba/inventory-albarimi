@@ -12,8 +12,10 @@ import {
   Building2,
   LogOut,
   Home,
-  MessageSquare
+  MessageSquare,
+  Filter
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
 import { useTheme } from "@/hooks/useTheme";
 import VoiceAssistant from "@/components/voice-assistant";
@@ -28,6 +30,7 @@ interface CardViewPageProps {
 export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) {
   const { companyName } = useTheme();
   const [voiceChatOpen, setVoiceChatOpen] = useState(false);
+  const [selectedManufacturer, setSelectedManufacturer] = useState<string>("الكل");
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -161,11 +164,36 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">عرض البطاقات التفصيلي</h1>
           <p className="text-slate-600">عرض جميع تفاصيل السيارات مجمعة حسب الصانع</p>
+          
+          {/* Manufacturer Filter */}
+          <div className="mt-6 flex items-center gap-4">
+            <div className="flex items-center gap-2 text-slate-700">
+              <Filter size={18} />
+              <span>تصفية حسب الصانع:</span>
+            </div>
+            <div className="min-w-[200px]">
+              <Select value={selectedManufacturer} onValueChange={setSelectedManufacturer}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="اختر الصانع" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="الكل">الكل</SelectItem>
+                  {Object.keys(groupedData).map((manufacturer) => (
+                    <SelectItem key={manufacturer} value={manufacturer}>
+                      {manufacturer}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
         {/* Vehicle Cards by Manufacturer */}
         <div className="space-y-8">
-          {Object.entries(groupedData).map(([manufacturer, data]) => {
+          {Object.entries(groupedData)
+            .filter(([manufacturer]) => selectedManufacturer === "الكل" || manufacturer === selectedManufacturer)
+            .map(([manufacturer, data]) => {
             const logo = getManufacturerLogo(manufacturer);
             
             return (

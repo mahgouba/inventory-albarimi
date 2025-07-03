@@ -163,7 +163,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                   <ArrowUpDown className="mr-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead className="text-white text-right">اللوجو</TableHead>
+
               <TableHead className="text-white text-right">
                 <Button
                   variant="ghost"
@@ -223,7 +223,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
           <TableBody>
             {filteredAndSortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={15} className="text-center py-8">
+                <TableCell colSpan={14} className="text-center py-8">
                   <p className="text-slate-500">لا توجد عناصر للعرض</p>
                 </TableCell>
               </TableRow>
@@ -231,19 +231,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
               filteredAndSortedItems.map((item: InventoryItem) => (
                 <TableRow key={item.id} className={`hover:bg-slate-50 ${item.isSold ? 'bg-red-50 border-l-4 border-red-500' : ''}`}>
                   <TableCell className="text-sm text-slate-800">{item.manufacturer}</TableCell>
-                  <TableCell className="text-center">
-                    {item.logo ? (
-                      <img
-                        src={item.logo}
-                        alt={`${item.manufacturer} logo`}
-                        className="w-8 h-8 object-contain rounded-full border border-slate-200"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-xs text-slate-600">
-                        {item.manufacturer.charAt(0)}
-                      </div>
-                    )}
-                  </TableCell>
+
                   <TableCell className="text-sm text-slate-800">{item.category}</TableCell>
                   <TableCell className="text-sm text-slate-800 font-latin">{item.engineCapacity}</TableCell>
                   <TableCell className="text-sm text-slate-800 font-latin">{item.year}</TableCell>
