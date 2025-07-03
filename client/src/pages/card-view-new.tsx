@@ -21,7 +21,9 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
-  Search
+  Search,
+  Moon,
+  Sun
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -40,7 +42,7 @@ interface CardViewPageProps {
 }
 
 export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) {
-  const { companyName } = useTheme();
+  const { companyName, darkMode, toggleDarkMode, isUpdatingDarkMode } = useTheme();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [voiceChatOpen, setVoiceChatOpen] = useState(false);
@@ -282,6 +284,17 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
+
+              {/* Dark Mode Toggle */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="p-2 text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100" 
+                onClick={toggleDarkMode}
+                disabled={isUpdatingDarkMode}
+              >
+                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              </Button>
 
               {/* Logout Button */}
               <Button onClick={onLogout} variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
 import type { AppearanceSettings } from '@shared/schema';
 
 // Function to convert hex color to HSL
@@ -34,10 +35,21 @@ function hexToHsl(hex: string): string {
 }
 
 export function useTheme() {
+  const queryClient = useQueryClient();
+  
   // Fetch appearance settings
   const { data: settings, isLoading } = useQuery<AppearanceSettings>({
     queryKey: ['/api/appearance'],
     refetchOnWindowFocus: false,
+  });
+
+  // Mutation for updating dark mode
+  const updateDarkModeMutation = useMutation({
+    mutationFn: (darkMode: boolean) => 
+      apiRequest('PUT', '/api/appearance', { darkMode }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/appearance'] });
+    },
   });
 
   // Apply theme when settings change
@@ -84,6 +96,12 @@ export function useTheme() {
     }
   }, [settings]);
 
+  // Toggle dark mode function
+  const toggleDarkMode = () => {
+    const newDarkMode = !settings?.darkMode;
+    updateDarkModeMutation.mutate(newDarkMode);
+  };
+
   return {
     settings,
     isLoading,
@@ -95,5 +113,7 @@ export function useTheme() {
     accentColor: settings?.accentColor || '#BF9231',
     darkMode: settings?.darkMode || false,
     rtlLayout: settings?.rtlLayout !== false,
+    toggleDarkMode,
+    isUpdatingDarkMode: updateDarkModeMutation.isPending,
   };
 }

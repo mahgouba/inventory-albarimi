@@ -55,25 +55,38 @@
 }
 
 .dark {
-  --background: hsl(222.2, 84%, 4.9%);
+  --background: hsl(0, 0%, 0%); /* #000000 - Black */
   --foreground: hsl(210, 40%, 98%);
-  --muted: hsl(217.2, 32.6%, 17.5%);
+  --muted: hsl(0, 0%, 7.8%); /* #141414 - Sooty */
   --muted-foreground: hsl(215, 20.2%, 65.1%);
-  --popover: hsl(222.2, 84%, 4.9%);
+  --popover: hsl(0, 0%, 15.7%); /* #282828 - Dire Wolf */
   --popover-foreground: hsl(210, 40%, 98%);
-  --card: hsl(222.2, 84%, 4.9%);
+  --card: hsl(0, 0%, 15.7%); /* #282828 - Dire Wolf */
   --card-foreground: hsl(210, 40%, 98%);
-  --border: hsl(217.2, 32.6%, 17.5%);
-  --input: hsl(217.2, 32.6%, 17.5%);
+  --border: hsl(268, 100%, 13.7%); /* #230046 */
+  --input: hsl(0, 0%, 15.7%); /* #282828 - Dire Wolf */
   --primary: var(--dynamic-primary, hsl(195, 100%, 25%));
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: var(--dynamic-secondary, hsl(217.2, 32.6%, 17.5%));
+  --secondary: var(--dynamic-secondary, hsl(300, 100%, 19.6%)); /* #320064 */
   --secondary-foreground: hsl(210, 40%, 98%);
   --accent: var(--dynamic-accent, hsl(42, 60%, 47%));
-  --accent-foreground: hsl(222.2, 84%, 4.9%);
+  --accent-foreground: hsl(210, 40%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(210, 40%, 98%);
   --ring: var(--dynamic-primary, hsl(195, 100%, 25%));
+  
+  /* Dark mode dynamic theme variables */
+  --dynamic-primary: var(--dynamic-primary-light, hsl(195, 100%, 25%));
+  --dynamic-primary-hover: var(--dynamic-primary-hover-light, hsl(195, 100%, 20%));
+  --dynamic-secondary: var(--dynamic-secondary-light, hsl(300, 100%, 19.6%));
+  --dynamic-secondary-hover: var(--dynamic-secondary-hover-light, hsl(300, 100%, 15%));
+  --dynamic-accent: var(--dynamic-accent-light, hsl(42, 60%, 47%));
+  --dynamic-accent-hover: var(--dynamic-accent-hover-light, hsl(42, 60%, 40%));
+  --dynamic-gradient: linear-gradient(135deg, var(--dynamic-primary), var(--dynamic-secondary));
+  --dynamic-card-bg: hsl(0, 0%, 15.7%); /* #282828 - Dire Wolf */
+  --dynamic-card-hover: hsl(0, 0%, 7.8%); /* #141414 - Sooty */
+  --dynamic-border: hsl(268, 100%, 13.7%); /* #230046 */
+  --dynamic-border-hover: var(--dynamic-primary);
   
   /* Dark mode specific overrides for teal and amber colors */
   --teal-50: hsl(166, 76%, 5%);

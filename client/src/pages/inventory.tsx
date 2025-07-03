@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign, Settings, LogOut, Palette, Users, MapPin, Building2, MessageSquare } from "lucide-react";
+import { Search, Plus, Download, Printer, Bell, UserCircle, FileSpreadsheet, LayoutGrid, Table, DollarSign, Settings, LogOut, Palette, Users, MapPin, Building2, MessageSquare, Moon, Sun } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/hooks/useTheme";
 import InventoryStats from "@/components/inventory-stats";
@@ -41,7 +41,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
   const itemsPerPage = 10;
 
   // Get theme settings
-  const { companyName, companyLogo } = useTheme();
+  const { companyName, companyLogo, darkMode, toggleDarkMode, isUpdatingDarkMode } = useTheme();
 
   const { data: items = [] } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -179,6 +179,17 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
 
               {/* User Actions */}
               <div className="flex items-center space-x-1 space-x-reverse">
+                {/* Dark Mode Toggle */}
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="p-2 text-slate-600 hover:text-slate-800 dark:text-slate-300 dark:hover:text-slate-100" 
+                  onClick={toggleDarkMode}
+                  disabled={isUpdatingDarkMode}
+                >
+                  {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+                </Button>
+                
                 <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800 hidden sm:flex">
                   <Bell size={18} />
                 </Button>

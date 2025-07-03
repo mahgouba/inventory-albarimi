@@ -149,6 +149,7 @@ Changelog:
 - July 03, 2025: Resolved manufacturer creation issue - removed standalone manufacturers management page and consolidated all manufacturer creation functionality into appearance page with dedicated "Add New Manufacturer" button, implemented duplicate name validation with clear error messages in Arabic, and enhanced API error handling for unique constraint violations with user-friendly messaging
 - July 03, 2025: Implemented interactive manufacturer logo hover effects with smooth animations, scaling effects, pulse animations, ring effects, and enhanced visual feedback in both main card view and filter dropdown for improved user experience
 - July 03, 2025: Added comprehensive search functionality to card view interface with real-time filtering across multiple fields (chassis number, category, colors, location, manufacturer, engine capacity, year, status, import type, notes), visual search results indicator with clear search button, and responsive search input with Arabic placeholder text
+- July 03, 2025: Implemented comprehensive dark mode system with custom color palette - Black (#000000), Sooty (#141414), Dire Wolf (#282828), and deep purple accents (#230046, #320064), added dark mode toggle icons to all pages, enhanced useTheme hook with toggle functionality, and updated CSS variables for complete dark mode theming support
 ```
 
 ## User Preferences
