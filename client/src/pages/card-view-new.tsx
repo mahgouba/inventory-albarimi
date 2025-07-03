@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { 
   Bell, 
   Settings, 
@@ -23,6 +25,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
 import { useTheme } from "@/hooks/useTheme";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import VoiceAssistant from "@/components/voice-assistant";
 import { CardViewFAB } from "@/components/animated-fab";
 import type { InventoryItem } from "@shared/schema";
@@ -34,9 +38,14 @@ interface CardViewPageProps {
 
 export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) {
   const { companyName } = useTheme();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [voiceChatOpen, setVoiceChatOpen] = useState(false);
   const [selectedManufacturer, setSelectedManufacturer] = useState<string>("الكل");
   const [expandedManufacturer, setExpandedManufacturer] = useState<string | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<InventoryItem | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -75,6 +84,63 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   // Toggle manufacturer expansion
   const toggleManufacturer = (manufacturerName: string) => {
     setExpandedManufacturer(expandedManufacturer === manufacturerName ? null : manufacturerName);
+  };
+
+  // Delete item mutation
+  const deleteItemMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/inventory/${id}`),
+    onSuccess: () => {
+      toast({
+        title: "تم الحذف بنجاح",
+        description: "تم حذف المركبة من المخزون",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+      setItemToDelete(null);
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في حذف المركبة",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Sell item mutation
+  const sellItemMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("PUT", `/api/inventory/${id}/sell`),
+    onSuccess: () => {
+      toast({
+        title: "تم البيع بنجاح",
+        description: "تم تسجيل بيع المركبة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في تسجيل بيع المركبة",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Handle delete confirmation
+  const handleDeleteItem = (item: InventoryItem) => {
+    setItemToDelete(item);
+  };
+
+  // Handle sell item
+  const handleSellItem = (item: InventoryItem) => {
+    sellItemMutation.mutate(item.id);
+  };
+
+  // Handle edit item
+  const handleEditItem = (item: InventoryItem) => {
+    setEditingItem(item);
+    setShowEditDialog(true);
   };
 
   // Status color mapping
@@ -360,6 +426,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                               size="sm"
                               variant="outline"
                               className="flex-1 h-8 text-xs"
+                              onClick={() => handleEditItem(item)}
                             >
                               <Edit3 size={12} className="ml-1" />
                               تعديل
@@ -368,14 +435,17 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                               size="sm"
                               variant="outline"
                               className="flex-1 h-8 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+                              onClick={() => handleSellItem(item)}
+                              disabled={sellItemMutation.isPending}
                             >
                               <ShoppingCart size={12} className="ml-1" />
-                              بيع
+                              {sellItemMutation.isPending ? "جاري البيع..." : "بيع"}
                             </Button>
                             <Button
                               size="sm"
                               variant="outline"
                               className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+                              onClick={() => handleDeleteItem(item)}
                             >
                               <Trash2 size={12} />
                             </Button>
@@ -431,6 +501,37 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
           console.log('Extracting chassis number from:', file);
         }}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!itemToDelete} onOpenChange={() => setItemToDelete(null)}>
+        <AlertDialogContent className="sm:max-w-md" dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-600">
+              تأكيد حذف المركبة
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-slate-600">
+              هل أنت متأكد من حذف هذه المركبة؟ لا يمكن التراجع عن هذا الإجراء.
+              <br />
+              <br />
+              <span className="font-semibold">
+                {itemToDelete?.manufacturer} {itemToDelete?.category} - {itemToDelete?.year}
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel>
+              إلغاء
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => itemToDelete && deleteItemMutation.mutate(itemToDelete.id)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={deleteItemMutation.isPending}
+            >
+              {deleteItemMutation.isPending ? "جاري الحذف..." : "تأكيد الحذف"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
