@@ -171,12 +171,23 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
       setNewManufacturerName("");
       setNewManufacturerLogo(null);
     },
-    onError: () => {
-      toast({
-        title: "خطأ",
-        description: "فشل في إنشاء الشركة المصنعة",
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      console.error("Error creating manufacturer:", error);
+      
+      // Check if it's a duplicate name error
+      if (error.message.includes("409")) {
+        toast({
+          title: "خطأ",
+          description: "الشركة المصنعة موجودة بالفعل! يرجى اختيار اسم آخر",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "خطأ",
+          description: "فشل في إنشاء الشركة المصنعة",
+          variant: "destructive",
+        });
+      }
     }
   });
 

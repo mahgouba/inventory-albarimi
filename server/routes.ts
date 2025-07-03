@@ -383,10 +383,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Received manufacturer data:", req.body);
       const manufacturerData = insertManufacturerSchema.parse(req.body);
       console.log("Parsed manufacturer data:", manufacturerData);
+      
+      // Check if manufacturer already exists
+      const existingManufacturers = await storage.getAllManufacturers();
+      const existingManufacturer = existingManufacturers.find(
+        m => m.name.toLowerCase() === manufacturerData.name.toLowerCase()
+      );
+      
+      if (existingManufacturer) {
+        return res.status(409).json({ 
+          message: "Manufacturer already exists",
+          error: "duplicate_name"
+        });
+      }
+      
       const manufacturer = await storage.createManufacturer(manufacturerData);
       res.status(201).json(manufacturer);
     } catch (error) {
       console.error("Error creating manufacturer:", error);
+      
+      // Check if it's a duplicate key error
+      if ((error as any).code === '23505' && (error as any).constraint === 'manufacturers_name_unique') {
+        return res.status(409).json({ 
+          message: "Manufacturer already exists",
+          error: "duplicate_name"
+        });
+      }
+      
       res.status(400).json({ message: "Invalid manufacturer data" });
     }
   });
