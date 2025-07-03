@@ -143,6 +143,7 @@ Changelog:
 - July 02, 2025: Fixed manufacturer logo upload system in appearance management to apply directly to manufacturer database with updated API endpoints and manufacturer-stats integration for real-time logo display in card view
 - July 03, 2025: Implemented comprehensive chassis number photo capture and OCR extraction system using OpenAI Vision API with camera support, image processing, and automatic text extraction integrated into inventory form with unique constraint validation
 - July 03, 2025: Enhanced manufacturer logo upload system with improved visual design - expanded upload area, clearer instructions, better preview display, and integrated logo upload directly into manufacturer creation form with dedicated upload box
+- July 03, 2025: Updated voice chat icon from message square to volume/speaker icon in floating action buttons across all pages, improved visual clarity for audio functionality, and ensured consistent use of uploaded manufacturer logos in aggregated data displays
 ```
 
 ## User Preferences
