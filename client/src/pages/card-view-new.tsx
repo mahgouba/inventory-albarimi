@@ -20,9 +20,11 @@ import {
   ShoppingCart,
   Trash2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Search
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import { useTheme } from "@/hooks/useTheme";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +50,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [sellingItemId, setSellingItemId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -67,10 +70,30 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   // Filter out sold cars from display
   const availableItems = inventoryData.filter(item => item.status !== "مباع");
 
+  // Apply search filter
+  const searchFilteredItems = searchQuery.trim() === "" 
+    ? availableItems 
+    : availableItems.filter(item => {
+        const query = searchQuery.toLowerCase();
+        return (
+          item.chassisNumber?.toLowerCase().includes(query) ||
+          item.category?.toLowerCase().includes(query) ||
+          item.exteriorColor?.toLowerCase().includes(query) ||
+          item.interiorColor?.toLowerCase().includes(query) ||
+          item.location?.toLowerCase().includes(query) ||
+          item.manufacturer?.toLowerCase().includes(query) ||
+          item.engineCapacity?.toLowerCase().includes(query) ||
+          item.year?.toString().includes(query) ||
+          item.status?.toLowerCase().includes(query) ||
+          item.importType?.toLowerCase().includes(query) ||
+          item.notes?.toLowerCase().includes(query)
+        );
+      });
+
   // Apply manufacturer filter
   const filteredItems = selectedManufacturer === "الكل" 
-    ? availableItems 
-    : availableItems.filter(item => item.manufacturer === selectedManufacturer);
+    ? searchFilteredItems 
+    : searchFilteredItems.filter(item => item.manufacturer === selectedManufacturer);
 
   // Group ALL items by manufacturer first (including sold cars for count calculation)
   const allGroupedData = inventoryData.reduce((acc, item) => {
@@ -276,53 +299,91 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
           <h1 className="text-3xl font-bold text-slate-800 mb-2">عرض البطاقات التفصيلي</h1>
           <p className="text-slate-600">عرض جميع تفاصيل السيارات مجمعة حسب الصانع</p>
           
-          {/* Manufacturer Filter */}
-          <div className="mt-6 flex items-center gap-4">
+          {/* Search and Filter Section */}
+          <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            {/* Search Input */}
+            <div className="flex items-center gap-2 text-slate-700 flex-1">
+              <div className="relative flex-1 max-w-md">
+                <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+                <Input
+                  type="text"
+                  placeholder="البحث في رقم الهيكل، الفئة، اللون، الموقع..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 w-full border-slate-300 focus:border-teal-500 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+
+            {/* Manufacturer Filter */}
             <div className="flex items-center gap-2 text-slate-700">
               <Filter size={18} />
               <span>تصفية حسب الصانع:</span>
-            </div>
-            <div className="min-w-[200px]">
-              <Select value={selectedManufacturer} onValueChange={setSelectedManufacturer}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="اختر الصانع" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="الكل">
-                    <div className="flex items-center gap-3">
-                      <Filter size={16} />
-                      <span>عرض جميع الشركات</span>
-                    </div>
-                  </SelectItem>
-                  {manufacturerStats.map((stat) => (
-                    <SelectItem key={stat.manufacturer} value={stat.manufacturer}>
-                      <div className="flex items-center gap-3 group">
-                        {stat.logo ? (
-                          <div className="relative">
-                            <img 
-                              src={stat.logo} 
-                              alt={stat.manufacturer}
-                              className="w-6 h-6 object-contain rounded transition-all duration-200 group-hover:scale-110 group-hover:drop-shadow-sm"
-                            />
-                            <div className="absolute inset-0 rounded bg-teal-400 opacity-0 scale-125 transition-all duration-200 group-hover:opacity-10 group-hover:scale-110"></div>
-                          </div>
-                        ) : (
-                          <div className="w-6 h-6 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600 transition-all duration-200 group-hover:bg-teal-100 group-hover:text-teal-700 group-hover:scale-110">
-                            {stat.manufacturer.charAt(0)}
-                          </div>
-                        )}
-                        <span className="transition-colors duration-200 group-hover:text-teal-700">{stat.manufacturer}</span>
-                        <Badge variant="secondary" className="text-xs transition-all duration-200 group-hover:bg-teal-100 group-hover:text-teal-700">
-                          {stat.total}
-                        </Badge>
+              <div className="min-w-[200px]">
+                <Select value={selectedManufacturer} onValueChange={setSelectedManufacturer}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر الصانع" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="الكل">
+                      <div className="flex items-center gap-3">
+                        <Filter size={16} />
+                        <span>عرض جميع الشركات</span>
                       </div>
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    {manufacturerStats.map((stat) => (
+                      <SelectItem key={stat.manufacturer} value={stat.manufacturer}>
+                        <div className="flex items-center gap-3 group">
+                          {stat.logo ? (
+                            <div className="relative">
+                              <img 
+                                src={stat.logo} 
+                                alt={stat.manufacturer}
+                                className="w-6 h-6 object-contain rounded transition-all duration-200 group-hover:scale-110 group-hover:drop-shadow-sm"
+                              />
+                              <div className="absolute inset-0 rounded bg-teal-400 opacity-0 scale-125 transition-all duration-200 group-hover:opacity-10 group-hover:scale-110"></div>
+                            </div>
+                          ) : (
+                            <div className="w-6 h-6 bg-slate-200 rounded flex items-center justify-center text-xs text-slate-600 transition-all duration-200 group-hover:bg-teal-100 group-hover:text-teal-700 group-hover:scale-110">
+                              {stat.manufacturer.charAt(0)}
+                            </div>
+                          )}
+                          <span className="transition-colors duration-200 group-hover:text-teal-700">{stat.manufacturer}</span>
+                          <Badge variant="secondary" className="text-xs transition-all duration-200 group-hover:bg-teal-100 group-hover:text-teal-700">
+                            {stat.total}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Search Results Indicator */}
+        {searchQuery.trim() !== "" && (
+          <div className="mb-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
+            <div className="flex items-center gap-2 text-teal-700">
+              <Search size={18} />
+              <span className="font-medium">
+                نتائج البحث عن "{searchQuery}": {filteredItems.length} نتيجة
+              </span>
+              {filteredItems.length === 0 && (
+                <span className="text-slate-600 mr-2">- لم يتم العثور على نتائج</span>
+              )}
+            </div>
+            {filteredItems.length > 0 && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="mt-2 text-sm text-teal-600 hover:text-teal-800 underline"
+              >
+                مسح البحث
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Vehicle Cards by Manufacturer */}
         <div className="space-y-8">
