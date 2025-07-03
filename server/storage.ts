@@ -349,11 +349,14 @@ export class MemStorage implements IStorage {
     logo?: string | null;
   }>> {
     const items = Array.from(this.inventoryItems.values());
-    const manufacturerSet = new Set(items.map(item => item.manufacturer));
+    
+    // استبعاد السيارات المباعة
+    const availableItems = items.filter(item => item.status !== "مباع");
+    const manufacturerSet = new Set(availableItems.map(item => item.manufacturer));
     const manufacturerNames = Array.from(manufacturerSet);
     
     return manufacturerNames.map(manufacturerName => {
-      const manufacturerItems = items.filter(item => item.manufacturer === manufacturerName);
+      const manufacturerItems = availableItems.filter(item => item.manufacturer === manufacturerName);
       const manufacturerEntity = Array.from(this.manufacturers.values()).find(m => m.name === manufacturerName);
       
       return {
@@ -616,11 +619,14 @@ export class DatabaseStorage implements IStorage {
   }>> {
     const items = await db.select().from(inventoryItems);
     const manufacturerEntities = await db.select().from(manufacturers);
-    const manufacturerSet = new Set(items.map(item => item.manufacturer));
+    
+    // استبعاد السيارات المباعة
+    const availableItems = items.filter(item => item.status !== "مباع");
+    const manufacturerSet = new Set(availableItems.map(item => item.manufacturer));
     const manufacturerNames = Array.from(manufacturerSet);
     
     return manufacturerNames.map(manufacturerName => {
-      const manufacturerItems = items.filter(item => item.manufacturer === manufacturerName);
+      const manufacturerItems = availableItems.filter(item => item.manufacturer === manufacturerName);
       const manufacturerEntity = manufacturerEntities.find(m => m.name === manufacturerName);
       
       return {

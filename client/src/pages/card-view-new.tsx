@@ -53,7 +53,14 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
     queryKey: ["/api/inventory"],
   });
 
-  const { data: manufacturerStats = [] } = useQuery({
+  const { data: manufacturerStats = [] } = useQuery<Array<{
+    manufacturer: string;
+    total: number;
+    personal: number;
+    company: number;
+    usedPersonal: number;
+    logo: string | null;
+  }>>({
     queryKey: ["/api/inventory/manufacturer-stats"],
   });
 
@@ -79,8 +86,9 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
 
   // Get manufacturer logo
   const getManufacturerLogo = (manufacturerName: string) => {
+    if (!manufacturerStats || !Array.isArray(manufacturerStats)) return null;
     const manufacturer = manufacturerStats.find((m: any) => m.manufacturer === manufacturerName);
-    return manufacturer?.logo;
+    return manufacturer?.logo || null;
   };
 
   // Toggle manufacturer expansion
@@ -274,7 +282,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                       <span>عرض جميع الشركات</span>
                     </div>
                   </SelectItem>
-                  {manufacturerStats.map((stat: any) => (
+                  {manufacturerStats.map((stat) => (
                     <SelectItem key={stat.manufacturer} value={stat.manufacturer}>
                       <div className="flex items-center gap-3">
                         {stat.logo ? (
