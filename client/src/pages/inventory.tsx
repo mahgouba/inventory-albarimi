@@ -434,6 +434,13 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
       {/* Floating Action Buttons */}
       <div className="fixed bottom-6 left-6 flex flex-col space-y-2">
         <Button
+          onClick={() => setVoiceChatOpen(true)}
+          className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg"
+          title="المساعد الصوتي"
+        >
+          <MessageSquare size={20} />
+        </Button>
+        <Button
           onClick={handleExport}
           className="bg-teal-600 hover:bg-teal-700 text-white p-3 rounded-full shadow-lg"
           title="تصدير البيانات"

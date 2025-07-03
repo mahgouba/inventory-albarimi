@@ -11,10 +11,12 @@ import {
   Palette, 
   Building2,
   LogOut,
-  Home
+  Home,
+  MessageSquare
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTheme } from "@/hooks/useTheme";
+import VoiceChat from "@/components/voice-chat";
 import type { InventoryItem } from "@shared/schema";
 
 interface CardViewPageProps {
@@ -24,6 +26,7 @@ interface CardViewPageProps {
 
 export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) {
   const { companyName } = useTheme();
+  const [voiceChatOpen, setVoiceChatOpen] = useState(false);
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -286,6 +289,23 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
           </div>
         )}
       </div>
+
+      {/* Floating Voice Assistant Button */}
+      <div className="fixed bottom-6 left-6">
+        <Button
+          onClick={() => setVoiceChatOpen(true)}
+          className="bg-green-600 hover:bg-green-700 text-white p-3 rounded-full shadow-lg"
+          title="المساعد الصوتي"
+        >
+          <MessageSquare size={20} />
+        </Button>
+      </div>
+
+      {/* Voice Chat Dialog */}
+      <VoiceChat
+        open={voiceChatOpen}
+        onOpenChange={setVoiceChatOpen}
+      />
     </div>
   );
 }
