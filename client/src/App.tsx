@@ -6,7 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useTheme } from "@/hooks/useTheme";
 import InventoryPage from "@/pages/inventory";
-import CardViewPage from "@/pages/card-view";
+import CardViewPage from "@/pages/card-view-new";
 import ManufacturersPage from "@/pages/manufacturers";
 import AppearancePage from "@/pages/appearance";
 import LoginPage from "@/pages/login";
@@ -24,11 +24,11 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function Router({ user }: { user: User }) {
+function Router({ user, onLogout }: { user: User; onLogout: () => void }) {
   return (
     <Switch>
       <Route path="/" component={() => <InventoryPage userRole={user.role} />} />
-      <Route path="/cards" component={() => <CardViewPage userRole={user.role} />} />
+      <Route path="/cards" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/manufacturers" component={() => <ManufacturersPage userRole={user.role} />} />
       <Route path="/appearance" component={() => <AppearancePage userRole={user.role} />} />
       <Route component={NotFound} />
@@ -80,7 +80,7 @@ function App() {
             {!user ? (
               <LoginPage onLogin={handleLogin} />
             ) : (
-              <Router user={user} />
+              <Router user={user} onLogout={handleLogout} />
             )}
           </div>
         </TooltipProvider>

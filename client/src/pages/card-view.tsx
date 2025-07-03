@@ -215,7 +215,8 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
           <p className="text-slate-600">عرض المركبات مجمعة حسب الصانع</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Manufacturer Headers */}
+        <div className="space-y-8">
           {Object.entries(groupedData).map(([manufacturer, data]) => {
             const logo = getManufacturerLogo(manufacturer);
             const totalCount = data.items.length;
