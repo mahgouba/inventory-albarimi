@@ -363,12 +363,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                         إدارة المستخدمين
                       </DropdownMenuItem>
                     </Link>
-                    <Link href="/manufacturers">
-                      <DropdownMenuItem>
-                        <Building2 className="mr-2 h-4 w-4" />
-                        إدارة الشركات المصنعة
-                      </DropdownMenuItem>
-                    </Link>
+
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
