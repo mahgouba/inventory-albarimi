@@ -181,27 +181,11 @@ export default function InventoryPage({ userRole, onLogout }: InventoryPageProps
                     </Button>
                   </Link>
                   
-                  <Link href="/user-management">
-                    <Button variant="outline" size="sm" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200 transition-colors">
-                      <Users size={16} className="ml-1" />
-                      <span className="hidden sm:inline">إدارة المستخدمين</span>
-                      <span className="sm:hidden">المستخدمين</span>
-                    </Button>
-                  </Link>
+
                 </div>
               )}
 
-              {/* Admin Links */}
-              {userRole === "admin" && (
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Link href="/manufacturers">
-                    <Button variant="outline" size="sm" className="text-slate-600 hover:text-slate-800 hidden sm:flex">
-                      <span className="hidden lg:inline">الشركات المصنعة</span>
-                      <span className="lg:hidden">الشركات</span>
-                    </Button>
-                  </Link>
-                </div>
-              )}
+
 
               {/* User Actions */}
               <div className="flex items-center space-x-1 space-x-reverse">
@@ -235,19 +219,8 @@ export default function InventoryPage({ userRole, onLogout }: InventoryPageProps
                           إدارة المظهر
                         </DropdownMenuItem>
                       </Link>
-                      <Link href="/user-management">
-                        <DropdownMenuItem>
-                          <Users className="mr-2 h-4 w-4" />
-                          إدارة المستخدمين
-                        </DropdownMenuItem>
-                      </Link>
-                      <DropdownMenuSeparator />
-                      <Link href="/manufacturers">
-                        <DropdownMenuItem>
-                          <Building2 className="mr-2 h-4 w-4" />
-                          الشركات المصنعة
-                        </DropdownMenuItem>
-                      </Link>
+
+
                       <Link href="/locations">
                         <DropdownMenuItem>
                           <MapPin className="mr-2 h-4 w-4" />
