@@ -6,10 +6,11 @@ async function seedDatabase() {
   console.log("Seeding database...");
   
   const sampleItems: InsertInventoryItem[] = [
+    // Mercedes-Benz
     {
       manufacturer: "مرسيدس",
-      category: "E200",
-      engineCapacity: "2.0L",
+      category: "S-Class",
+      engineCapacity: "3.0L V6",
       year: 2025,
       exteriorColor: "أسود",
       interiorColor: "بيج",
@@ -23,8 +24,8 @@ async function seedDatabase() {
     },
     {
       manufacturer: "مرسيدس",
-      category: "C200",
-      engineCapacity: "1.5L",
+      category: "E-Class",
+      engineCapacity: "2.0L",
       year: 2024,
       exteriorColor: "أبيض",
       interiorColor: "أسود",
@@ -32,28 +33,45 @@ async function seedDatabase() {
       importType: "شركة",
       location: "المستودع الرئيسي",
       chassisNumber: "WDB2040461A789012",
-      images: ["https://example.com/mercedes-c200.jpg"],
+      images: [],
       notes: "للشركة الرئيسية",
       isSold: false
     },
     {
       manufacturer: "مرسيدس",
-      category: "C300",
+      category: "C-Class",
       engineCapacity: "2.0L",
       year: 2025,
       exteriorColor: "فضي",
       interiorColor: "أحمر",
-      status: "متوفر",
+      status: "محجوز",
       importType: "مستعمل شخصي",
       location: "المعرض",
       chassisNumber: "WDB2040461A345678",
       images: [],
-      notes: "حالة ممتازة",
-      isSold: true
+      notes: "حالة ممتازة - محجوز لعميل VIP",
+      isSold: false
     },
     {
+      manufacturer: "مرسيدس",
+      category: "GLE",
+      engineCapacity: "3.0L V6",
+      year: 2024,
+      exteriorColor: "أسود",
+      interiorColor: "بني",
+      status: "متوفر",
+      importType: "شخصي",
+      location: "المعرض",
+      chassisNumber: "WDB1670461A456789",
+      images: [],
+      notes: "SUV فاخر",
+      isSold: false
+    },
+    
+    // BMW
+    {
       manufacturer: "بي ام دبليو",
-      category: "X5",
+      category: "X7",
       engineCapacity: "3.0L",
       year: 2024,
       exteriorColor: "أسود",
@@ -68,7 +86,7 @@ async function seedDatabase() {
     },
     {
       manufacturer: "بي ام دبليو",
-      category: "X3",
+      category: "X5",
       engineCapacity: "2.0L",
       year: 2025,
       exteriorColor: "أبيض",
@@ -77,14 +95,31 @@ async function seedDatabase() {
       importType: "شركة",
       location: "المعرض",
       chassisNumber: "WBAXH9C50KC789012",
-      images: ["https://example.com/bmw-x3.jpg"],
+      images: [],
       notes: "موديل حديث",
       isSold: false
     },
     {
+      manufacturer: "بي ام دبليو",
+      category: "7 Series",
+      engineCapacity: "3.0L V6",
+      year: 2024,
+      exteriorColor: "أزرق",
+      interiorColor: "بيج",
+      status: "متوفر",
+      importType: "شخصي",
+      location: "المستودع الرئيسي",
+      chassisNumber: "WBANG9C50KC567890",
+      images: [],
+      notes: "سيدان فاخر",
+      isSold: false
+    },
+    
+    // Audi
+    {
       manufacturer: "اودي",
-      category: "A4",
-      engineCapacity: "2.0L",
+      category: "Q8",
+      engineCapacity: "3.0L V6",
       year: 2024,
       exteriorColor: "أزرق",
       interiorColor: "بيج",
@@ -98,8 +133,8 @@ async function seedDatabase() {
     },
     {
       manufacturer: "اودي",
-      category: "Q5",
-      engineCapacity: "2.0L",
+      category: "A8",
+      engineCapacity: "3.0L V6",
       year: 2025,
       exteriorColor: "رمادي",
       interiorColor: "أسود",
@@ -107,8 +142,106 @@ async function seedDatabase() {
       importType: "شركة",
       location: "الميناء",
       chassisNumber: "WAUZZZ8R7JA901234",
-      images: ["https://example.com/audi-q5.jpg"],
+      images: [],
       notes: "وصول متوقع الأسبوع القادم",
+      isSold: false
+    },
+    
+    // Toyota
+    {
+      manufacturer: "تويوتا",
+      category: "لاند كروزر",
+      engineCapacity: "4.0L V6",
+      year: 2024,
+      exteriorColor: "أبيض",
+      interiorColor: "رمادي",
+      status: "متوفر",
+      importType: "شخصي",
+      location: "المعرض",
+      chassisNumber: "JTMZK3AV1PJ123456",
+      images: [],
+      notes: "سيارة عائلية ممتازة",
+      isSold: false
+    },
+    {
+      manufacturer: "تويوتا",
+      category: "كامري",
+      engineCapacity: "2.5L",
+      year: 2025,
+      exteriorColor: "فضي",
+      interiorColor: "أسود",
+      status: "متوفر",
+      importType: "شركة",
+      location: "المستودع الرئيسي",
+      chassisNumber: "4T1BZ1FK8NU234567",
+      images: [],
+      notes: "سيدان اقتصادي",
+      isSold: false
+    },
+    
+    // Lexus
+    {
+      manufacturer: "لكزس",
+      category: "LX 600",
+      engineCapacity: "3.5L V6",
+      year: 2024,
+      exteriorColor: "أسود",
+      interiorColor: "بني",
+      status: "محجوز",
+      importType: "شخصي",
+      location: "المعرض",
+      chassisNumber: "JTJHY7AX1K4345678",
+      images: [],
+      notes: "SUV فاخر - محجوز للعميل أحمد",
+      isSold: false
+    },
+    {
+      manufacturer: "لكزس",
+      category: "ES 350",
+      engineCapacity: "3.5L V6",
+      year: 2025,
+      exteriorColor: "أبيض",
+      interiorColor: "أسود",
+      status: "متوفر",
+      importType: "شركة",
+      location: "المعرض",
+      chassisNumber: "58ABK1GG1NU456789",
+      images: [],
+      notes: "سيدان فاخر",
+      isSold: false
+    },
+    
+    // Range Rover
+    {
+      manufacturer: "رنج روفر",
+      category: "Range Rover Vogue",
+      engineCapacity: "3.0L V6",
+      year: 2024,
+      exteriorColor: "أسود",
+      interiorColor: "بيج",
+      status: "متوفر",
+      importType: "شخصي",
+      location: "المعرض",
+      chassisNumber: "SALGS2SE1KA567890",
+      images: [],
+      notes: "SUV فاخر بريطاني",
+      isSold: false
+    },
+    
+    // Porsche
+    {
+      manufacturer: "بورش",
+      category: "Cayenne",
+      engineCapacity: "3.0L V6",
+      year: 2024,
+      exteriorColor: "رمادي",
+      interiorColor: "أحمر",
+      status: "في الطريق",
+      importType: "شخصي",
+      location: "الميناء",
+      chassisNumber: "WP1AB2A27KLA678901",
+      images: [],
+      notes: "SUV رياضي",
       isSold: false
     }
   ];
@@ -117,6 +250,7 @@ async function seedDatabase() {
   const baseManufacturers = [
     { name: "مرسيدس" },
     { name: "بي ام دبليو" },
+    { name: "اودي" },
     { name: "رولز رويز" },
     { name: "بنتلي" },
     { name: "رنج روفر" },
@@ -126,8 +260,19 @@ async function seedDatabase() {
     { name: "لينكون" },
     { name: "شوفولية" },
     { name: "تويوتا" },
+    { name: "نيسان" },
+    { name: "انفينيتي" },
+    { name: "هيونداي" },
+    { name: "كيا" },
+    { name: "فولفو" },
+    { name: "جاكوار" },
+    { name: "مازيراتي" },
+    { name: "فيراري" },
+    { name: "لامبورغيني" },
     { name: "تسلا" },
-    { name: "لوسيد" }
+    { name: "لوسيد" },
+    { name: "كاديلاك" },
+    { name: "جي ام سي" }
   ];
 
   try {

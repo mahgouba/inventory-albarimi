@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye, Images, ArrowUpDown, ShoppingCart, DollarSign } from "lucide-react";
+import { Edit, Trash2, Eye, Images, ArrowUpDown, ShoppingCart, DollarSign, Calendar, X } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -77,6 +77,50 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
     },
   });
 
+  const reserveMutation = useMutation({
+    mutationFn: (data: { id: number; reservedBy: string; reservationNote?: string }) => 
+      apiRequest("POST", `/api/inventory/${data.id}/reserve`, {
+        reservedBy: data.reservedBy,
+        reservationNote: data.reservationNote
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+      toast({
+        title: "تم الحجز",
+        description: "تم حجز المركبة بنجاح",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في حجز المركبة",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cancelReservationMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/inventory/${id}/cancel-reservation`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+      toast({
+        title: "تم إلغاء الحجز",
+        description: "تم إلغاء حجز المركبة",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في إلغاء حجز المركبة",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSort = (column: string) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -104,6 +148,22 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
   const handleSell = (id: number) => {
     if (window.confirm("هل أنت متأكد من تحديد هذه السيارة كمباعة؟")) {
       sellMutation.mutate(id);
+    }
+  };
+
+  const handleReserve = (id: number) => {
+    if (window.confirm("هل أنت متأكد من حجز هذه السيارة؟")) {
+      reserveMutation.mutate({
+        id,
+        reservedBy: "مدير النظام",
+        reservationNote: "حجز من الجدول الرئيسي"
+      });
+    }
+  };
+
+  const handleCancelReservation = (id: number) => {
+    if (window.confirm("هل أنت متأكد من إلغاء حجز هذه السيارة؟")) {
+      cancelReservationMutation.mutate(id);
     }
   };
 
@@ -263,7 +323,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                   </TableCell>
                   <TableCell className="text-sm text-slate-600">{item.notes || '-'}</TableCell>
                   <TableCell>
-                    <div className="flex items-center space-x-2 space-x-reverse">
+                    <div className="flex items-center space-x-1 space-x-reverse">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -283,6 +343,29 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                      {item.status === "محجوز" ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCancelReservation(item.id)}
+                          className="text-orange-600 hover:text-orange-800 p-1"
+                          title="إلغاء الحجز"
+                          disabled={cancelReservationMutation.isPending}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleReserve(item.id)}
+                          className="text-blue-600 hover:text-blue-800 p-1"
+                          title="حجز"
+                          disabled={reserveMutation.isPending || item.status !== "متوفر"}
+                        >
+                          <Calendar className="h-4 w-4" />
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
