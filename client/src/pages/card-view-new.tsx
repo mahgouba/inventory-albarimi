@@ -298,9 +298,9 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 dark:bg-black min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo and Company Name */}
@@ -392,13 +392,13 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
       {/* Main Content */}
       <div className="max-w-7xl mx-auto p-4">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">عرض البطاقات التفصيلي</h1>
-          <p className="text-slate-600">عرض جميع تفاصيل السيارات مجمعة حسب الصانع</p>
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-200 mb-2">عرض البطاقات التفصيلي</h1>
+          <p className="text-slate-600 dark:text-slate-400">عرض جميع تفاصيل السيارات مجمعة حسب الصانع</p>
           
           {/* Search and Filter Section */}
           <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             {/* Search Input */}
-            <div className="flex items-center gap-2 text-slate-700 flex-1">
+            <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300 flex-1">
               <div className="relative flex-1 max-w-md">
                 <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
                 <Input
@@ -424,7 +424,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
             )}
 
             {/* Manufacturer Filter */}
-            <div className="flex items-center gap-2 text-slate-700">
+            <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
               <Filter size={18} />
               <span>تصفية حسب الصانع:</span>
               <div className="min-w-[200px]">
@@ -504,7 +504,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
               <div key={manufacturer} className="space-y-4">
                 {/* Manufacturer Header - Clickable */}
                 <div 
-                  className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all duration-200"
+                  className="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-6 cursor-pointer hover:shadow-md hover:border-teal-300 transition-all duration-200"
                   onClick={() => toggleManufacturer(manufacturer)}
                 >
                   <div className="flex items-center justify-between">
@@ -534,7 +534,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                       
                       {/* Manufacturer Name and Count */}
                       <div className="flex flex-col">
-                        <h2 className="text-2xl font-bold text-slate-800 mb-2">{manufacturer}</h2>
+                        <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">{manufacturer}</h2>
                         <div className="flex items-center space-x-3 space-x-reverse">
                           <Badge variant="secondary" className="bg-dynamic-card text-dynamic-primary px-3 py-1 text-sm font-semibold">
                             {showSoldCars 
@@ -568,7 +568,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                     <Card key={item.id} className="card-dynamic">
                       <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
-                          <CardTitle className="text-lg font-bold text-slate-800">{item.category}</CardTitle>
+                          <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-200">{item.category}</CardTitle>
                           <Badge variant="secondary" className={`${getStatusColor(item.status)} text-xs`}>
                             {item.status}
                           </Badge>
@@ -577,34 +577,34 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                       <CardContent className="pt-0">
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-slate-600 font-medium">سعة المحرك:</span>
-                            <span className="font-semibold font-latin text-slate-800">{item.engineCapacity}</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium">سعة المحرك:</span>
+                            <span className="font-semibold font-latin text-slate-800 dark:text-slate-200">{item.engineCapacity}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600 font-medium">السنة:</span>
-                            <span className="font-semibold font-latin text-slate-800">{item.year}</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium">السنة:</span>
+                            <span className="font-semibold font-latin text-slate-800 dark:text-slate-200">{item.year}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600 font-medium">اللون الخارجي:</span>
-                            <span className="font-semibold text-slate-800">{item.exteriorColor}</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium">اللون الخارجي:</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{item.exteriorColor}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600 font-medium">اللون الداخلي:</span>
-                            <span className="font-semibold text-slate-800">{item.interiorColor}</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium">اللون الداخلي:</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{item.interiorColor}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600 font-medium">نوع الاستيراد:</span>
-                            <span className="font-semibold text-slate-800">{item.importType}</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium">نوع الاستيراد:</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{item.importType}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-slate-600 font-medium">الموقع:</span>
-                            <span className="font-semibold text-slate-800">{item.location}</span>
+                            <span className="text-slate-600 dark:text-slate-400 font-medium">الموقع:</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{item.location}</span>
                           </div>
                           
                           {item.price && (
-                            <div className="flex justify-between py-2 border-t border-slate-200 mt-3">
-                              <span className="text-slate-600 font-medium">السعر:</span>
-                              <span className="font-bold font-latin text-teal-700">{item.price}</span>
+                            <div className="flex justify-between py-2 border-t border-slate-200 dark:border-slate-700 mt-3">
+                              <span className="text-slate-600 dark:text-slate-400 font-medium">السعر:</span>
+                              <span className="font-bold font-latin text-teal-700 dark:text-teal-400">{item.price}</span>
                             </div>
                           )}
                           

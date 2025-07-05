@@ -120,9 +120,9 @@ export default function InventoryPage({ userRole, username, onLogout }: Inventor
   const totalPages = Math.ceil(items.length / itemsPerPage);
 
   return (
-    <div className="bg-slate-50 min-h-screen">
+    <div className="bg-slate-50 dark:bg-black min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white dark:bg-slate-900 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo and Company Name */}
@@ -273,7 +273,7 @@ export default function InventoryPage({ userRole, username, onLogout }: Inventor
         <InventoryStats />
 
         {/* Controls */}
-        <Card className="mb-8 border border-slate-200">
+        <Card className="mb-8 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
           <CardContent className="p-6">
             <div className="flex flex-col gap-4">
               {/* Search Bar */}

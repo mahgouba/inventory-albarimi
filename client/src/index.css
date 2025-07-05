@@ -124,6 +124,83 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
 
+  /* Enhanced Dark Mode Styles */
+  .dark body {
+    @apply bg-black text-slate-100;
+  }
+
+  /* Main content containers in dark mode */
+  .dark .main-content {
+    @apply bg-black text-slate-100;
+  }
+
+  /* Card backgrounds in dark mode */
+  .dark .card-dynamic {
+    @apply bg-slate-900 border-slate-700 text-slate-100;
+  }
+
+  /* Text color overrides for dark mode */
+  .dark .text-slate-800 {
+    @apply text-slate-100 !important;
+  }
+
+  .dark .text-slate-700 {
+    @apply text-slate-200 !important;
+  }
+
+  .dark .text-slate-600 {
+    @apply text-slate-300 !important;
+  }
+
+  .dark .text-slate-500 {
+    color: rgb(148 163 184) !important;
+  }
+
+  .dark .text-slate-400 {
+    color: rgb(156 163 175) !important;
+  }
+
+  /* Background overrides for dark mode */
+  .dark .bg-white {
+    @apply bg-slate-900 border-slate-700 !important;
+  }
+
+  .dark .bg-slate-100 {
+    @apply bg-slate-800 !important;
+  }
+
+  .dark .bg-slate-50 {
+    @apply bg-slate-800 !important;
+  }
+
+  /* Hover states in dark mode */
+  .dark .hover\\:bg-slate-50:hover {
+    @apply bg-slate-800 !important;
+  }
+
+  .dark .hover\\:bg-slate-100:hover {
+    @apply bg-slate-700 !important;
+  }
+
+  /* Border colors in dark mode */
+  .dark .border-slate-200 {
+    @apply border-slate-700 !important;
+  }
+
+  .dark .border-slate-300 {
+    @apply border-slate-600 !important;
+  }
+
+  /* Page container backgrounds */
+  .dark .page-container {
+    @apply bg-black min-h-screen;
+  }
+
+  /* Ensure all page backgrounds are dark */
+  .dark [class*="bg-gray"], .dark [class*="bg-slate"] {
+    @apply bg-slate-900;
+  }
+
   /* Smooth transitions for theme changes */
   .theme-transition {
     transition: all 0.3s ease;
