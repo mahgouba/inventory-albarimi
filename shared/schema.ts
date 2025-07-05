@@ -209,8 +209,31 @@ export const appearanceSettings = pgTable("appearance_settings", {
   cardHoverColor: varchar("card_hover_color", { length: 7 }).default("#f8fafc"), // Slate-50
   borderColor: varchar("border_color", { length: 7 }).default("#e2e8f0"), // Slate-200
   borderHoverColor: varchar("border_hover_color", { length: 7 }).default("#0f766e"), // Teal-700
-  backgroundColor: varchar("background_color", { length: 7 }).default("#ffffff"), // Light mode background
+  backgroundColor: varchar("background_color", { length: 7 }).default("#f8fafc"), // Light mode background
   darkBackgroundColor: varchar("dark_background_color", { length: 7 }).default("#000000"), // Dark mode background
+  
+  // Dark mode colors
+  darkPrimaryColor: varchar("dark_primary_color", { length: 7 }).default("#14b8a6"), // Teal-500
+  darkPrimaryHoverColor: varchar("dark_primary_hover_color", { length: 7 }).default("#0d9488"), // Teal-600
+  darkSecondaryColor: varchar("dark_secondary_color", { length: 7 }).default("#0ea5e9"), // Sky-500
+  darkSecondaryHoverColor: varchar("dark_secondary_hover_color", { length: 7 }).default("#0284c7"), // Sky-600
+  darkAccentColor: varchar("dark_accent_color", { length: 7 }).default("#f59e0b"), // Amber-500
+  darkAccentHoverColor: varchar("dark_accent_hover_color", { length: 7 }).default("#d97706"), // Amber-600
+  darkCardBackgroundColor: varchar("dark_card_background_color", { length: 7 }).default("#141414"), // Sooty
+  darkCardHoverColor: varchar("dark_card_hover_color", { length: 7 }).default("#282828"), // Dire Wolf
+  darkBorderColor: varchar("dark_border_color", { length: 7 }).default("#374151"), // Gray-700
+  darkBorderHoverColor: varchar("dark_border_hover_color", { length: 7 }).default("#14b8a6"), // Teal-500
+  darkTextPrimaryColor: varchar("dark_text_primary_color", { length: 7 }).default("#f1f5f9"), // Slate-100
+  darkTextSecondaryColor: varchar("dark_text_secondary_color", { length: 7 }).default("#94a3b8"), // Slate-400
+  
+  // Light mode text colors
+  textPrimaryColor: varchar("text_primary_color", { length: 7 }).default("#1e293b"), // Slate-800
+  textSecondaryColor: varchar("text_secondary_color", { length: 7 }).default("#64748b"), // Slate-500
+  
+  // Header colors
+  headerBackgroundColor: varchar("header_background_color", { length: 7 }).default("#ffffff"), // White
+  darkHeaderBackgroundColor: varchar("dark_header_background_color", { length: 7 }).default("#141414"), // Sooty
+  
   darkMode: boolean("dark_mode").default(false),
   rtlLayout: boolean("rtl_layout").default(true),
   createdAt: timestamp("created_at").defaultNow(),
