@@ -561,6 +561,15 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                             </div>
                           )}
                           
+                          {item.reservationDate && (
+                            <div className="flex justify-between text-xs pt-2 border-t border-blue-100 mt-2 bg-blue-50 p-2 rounded">
+                              <span className="text-blue-600 font-medium">تاريخ الحجز:</span>
+                              <span className="font-medium text-blue-700">
+                                {new Date(item.reservationDate).toLocaleDateString('ar-SA')}
+                              </span>
+                            </div>
+                          )}
+                          
                           {item.notes && (
                             <div className="pt-2 border-t border-slate-100 mt-2">
                               <span className="text-slate-500 text-xs">ملاحظات:</span>
