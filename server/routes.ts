@@ -271,11 +271,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/inventory/:id/reserve", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
+      const { reservedBy, reservationNote } = req.body;
+      
       if (isNaN(id)) {
         return res.status(400).json({ message: "Invalid item ID" });
       }
       
-      const success = await storage.reserveItem(id);
+      if (!reservedBy) {
+        return res.status(400).json({ message: "Reserved by is required" });
+      }
+      
+      const success = await storage.reserveItem(id, reservedBy, reservationNote);
       if (!success) {
         return res.status(404).json({ message: "Item not found" });
       }
@@ -283,6 +289,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Item reserved successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to reserve item" });
+    }
+  });
+
+  // Cancel reservation
+  app.post("/api/inventory/:id/cancel-reservation", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid item ID" });
+      }
+      
+      const success = await storage.cancelReservation(id);
+      if (!success) {
+        return res.status(404).json({ message: "Item not found" });
+      }
+      
+      res.json({ message: "Reservation cancelled successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to cancel reservation" });
     }
   });
 

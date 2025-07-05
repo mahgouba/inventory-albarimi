@@ -29,6 +29,8 @@ export const inventoryItems = pgTable("inventory_items", {
   isSold: boolean("is_sold").default(false).notNull(), // مباع
   soldDate: timestamp("sold_date"), // تاريخ البيع
   reservationDate: timestamp("reservation_date"), // تاريخ الحجز
+  reservedBy: text("reserved_by"), // المستخدم الذي حجز
+  reservationNote: text("reservation_note"), // ملاحظة الحجز
 });
 
 // Manufacturers table for storing manufacturer logos

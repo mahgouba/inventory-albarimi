@@ -73,7 +73,8 @@ export interface IStorage {
   getLocationTransfers(inventoryItemId?: number): Promise<LocationTransfer[]>;
   createLocationTransfer(transfer: InsertLocationTransfer): Promise<LocationTransfer>;
   markAsSold(id: number): Promise<boolean>;
-  reserveItem(id: number): Promise<boolean>;
+  reserveItem(id: number, reservedBy: string, reservationNote?: string): Promise<boolean>;
+  cancelReservation(id: number): Promise<boolean>;
   
   // Manufacturer methods
   getAllManufacturers(): Promise<Manufacturer[]>;
@@ -736,10 +737,28 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async reserveItem(id: number): Promise<boolean> {
+  async reserveItem(id: number, reservedBy: string, reservationNote?: string): Promise<boolean> {
     const result = await db
       .update(inventoryItems)
-      .set({ status: "محجوز", reservationDate: new Date() })
+      .set({ 
+        status: "محجوز", 
+        reservationDate: new Date(),
+        reservedBy: reservedBy,
+        reservationNote: reservationNote || null
+      })
+      .where(eq(inventoryItems.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async cancelReservation(id: number): Promise<boolean> {
+    const result = await db
+      .update(inventoryItems)
+      .set({ 
+        status: "متوفر", 
+        reservationDate: null,
+        reservedBy: null,
+        reservationNote: null
+      })
       .where(eq(inventoryItems.id, id));
     return (result.rowCount ?? 0) > 0;
   }

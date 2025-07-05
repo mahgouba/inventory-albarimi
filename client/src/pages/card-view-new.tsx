@@ -23,7 +23,9 @@ import {
   ChevronUp,
   Search,
   Moon,
-  Sun
+  Sun,
+  Calendar,
+  X
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -53,6 +55,8 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [sellingItemId, setSellingItemId] = useState<number | null>(null);
+  const [reservingItemId, setReservingItemId] = useState<number | null>(null);
+  const [cancelingReservationId, setCancelingReservationId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
@@ -180,7 +184,58 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
     }
   });
 
+  // Reserve item mutation
+  const reserveItemMutation = useMutation({
+    mutationFn: (data: { id: number; reservedBy: string; reservationNote?: string }) => {
+      setReservingItemId(data.id);
+      return apiRequest("POST", `/api/inventory/${data.id}/reserve`, {
+        reservedBy: data.reservedBy,
+        reservationNote: data.reservationNote
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: "تم الحجز بنجاح",
+        description: "تم حجز المركبة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+      setReservingItemId(null);
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في حجز المركبة",
+        variant: "destructive",
+      });
+      setReservingItemId(null);
+    }
+  });
 
+  // Cancel reservation mutation
+  const cancelReservationMutation = useMutation({
+    mutationFn: (id: number) => {
+      setCancelingReservationId(id);
+      return apiRequest("POST", `/api/inventory/${id}/cancel-reservation`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "تم إلغاء الحجز",
+        description: "تم إلغاء حجز المركبة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+      setCancelingReservationId(null);
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في إلغاء حجز المركبة",
+        variant: "destructive",
+      });
+      setCancelingReservationId(null);
+    }
+  });
 
   // Handle delete confirmation
   const handleDeleteItem = (item: InventoryItem) => {
@@ -192,6 +247,23 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
     // Prevent multiple calls by checking if already processing
     if (sellingItemId !== null) return;
     sellItemMutation.mutate(item.id);
+  };
+
+  // Handle reserve item
+  const handleReserveItem = (item: InventoryItem) => {
+    if (reservingItemId !== null) return;
+    // Use current user or a default for now
+    reserveItemMutation.mutate({
+      id: item.id,
+      reservedBy: "مدير النظام",
+      reservationNote: "حجز من واجهة البطاقات"
+    });
+  };
+
+  // Handle cancel reservation
+  const handleCancelReservation = (item: InventoryItem) => {
+    if (cancelingReservationId !== null) return;
+    cancelReservationMutation.mutate(item.id);
   };
 
   // Handle edit item
@@ -208,6 +280,8 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
       case "في الطريق":
         return "bg-blue-100 text-blue-800 border-blue-200";
       case "قيد الصيانة":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "محجوز":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
         return "bg-slate-100 text-slate-800 border-slate-200";
@@ -557,6 +631,30 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                               <Edit3 size={12} className="ml-1" />
                               تعديل
                             </Button>
+
+                            {item.status === "محجوز" ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 h-8 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
+                                onClick={() => handleCancelReservation(item)}
+                                disabled={cancelingReservationId === item.id}
+                              >
+                                <X size={12} className="ml-1" />
+                                {cancelingReservationId === item.id ? "جاري الإلغاء..." : "إلغاء الحجز"}
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 h-8 text-xs text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 border-yellow-200"
+                                onClick={() => handleReserveItem(item)}
+                                disabled={reservingItemId === item.id || item.status !== "متوفر"}
+                              >
+                                <Calendar size={12} className="ml-1" />
+                                {reservingItemId === item.id ? "جاري الحجز..." : "حجز"}
+                              </Button>
+                            )}
 
                             <Button
                               size="sm"
