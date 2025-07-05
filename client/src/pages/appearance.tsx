@@ -51,9 +51,10 @@ function hexToHsl(hex: string): string {
 
 interface AppearancePageProps {
   userRole: string;
+  onLogout: () => void;
 }
 
-export default function AppearancePage({ userRole }: AppearancePageProps) {
+export default function AppearancePage({ userRole, onLogout }: AppearancePageProps) {
   // State variables for all color customization
   const [companyName, setCompanyName] = useState("إدارة المخزون");
   const [companyNameEn, setCompanyNameEn] = useState("Inventory System");

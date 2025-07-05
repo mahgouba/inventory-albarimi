@@ -29,7 +29,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 function Router({ user, onLogout }: { user: User; onLogout: () => void }) {
   return (
     <Switch>
-      <Route path="/" component={() => <InventoryPage userRole={user.role} />} />
+      <Route path="/" component={() => <InventoryPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/cards" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/card-view" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/card-view-new" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
@@ -37,8 +37,8 @@ function Router({ user, onLogout }: { user: User; onLogout: () => void }) {
       {/* صفحات الأدمن فقط */}
       {user.role === "admin" && (
         <>
-          <Route path="/appearance" component={() => <AppearancePage userRole={user.role} />} />
-          <Route path="/user-management" component={() => <UserManagementPage />} />
+          <Route path="/appearance" component={() => <AppearancePage userRole={user.role} onLogout={onLogout} />} />
+          <Route path="/user-management" component={() => <UserManagementPage onLogout={onLogout} />} />
         </>
       )}
       <Route component={NotFound} />

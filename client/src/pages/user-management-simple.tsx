@@ -33,7 +33,11 @@ interface UserData {
   createdAt: string;
 }
 
-export default function UserManagement() {
+interface UserManagementProps {
+  onLogout: () => void;
+}
+
+export default function UserManagement({ onLogout }: UserManagementProps) {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [newUserOpen, setNewUserOpen] = useState(false);
@@ -261,10 +265,7 @@ export default function UserManagement() {
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900 cursor-pointer"
-                    onClick={() => {
-                      localStorage.removeItem("auth");
-                      navigate("/login");
-                    }}
+                    onClick={onLogout}
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     تسجيل الخروج

@@ -20,9 +20,10 @@ import type { InventoryItem } from "@shared/schema";
 
 interface InventoryPageProps {
   userRole: string;
+  onLogout: () => void;
 }
 
-export default function InventoryPage({ userRole }: InventoryPageProps) {
+export default function InventoryPage({ userRole, onLogout }: InventoryPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("جميع الفئات");
   const [manufacturerFilter, setManufacturerFilter] = useState("جميع الصناع");
@@ -272,10 +273,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       className="text-red-600 hover:bg-red-50 cursor-pointer"
-                      onClick={() => {
-                        localStorage.removeItem("auth");
-                        window.location.href = '/login';
-                      }}
+                      onClick={onLogout}
                     >
                       <LogOut className="mr-2 h-4 w-4" />
                       تسجيل الخروج
