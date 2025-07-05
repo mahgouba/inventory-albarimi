@@ -169,14 +169,16 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                 </Link>
               </div>
 
-              {/* Appearance Management Button - Always Visible */}
-              <Link href="/appearance">
-                <Button variant="outline" size="sm" className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 border-teal-200 transition-colors">
-                  <Palette size={16} className="ml-1" />
-                  <span className="hidden sm:inline">إدارة المظهر</span>
-                  <span className="sm:hidden">المظهر</span>
-                </Button>
-              </Link>
+              {/* Appearance Management Button - Admin Only */}
+              {userRole === "admin" && (
+                <Link href="/appearance">
+                  <Button variant="outline" size="sm" className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 border-teal-200 transition-colors">
+                    <Palette size={16} className="ml-1" />
+                    <span className="hidden sm:inline">إدارة المظهر</span>
+                    <span className="sm:hidden">المظهر</span>
+                  </Button>
+                </Link>
+              )}
 
               {/* Admin Links */}
               {userRole === "admin" && (
@@ -245,21 +247,32 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                   </DropdownMenu>
                 )}
                 
-                <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
-                  <UserCircle size={18} />
-                </Button>
+                {/* User Dropdown Menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800">
+                      <UserCircle size={18} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem className="text-sm text-slate-500 cursor-default">
+                      <UserCircle className="mr-2 h-4 w-4" />
+                      المستخدم: {userRole === "admin" ? "أدمن" : "مستخدم"}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className="text-red-600 hover:bg-red-50 cursor-pointer"
+                      onClick={() => {
+                        localStorage.removeItem("auth");
+                        window.location.href = '/login';
+                      }}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      تسجيل الخروج
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              
-              {/* Logout Button */}
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="border-red-300 text-red-600 hover:bg-red-50 hidden sm:flex"
-                onClick={() => window.location.href = '/login'}
-              >
-                <LogOut size={16} className="mr-1" />
-                تسجيل الخروج
-              </Button>
             </div>
           </div>
         </div>
@@ -356,13 +369,28 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
               
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
-                  onClick={() => setFormOpen(true)}
-                  className="bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto"
-                >
-                  <Plus className="w-4 h-4 ml-2" />
-                  إضافة عنصر
-                </Button>
+                {/* Admin-only buttons */}
+                {userRole === "admin" && (
+                  <>
+                    <Button 
+                      onClick={() => setFormOpen(true)}
+                      className="bg-teal-600 hover:bg-teal-700 text-white w-full sm:w-auto"
+                    >
+                      <Plus className="w-4 h-4 ml-2" />
+                      إضافة عنصر
+                    </Button>
+                    <Button 
+                      onClick={() => setIsExcelImportOpen(true)}
+                      variant="outline"
+                      className="border-teal-600 text-teal-600 hover:bg-teal-50 w-full sm:w-auto"
+                    >
+                      <FileSpreadsheet className="w-4 h-4 ml-2" />
+                      استيراد Excel
+                    </Button>
+                  </>
+                )}
+                
+                {/* Voice Assistant - Available for all users */}
                 <Button 
                   onClick={() => setVoiceChatOpen(true)}
                   variant="outline"
@@ -370,14 +398,6 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
                 >
                   <MessageSquare className="w-4 h-4 ml-2" />
                   المساعد الصوتي
-                </Button>
-                <Button 
-                  onClick={() => setIsExcelImportOpen(true)}
-                  variant="outline"
-                  className="border-teal-600 text-teal-600 hover:bg-teal-50 w-full sm:w-auto"
-                >
-                  <FileSpreadsheet className="w-4 h-4 ml-2" />
-                  استيراد Excel
                 </Button>
                 <Button 
                   onClick={handleExport}
@@ -458,7 +478,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
 
       {/* Animated Floating Action Button */}
       <InventoryFAB
-        onAddItem={() => setFormOpen(true)}
+        onAddItem={userRole === "admin" ? () => setFormOpen(true) : undefined}
         onSearch={() => {
           // Focus on search input if visible, or scroll to search area
           const searchInput = document.querySelector('input[placeholder*="البحث"]') as HTMLInputElement;
@@ -470,6 +490,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
         onExport={handleExport}
         onPrint={handlePrint}
         onVoiceChat={() => setVoiceChatOpen(true)}
+        userRole={userRole}
       />
 
       {/* Add/Edit Form */}

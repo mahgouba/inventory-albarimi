@@ -5,7 +5,8 @@ import {
   insertInventoryItemSchema, 
   insertManufacturerSchema,
   insertLocationSchema,
-  insertLocationTransferSchema 
+  insertLocationTransferSchema,
+  insertUserSchema 
 } from "@shared/schema";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
@@ -139,6 +140,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { username, password, role } = req.body;
+      
+      if (!username || !password || !role) {
+        return res.status(400).json({ message: "Username, password, and role are required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(409).json({ message: "Username already exists" });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create user
+      const newUser = await storage.createUser({
+        username,
+        password: hashedPassword,
+        role
+      });
+
+      res.status(201).json({
+        message: "User created successfully",
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          role: newUser.role
+        }
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
     }
   });
 

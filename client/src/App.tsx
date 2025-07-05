@@ -33,7 +33,10 @@ function Router({ user, onLogout }: { user: User; onLogout: () => void }) {
       <Route path="/card-view" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/card-view-new" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/locations" component={() => <LocationPage userRole={user.role} onLogout={onLogout} />} />
-      <Route path="/appearance" component={() => <AppearancePage userRole={user.role} />} />
+      {/* صفحة إدارة المظهر متاحة للأدمن فقط */}
+      {user.role === "admin" && (
+        <Route path="/appearance" component={() => <AppearancePage userRole={user.role} />} />
+      )}
       <Route component={NotFound} />
     </Switch>
   );
