@@ -354,7 +354,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                         إدارة المظهر
                       </DropdownMenuItem>
                     </Link>
-                    <Link href="/users">
+                    <Link href="/user-management">
                       <DropdownMenuItem>
                         <Users className="mr-2 h-4 w-4" />
                         إدارة المستخدمين
