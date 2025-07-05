@@ -181,6 +181,13 @@ export default function InventoryPage({ userRole, onLogout }: InventoryPageProps
                     </Button>
                   </Link>
                   
+                  <Link href="/user-management">
+                    <Button variant="outline" size="sm" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200 transition-colors">
+                      <Users size={16} className="ml-1" />
+                      <span className="hidden sm:inline">إدارة المستخدمين</span>
+                      <span className="sm:hidden">المستخدمين</span>
+                    </Button>
+                  </Link>
 
                 </div>
               )}
@@ -221,10 +228,10 @@ export default function InventoryPage({ userRole, onLogout }: InventoryPageProps
                       </Link>
 
 
-                      <Link href="/locations">
+                      <Link href="/user-management">
                         <DropdownMenuItem>
-                          <MapPin className="mr-2 h-4 w-4" />
-                          إدارة المواقع
+                          <Users className="mr-2 h-4 w-4" />
+                          إدارة المستخدمين
                         </DropdownMenuItem>
                       </Link>
                     </DropdownMenuContent>
