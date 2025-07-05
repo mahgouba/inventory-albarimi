@@ -63,16 +63,10 @@ export default function InventoryStats() {
 
   const mainStatsData = [
     {
-      title: "إجمالي العناصر",
-      value: stats?.total || 0,
-      icon: Package,
-      color: "bg-teal-100 text-teal-600",
-    },
-    {
-      title: "في الطريق",
-      value: stats?.inTransit || 0,
-      icon: Truck,
-      color: "bg-amber-100 text-amber-600",
+      title: "قيد الصيانة",
+      value: stats?.maintenance || 0,
+      icon: Wrench,
+      color: "bg-red-100 text-red-600",
     },
     {
       title: "متوفر",
@@ -81,11 +75,20 @@ export default function InventoryStats() {
       color: "bg-green-100 text-green-600",
     },
     {
-      title: "قيد الصيانة",
-      value: stats?.maintenance || 0,
-      icon: Wrench,
-      color: "bg-red-100 text-red-600",
+      title: "في الطريق",
+      value: stats?.inTransit || 0,
+      icon: Truck,
+      color: "bg-amber-100 text-amber-600",
     },
+    {
+      title: "إجمالي العناصر",
+      value: stats?.total || 0,
+      icon: Package,
+      color: "bg-teal-100 text-teal-600",
+    },
+  ];
+
+  const secondRowStatsData = [
     {
       title: "محجوز",
       value: stats?.reserved || 0,
@@ -142,6 +145,25 @@ export default function InventoryStats() {
         ))}
       </div>
 
+      {/* Second Row Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+        {secondRowStatsData.map((stat, index) => (
+          <Card key={index} className="border border-slate-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">{stat.title}</p>
+                  <p className="text-3xl font-bold text-slate-800">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-full ${stat.color}`}>
+                  <stat.icon className="text-xl" size={24} />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       {/* Import Type Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {importStatsData.map((stat, index) => (
@@ -167,7 +189,15 @@ export default function InventoryStats() {
           <Card key={index} className="border border-slate-200">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <span className="text-2xl">{manufacturerLogos[manufacturer.manufacturer] || "🔸"}</span>
+                {manufacturer.logo ? (
+                  <img 
+                    src={manufacturer.logo} 
+                    alt={manufacturer.manufacturer}
+                    className="w-8 h-8 object-contain rounded"
+                  />
+                ) : (
+                  <span className="text-2xl">{manufacturerLogos[manufacturer.manufacturer] || "🔸"}</span>
+                )}
                 {manufacturer.manufacturer}
               </CardTitle>
             </CardHeader>

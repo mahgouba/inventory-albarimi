@@ -151,6 +151,7 @@ Changelog:
 - July 03, 2025: Added comprehensive search functionality to card view interface with real-time filtering across multiple fields (chassis number, category, colors, location, manufacturer, engine capacity, year, status, import type, notes), visual search results indicator with clear search button, and responsive search input with Arabic placeholder text
 - July 03, 2025: Implemented comprehensive dark mode system with custom color palette - Black (#000000), Sooty (#141414), Dire Wolf (#282828), and deep purple accents (#230046, #320064), added dark mode toggle icons to all pages, enhanced useTheme hook with toggle functionality, and updated CSS variables for complete dark mode theming support
 - July 05, 2025: Added smooth CSS animations for dark mode transitions with 0.3s ease transitions on all elements, implemented car reservation functionality with status change to "محجوز" and automatic reservation date tracking, added reservation button to action buttons with Calendar icon and appropriate styling, and enhanced database schema with reservationDate field for tracking reservation timestamps
+- July 05, 2025: Fixed inventory statistics data accuracy - updated database storage to include "reserved" category in stats, reorganized statistics grid layout with proper 4+1 column arrangement (قيد الصيانة، متوفر، في الطريق، إجمالي العناصر in first row, محجوز in second row), and integrated real manufacturer logos from database instead of emoji placeholders in manufacturer statistics cards
 ```
 
 ## User Preferences
