@@ -536,12 +536,12 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                       <div className="flex flex-col">
                         <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-2">{manufacturer}</h2>
                         <div className="flex items-center space-x-3 space-x-reverse">
-                          <Badge variant="secondary" className="bg-dynamic-card text-dynamic-primary px-3 py-1 text-sm font-semibold">
+                          <Badge variant="secondary" className="bg-dynamic-card text-dynamic-primary dark:text-slate-300 px-3 py-1 text-sm font-semibold">
                             {showSoldCars 
                               ? allGroupedData[manufacturer]?.items.length || 0 
                               : allGroupedData[manufacturer]?.items.filter(item => item.status !== "مباع").length || 0} مركبة
                           </Badge>
-                          <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-3 py-1 text-sm font-semibold">
+                          <Badge variant="outline" className="border-green-200 dark:border-green-700 text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30 px-3 py-1 text-sm font-semibold">
                             {data.items.filter(item => item.status === "متوفر").length} متوفر
                           </Badge>
                         </div>
