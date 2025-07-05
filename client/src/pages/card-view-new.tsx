@@ -35,7 +35,7 @@ import { apiRequest } from "@/lib/queryClient";
 import VoiceAssistant from "@/components/voice-assistant";
 import { CardViewFAB } from "@/components/animated-fab";
 import InventoryFormSimple from "@/components/inventory-form-simple";
-import VehicleTransfer from "@/components/vehicle-transfer";
+
 import type { InventoryItem } from "@shared/schema";
 
 interface CardViewPageProps {
@@ -54,8 +54,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [sellingItemId, setSellingItemId] = useState<number | null>(null);
-  const [showTransferDialog, setShowTransferDialog] = useState(false);
-  const [transferingItem, setTransferingItem] = useState<InventoryItem | null>(null);
+  const [reservingItemId, setReservingItemId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
@@ -183,7 +182,30 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
     }
   });
 
-
+  // Reserve item mutation
+  const reserveItemMutation = useMutation({
+    mutationFn: (id: number) => {
+      setReservingItemId(id);
+      return apiRequest("POST", `/api/inventory/${id}/reserve`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "تم الحجز بنجاح",
+        description: "تم حجز المركبة بنجاح",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
+      setReservingItemId(null);
+    },
+    onError: () => {
+      toast({
+        title: "خطأ",
+        description: "فشل في حجز المركبة",
+        variant: "destructive",
+      });
+      setReservingItemId(null);
+    }
+  });
 
   // Handle delete confirmation
   const handleDeleteItem = (item: InventoryItem) => {
@@ -197,10 +219,11 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
     sellItemMutation.mutate(item.id);
   };
 
-  // Handle transfer item
-  const handleTransferItem = (item: InventoryItem) => {
-    setTransferingItem(item);
-    setShowTransferDialog(true);
+  // Handle reserve item
+  const handleReserveItem = (item: InventoryItem) => {
+    // Prevent multiple calls by checking if already processing
+    if (reservingItemId !== null) return;
+    reserveItemMutation.mutate(item.id);
   };
 
   // Handle edit item
@@ -570,10 +593,11 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                               size="sm"
                               variant="outline"
                               className="flex-1 h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                              onClick={() => handleTransferItem(item)}
+                              onClick={() => handleReserveItem(item)}
+                              disabled={reservingItemId === item.id || item.status === "محجوز"}
                             >
                               <Calendar size={12} className="ml-1" />
-                              نقل
+                              {reservingItemId === item.id ? "جاري الحجز..." : item.status === "محجوز" ? "محجوز" : "حجز"}
                             </Button>
                             <Button
                               size="sm"
@@ -682,13 +706,6 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
         editItem={editingItem || undefined}
-      />
-
-      {/* Vehicle Transfer Dialog */}
-      <VehicleTransfer
-        open={showTransferDialog}
-        onOpenChange={setShowTransferDialog}
-        vehicle={transferingItem}
       />
     </div>
   );
