@@ -621,59 +621,64 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                           )}
 
                           {/* Action Buttons */}
-                          <div className="flex gap-2 pt-3 mt-3 border-t border-slate-200">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1 h-8 text-xs"
-                              onClick={() => handleEditItem(item)}
-                            >
-                              <Edit3 size={12} className="ml-1" />
-                              تعديل
-                            </Button>
-
-                            {item.status === "محجوز" ? (
+                          <div className="pt-3 mt-3 border-t border-slate-200 space-y-2">
+                            {/* First row - Edit and Delete */}
+                            <div className="flex gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="flex-1 h-8 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-200"
-                                onClick={() => handleCancelReservation(item)}
-                                disabled={cancelingReservationId === item.id}
+                                className="flex-1 h-9 text-xs text-slate-700 hover:text-slate-900 hover:bg-slate-50 border-slate-300"
+                                onClick={() => handleEditItem(item)}
                               >
-                                <X size={12} className="ml-1" />
-                                {cancelingReservationId === item.id ? "جاري الإلغاء..." : "إلغاء الحجز"}
+                                <Edit3 size={14} className="ml-1" />
+                                تعديل
                               </Button>
-                            ) : (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="flex-1 h-8 text-xs text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 border-yellow-200"
-                                onClick={() => handleReserveItem(item)}
-                                disabled={reservingItemId === item.id || item.status !== "متوفر"}
+                                className="px-3 h-9 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-300"
+                                onClick={() => handleDeleteItem(item)}
                               >
-                                <Calendar size={12} className="ml-1" />
-                                {reservingItemId === item.id ? "جاري الحجز..." : "حجز"}
+                                <Trash2 size={14} />
                               </Button>
-                            )}
+                            </div>
 
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1 h-8 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
-                              onClick={() => handleSellItem(item)}
-                              disabled={sellingItemId === item.id}
-                            >
-                              <ShoppingCart size={12} className="ml-1" />
-                              {sellingItemId === item.id ? "جاري البيع..." : "بيع"}
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                              onClick={() => handleDeleteItem(item)}
-                            >
-                              <Trash2 size={12} />
-                            </Button>
+                            {/* Second row - Reserve/Cancel and Sell */}
+                            <div className="flex gap-2">
+                              {item.status === "محجوز" ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex-1 h-9 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50 border-orange-300"
+                                  onClick={() => handleCancelReservation(item)}
+                                  disabled={cancelingReservationId === item.id}
+                                >
+                                  <X size={14} className="ml-1" />
+                                  {cancelingReservationId === item.id ? "جاري الإلغاء..." : "إلغاء الحجز"}
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="flex-1 h-9 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300"
+                                  onClick={() => handleReserveItem(item)}
+                                  disabled={reservingItemId === item.id || item.status !== "متوفر"}
+                                >
+                                  <Calendar size={14} className="ml-1" />
+                                  {reservingItemId === item.id ? "جاري الحجز..." : "حجز"}
+                                </Button>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 h-9 text-xs text-green-600 hover:text-green-700 hover:bg-green-50 border-green-300"
+                                onClick={() => handleSellItem(item)}
+                                disabled={sellingItemId === item.id}
+                              >
+                                <ShoppingCart size={14} className="ml-1" />
+                                {sellingItemId === item.id ? "جاري البيع..." : "بيع"}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </CardContent>

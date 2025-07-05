@@ -116,12 +116,6 @@ export default function InventoryStats() {
       icon: Users,
       color: "bg-orange-100 text-orange-600",
     },
-    {
-      title: "مباع",
-      value: stats?.sold || 0,
-      icon: ShoppingCart,
-      color: "bg-red-100 text-red-600",
-    },
   ];
 
   return (
@@ -145,8 +139,9 @@ export default function InventoryStats() {
         ))}
       </div>
 
-      {/* Second Row Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      {/* Import Type Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Reserved box first */}
         {secondRowStatsData.map((stat, index) => (
           <Card key={index} className="border border-slate-200">
             <CardContent className="p-6">
@@ -162,10 +157,7 @@ export default function InventoryStats() {
             </CardContent>
           </Card>
         ))}
-      </div>
-
-      {/* Import Type Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Then import type stats */}
         {importStatsData.map((stat, index) => (
           <Card key={index} className="border border-slate-200">
             <CardContent className="p-6">
