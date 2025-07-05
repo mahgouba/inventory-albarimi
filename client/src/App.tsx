@@ -11,6 +11,7 @@ import CardViewPage from "@/pages/card-view-new";
 import AppearancePage from "@/pages/appearance";
 import LocationPage from "@/pages/locations";
 import LoginPage from "@/pages/login";
+import UserManagementPage from "@/pages/user-management-simple";
 import NotFound from "@/pages/not-found";
 
 interface User {
@@ -33,9 +34,12 @@ function Router({ user, onLogout }: { user: User; onLogout: () => void }) {
       <Route path="/card-view" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/card-view-new" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
       <Route path="/locations" component={() => <LocationPage userRole={user.role} onLogout={onLogout} />} />
-      {/* صفحة إدارة المظهر متاحة للأدمن فقط */}
+      {/* صفحات الأدمن فقط */}
       {user.role === "admin" && (
-        <Route path="/appearance" component={() => <AppearancePage userRole={user.role} />} />
+        <>
+          <Route path="/appearance" component={() => <AppearancePage userRole={user.role} />} />
+          <Route path="/user-management" component={() => <UserManagementPage />} />
+        </>
       )}
       <Route component={NotFound} />
     </Switch>

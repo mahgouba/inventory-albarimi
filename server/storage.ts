@@ -17,6 +17,9 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
   
   // Inventory methods
   getAllInventoryItems(): Promise<InventoryItem[]>;
@@ -1052,6 +1055,39 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Update manufacturer logo error:', error);
       return undefined;
+    }
+  }
+
+  // User management methods
+  async getAllUsers(): Promise<User[]> {
+    try {
+      return await db.select().from(users);
+    } catch (error) {
+      console.error('Get all users error:', error);
+      return [];
+    }
+  }
+
+  async updateUser(id: number, userData: Partial<InsertUser>): Promise<User | undefined> {
+    try {
+      const [user] = await db.update(users)
+        .set(userData)
+        .where(eq(users.id, id))
+        .returning();
+      return user;
+    } catch (error) {
+      console.error('Update user error:', error);
+      return undefined;
+    }
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      const result = await db.delete(users).where(eq(users.id, id));
+      return true;
+    } catch (error) {
+      console.error('Delete user error:', error);
+      return false;
     }
   }
 }

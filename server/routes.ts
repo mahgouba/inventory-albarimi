@@ -791,6 +791,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Management APIs (Admin only)
+  
+  // Get all users
+  app.get("/api/users", async (req, res) => {
+    try {
+      const users = await storage.getAllUsers();
+      // Remove password from response for security
+      const safeUsers = users.map(user => {
+        const { password, ...safeUser } = user;
+        return {
+          ...safeUser,
+          createdAt: new Date().toISOString() // Add created date for display
+        };
+      });
+      res.json(safeUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  // Create new user
+  app.post("/api/users", async (req, res) => {
+    try {
+      const { username, password, role } = req.body;
+      
+      if (!username || !password || !role) {
+        return res.status(400).json({ message: "Username, password, and role are required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: "المستخدم موجود بالفعل" });
+      }
+
+      const newUser = await storage.createUser({
+        username,
+        password,
+        role
+      });
+
+      // Remove password from response
+      const { password: _, ...safeUser } = newUser;
+      res.status(201).json(safeUser);
+    } catch (error) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  // Update user
+  app.put("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const { role, password } = req.body;
+      const updateData: any = {};
+      
+      if (role) updateData.role = role;
+      if (password) updateData.password = password;
+
+      const updatedUser = await storage.updateUser(id, updateData);
+      if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Remove password from response
+      const { password: _, ...safeUser } = updatedUser;
+      res.json(safeUser);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Failed to update user" });
+    }
+  });
+
+  // Delete user
+  app.delete("/api/users/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const deleted = await storage.deleteUser(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
