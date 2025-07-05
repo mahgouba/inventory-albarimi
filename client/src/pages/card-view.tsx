@@ -139,13 +139,22 @@ export default function CardViewPage({ userRole }: CardViewPageProps) {
                 </Button>
               </Link>
 
-              {/* Admin Links */}
+              {/* Admin Management Buttons - Admin Only */}
               {userRole === "admin" && (
                 <div className="flex items-center space-x-2 space-x-reverse">
-                  <Link href="/manufacturers">
-                    <Button variant="outline" size="sm" className="text-slate-600 hover:text-slate-800 hidden sm:flex">
-                      <span className="hidden lg:inline">الشركات المصنعة</span>
-                      <span className="lg:hidden">الشركات</span>
+                  <Link href="/appearance">
+                    <Button variant="outline" size="sm" className="text-teal-600 hover:text-teal-700 hover:bg-teal-50 border-teal-200 transition-colors">
+                      <Palette size={16} className="ml-1" />
+                      <span className="hidden sm:inline">إدارة المظهر</span>
+                      <span className="sm:hidden">المظهر</span>
+                    </Button>
+                  </Link>
+                  
+                  <Link href="/user-management">
+                    <Button variant="outline" size="sm" className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 border-purple-200 transition-colors">
+                      <Users size={16} className="ml-1" />
+                      <span className="hidden sm:inline">إدارة المستخدمين</span>
+                      <span className="sm:hidden">المستخدمين</span>
                     </Button>
                   </Link>
                 </div>
