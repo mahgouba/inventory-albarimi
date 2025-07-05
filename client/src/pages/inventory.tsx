@@ -12,7 +12,7 @@ import InventoryStats from "@/components/inventory-stats";
 import InventoryTable from "@/components/inventory-table";
 import InventoryFormSimple from "@/components/inventory-form-simple";
 import ExcelImport from "@/components/excel-import";
-import VehicleTransfer from "@/components/vehicle-transfer";
+
 import VoiceAssistant from "@/components/voice-assistant";
 import { InventoryFAB } from "@/components/animated-fab";
 import { exportToCSV, exportToExcel, printTable } from "@/lib/utils";
@@ -34,8 +34,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
   const [formOpen, setFormOpen] = useState(false);
   const [editItem, setEditItem] = useState<InventoryItem | undefined>(undefined);
   const [isExcelImportOpen, setIsExcelImportOpen] = useState(false);
-  const [transferOpen, setTransferOpen] = useState(false);
-  const [transferVehicle, setTransferVehicle] = useState<InventoryItem | null>(null);
+
   const [voiceChatOpen, setVoiceChatOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -94,15 +93,9 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
     setEditItem(undefined);
   };
 
-  const handleTransfer = (item: InventoryItem) => {
-    setTransferVehicle(item);
-    setTransferOpen(true);
-  };
 
-  const handleTransferClose = () => {
-    setTransferOpen(false);
-    setTransferVehicle(null);
-  };
+
+
 
   // Reset category filter when manufacturer changes
   const handleManufacturerChange = (value: string) => {
@@ -406,7 +399,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
           showSoldCars={showSoldCars}
           userRole={userRole}
           onEdit={handleEdit}
-          onTransfer={handleTransfer}
+
         />
 
         {/* Pagination */}
@@ -472,12 +465,7 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
         onOpenChange={setIsExcelImportOpen} 
       />
 
-      {/* Vehicle Transfer Dialog */}
-      <VehicleTransfer
-        open={transferOpen}
-        onOpenChange={handleTransferClose}
-        vehicle={transferVehicle}
-      />
+
 
       {/* Voice Assistant Dialog */}
       <VoiceAssistant

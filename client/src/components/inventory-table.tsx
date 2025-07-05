@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye, Images, ArrowUpDown, ShoppingCart, DollarSign, ArrowLeftRight } from "lucide-react";
+import { Edit, Trash2, Eye, Images, ArrowUpDown, ShoppingCart, DollarSign } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -21,10 +21,10 @@ interface InventoryTableProps {
   showSoldCars: boolean;
   userRole: string;
   onEdit?: (item: InventoryItem) => void;
-  onTransfer?: (item: InventoryItem) => void;
+
 }
 
-export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, engineCapacityFilter, showSoldCars, userRole, onEdit, onTransfer }: InventoryTableProps) {
+export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, engineCapacityFilter, showSoldCars, userRole, onEdit }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<InventoryItem | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<string>("");
@@ -283,17 +283,6 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
-                      {onTransfer && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onTransfer(item)}
-                          className="text-blue-600 hover:text-blue-800 p-1"
-                          title="نقل الموقع"
-                        >
-                          <ArrowLeftRight className="h-4 w-4" />
-                        </Button>
-                      )}
                       <Button
                         variant="ghost"
                         size="sm"
