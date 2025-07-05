@@ -29,10 +29,10 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 function Router({ user, onLogout }: { user: User; onLogout: () => void }) {
   return (
     <Switch>
-      <Route path="/" component={() => <InventoryPage userRole={user.role} onLogout={onLogout} />} />
-      <Route path="/cards" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
-      <Route path="/card-view" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
-      <Route path="/card-view-new" component={() => <CardViewPage userRole={user.role} onLogout={onLogout} />} />
+      <Route path="/" component={() => <InventoryPage userRole={user.role} username={user.username} onLogout={onLogout} />} />
+      <Route path="/cards" component={() => <CardViewPage userRole={user.role} username={user.username} onLogout={onLogout} />} />
+      <Route path="/card-view" component={() => <CardViewPage userRole={user.role} username={user.username} onLogout={onLogout} />} />
+      <Route path="/card-view-new" component={() => <CardViewPage userRole={user.role} username={user.username} onLogout={onLogout} />} />
       <Route path="/locations" component={() => <LocationPage userRole={user.role} onLogout={onLogout} />} />
       {/* صفحات الأدمن فقط */}
       {user.role === "admin" && (

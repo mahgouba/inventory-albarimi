@@ -20,10 +20,11 @@ import type { InventoryItem } from "@shared/schema";
 
 interface InventoryPageProps {
   userRole: string;
+  username: string;
   onLogout: () => void;
 }
 
-export default function InventoryPage({ userRole, onLogout }: InventoryPageProps) {
+export default function InventoryPage({ userRole, username, onLogout }: InventoryPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("جميع الفئات");
   const [manufacturerFilter, setManufacturerFilter] = useState("جميع الصناع");
@@ -427,8 +428,8 @@ export default function InventoryPage({ userRole, onLogout }: InventoryPageProps
           engineCapacityFilter={engineCapacityFilter}
           showSoldCars={showSoldCars}
           userRole={userRole}
+          username={username}
           onEdit={handleEdit}
-
         />
 
         {/* Pagination */}

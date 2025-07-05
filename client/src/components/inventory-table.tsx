@@ -20,11 +20,11 @@ interface InventoryTableProps {
   engineCapacityFilter: string;
   showSoldCars: boolean;
   userRole: string;
+  username: string;
   onEdit?: (item: InventoryItem) => void;
-
 }
 
-export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, engineCapacityFilter, showSoldCars, userRole, onEdit }: InventoryTableProps) {
+export default function InventoryTable({ searchQuery, categoryFilter, manufacturerFilter, yearFilter, importTypeFilter, engineCapacityFilter, showSoldCars, userRole, username, onEdit }: InventoryTableProps) {
   const [editItem, setEditItem] = useState<InventoryItem | undefined>();
   const [formOpen, setFormOpen] = useState(false);
   const [sortColumn, setSortColumn] = useState<string>("");
@@ -155,8 +155,8 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
     if (window.confirm("هل أنت متأكد من حجز هذه السيارة؟")) {
       reserveMutation.mutate({
         id,
-        reservedBy: "مدير النظام",
-        reservationNote: "حجز من الجدول الرئيسي"
+        reservedBy: username,
+        reservationNote: `حجز بواسطة ${username} - ${new Date().toLocaleDateString('ar-SA')}`
       });
     }
   };

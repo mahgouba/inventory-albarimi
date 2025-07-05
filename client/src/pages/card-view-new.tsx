@@ -41,10 +41,11 @@ import type { InventoryItem } from "@shared/schema";
 
 interface CardViewPageProps {
   userRole: string;
+  username: string;
   onLogout: () => void;
 }
 
-export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) {
+export default function CardViewPage({ userRole, username, onLogout }: CardViewPageProps) {
   const { companyName, companyLogo, darkMode, toggleDarkMode, isUpdatingDarkMode } = useTheme();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -253,11 +254,10 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   // Handle reserve item
   const handleReserveItem = (item: InventoryItem) => {
     if (reservingItemId !== null) return;
-    // Use current user or a default for now
     reserveItemMutation.mutate({
       id: item.id,
-      reservedBy: "مدير النظام",
-      reservationNote: "حجز من واجهة البطاقات"
+      reservedBy: username,
+      reservationNote: `حجز بواسطة ${username} من واجهة البطاقات - ${new Date().toLocaleDateString('ar-SA')}`
     });
   };
 
