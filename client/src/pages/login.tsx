@@ -70,13 +70,14 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       });
 
       if (!response.ok) {
-        throw new Error("فشل تسجيل الدخول");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "فشل تسجيل الدخول");
       }
 
       const userData = await response.json();
       
-      // Store auth in localStorage
-      localStorage.setItem("auth", JSON.stringify(userData));
+      // Store auth role in localStorage for simple auth
+      localStorage.setItem("auth", userData.role);
       
       // Call parent callback
       onLogin(userData);
@@ -85,10 +86,11 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         title: "تم تسجيل الدخول بنجاح",
         description: `مرحباً ${userData.username}`,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Login error:", error);
       toast({
         title: "خطأ في تسجيل الدخول",
-        description: "اسم المستخدم أو كلمة المرور غير صحيحة",
+        description: error.message || "اسم المستخدم أو كلمة المرور غير صحيحة",
         variant: "destructive",
       });
     } finally {
@@ -110,9 +112,12 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       });
 
       if (!response.ok) {
-        throw new Error("فشل إنشاء الحساب");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "فشل إنشاء الحساب");
       }
 
+      const result = await response.json();
+      
       toast({
         title: "تم إنشاء الحساب بنجاح",
         description: "يمكنك الآن تسجيل الدخول بالحساب الجديد",
@@ -121,10 +126,11 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       // Reset form
       registerForm.reset();
       
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Registration error:", error);
       toast({
         title: "خطأ في إنشاء الحساب",
-        description: "حدث خطأ أثناء إنشاء الحساب، تأكد من البيانات",
+        description: error.message || "حدث خطأ أثناء إنشاء الحساب، تأكد من البيانات",
         variant: "destructive",
       });
     } finally {
