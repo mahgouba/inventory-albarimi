@@ -218,6 +218,53 @@ export default function InventoryFormSimple({ open, onOpenChange, editItem }: In
     return titles[type] || "";
   };
 
+  // Load edit item data when editItem changes
+  useEffect(() => {
+    if (editItem && open) {
+      // Set form values from editItem
+      form.reset({
+        manufacturer: editItem.manufacturer,
+        category: editItem.category,
+        engineCapacity: editItem.engineCapacity,
+        year: editItem.year,
+        exteriorColor: editItem.exteriorColor,
+        interiorColor: editItem.interiorColor,
+        status: editItem.status,
+        importType: editItem.importType,
+        location: editItem.location,
+        chassisNumber: editItem.chassisNumber,
+        price: editItem.price || "",
+        images: editItem.images || [],
+        notes: editItem.notes || "",
+        isSold: editItem.isSold || false,
+      });
+
+      // Set manufacturer and available categories
+      setSelectedManufacturer(editItem.manufacturer);
+      setAvailableCategories(localManufacturerCategories[editItem.manufacturer] || []);
+    } else if (!editItem && open) {
+      // Reset form for new item
+      form.reset({
+        manufacturer: "",
+        category: "",
+        engineCapacity: "",
+        year: new Date().getFullYear(),
+        exteriorColor: "",
+        interiorColor: "",
+        status: "متوفر",
+        importType: "شخصي",
+        location: "المستودع الرئيسي",
+        chassisNumber: "",
+        price: "",
+        images: [],
+        notes: "",
+        isSold: false,
+      });
+      setSelectedManufacturer("");
+      setAvailableCategories([]);
+    }
+  }, [editItem, open, form, localManufacturerCategories]);
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
