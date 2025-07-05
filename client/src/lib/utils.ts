@@ -222,7 +222,7 @@ export function printTable() {
     <body>
       <div class="print-header">
         <h1>جدول المخزون</h1>
-        <div class="print-date">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-SA')}</div>
+        <div class="print-date">تاريخ الطباعة: ${new Date().toLocaleDateString('en-US')}</div>
       </div>
       <div class="table-container">
         ${tableElement.outerHTML}

@@ -165,6 +165,7 @@ Changelog:
 - July 05, 2025: Simplified admin interface - removed "user management" and "manufacturer management" buttons from both inventory table header and card view admin dropdown menus to streamline the interface and reduce administrative complexity
 - July 05, 2025: Updated admin interface - replaced "location management" button with "user management" button in both inventory table and card view interfaces, restoring user management functionality while removing location management to simplify the admin workflow
 - July 05, 2025: Fixed admin interface functionality - removed notification bell button from inventory page, created new simplified user management page (user-management-simple.tsx) with working CRUD operations, proper API integration, and clean Arabic interface to replace the broken user management page
+- July 05, 2025: Changed date system from Hijri to Gregorian calendar - updated all date displays and reservation date recording throughout the system, modified entry date display in card view from 'ar-SA' to 'en-US' locale, updated reservation date display and recording in both card view and inventory table, and changed print date format in utils.ts to use Gregorian calendar for consistency across the entire application
 ```
 
 ## User Preferences

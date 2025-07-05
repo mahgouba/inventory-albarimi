@@ -156,7 +156,7 @@ export default function InventoryTable({ searchQuery, categoryFilter, manufactur
       reserveMutation.mutate({
         id,
         reservedBy: username,
-        reservationNote: `حجز بواسطة ${username} - ${new Date().toLocaleDateString('ar-SA')}`
+        reservationNote: `حجز بواسطة ${username} - ${new Date().toLocaleDateString('en-US')}`
       });
     }
   };

@@ -257,7 +257,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
     reserveItemMutation.mutate({
       id: item.id,
       reservedBy: username,
-      reservationNote: `حجز بواسطة ${username} من واجهة البطاقات - ${new Date().toLocaleDateString('ar-SA')}`
+      reservationNote: `حجز بواسطة ${username} من واجهة البطاقات - ${new Date().toLocaleDateString('en-US')}`
     });
   };
 
@@ -619,7 +619,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                             <div className="flex justify-between text-xs pt-2 border-t border-slate-100 mt-2">
                               <span className="text-slate-500">تاريخ الإدخال:</span>
                               <span className="font-medium text-slate-600">
-                                {new Date(item.entryDate).toLocaleDateString('ar-SA')}
+                                {new Date(item.entryDate).toLocaleDateString('en-US')}
                               </span>
                             </div>
                           )}
@@ -628,7 +628,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                             <div className="flex justify-between text-xs pt-2 border-t border-blue-100 mt-2 bg-blue-50 p-2 rounded">
                               <span className="text-blue-600 font-medium">تاريخ الحجز:</span>
                               <span className="font-medium text-blue-700">
-                                {new Date(item.reservationDate).toLocaleDateString('ar-SA')}
+                                {new Date(item.reservationDate).toLocaleDateString('en-US')}
                               </span>
                             </div>
                           )}
