@@ -157,6 +157,7 @@ Changelog:
 - July 05, 2025: Implemented company logo display system - integrated company logo from appearance management to be displayed in website headers across inventory and card view pages, with fallback to default "ش" character when no logo is uploaded, enhanced logo container with proper sizing and overflow handling for optimal display
 - July 05, 2025: Fixed vehicle reservation system - prevented reservation of sold vehicles by adding isSold condition to reservation buttons in both inventory table and card view, ensuring sold vehicles cannot be reserved while maintaining proper reservation functionality for available vehicles
 - July 05, 2025: Fixed manufacturer statistics in homepage - updated getManufacturerStats to include sold vehicles in total count and prevent manufacturer cards from being hidden when all vehicles are sold, ensuring accurate inventory representation across all statuses
+- July 05, 2025: Fixed manufacturer card display in homepage - updated card view to show total vehicle count including sold vehicles using allGroupedData instead of filtered data, ensuring accurate count display in manufacturer cards
 ```
 
 ## User Preferences
