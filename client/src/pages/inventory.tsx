@@ -207,9 +207,7 @@ export default function InventoryPage({ userRole, onLogout }: InventoryPageProps
                   {darkMode ? <Sun size={18} /> : <Moon size={18} />}
                 </Button>
                 
-                <Button variant="ghost" size="sm" className="p-2 text-slate-600 hover:text-slate-800 hidden sm:flex">
-                  <Bell size={18} />
-                </Button>
+
                 
                 {/* Admin Dropdown Menu */}
                 {userRole === "admin" && (

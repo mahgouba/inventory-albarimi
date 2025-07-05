@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,7 +24,9 @@ import {
   Home,
   UserCircle,
   LogOut,
-  MoreVertical
+  MoreVertical,
+  Sun,
+  Moon
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -35,7 +38,7 @@ interface UserWithStats extends User {
 export default function UserManagement() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { darkMode, toggleDarkMode } = useTheme();
   const [newUserOpen, setNewUserOpen] = useState(false);
   const [editUserOpen, setEditUserOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithStats | null>(null);
