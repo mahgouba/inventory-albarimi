@@ -423,14 +423,17 @@ export default function InventoryPage({ userRole, onLogout }: InventoryPageProps
                   <Printer className="w-4 h-4 ml-2" />
                   طباعة
                 </Button>
-                <Button 
-                  onClick={() => setShowSoldCars(!showSoldCars)}
-                  variant={showSoldCars ? "default" : "outline"}
-                  className={showSoldCars ? "bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto" : "border-red-300 text-red-600 hover:bg-red-50 w-full sm:w-auto"}
-                >
-                  <DollarSign className="w-4 h-4 ml-2" />
-                  {showSoldCars ? "إخفاء السيارات المباعة" : "إظهار السيارات المباعة"}
-                </Button>
+                {/* Show Sold Cars Button - Admin Only */}
+                {userRole === "admin" && (
+                  <Button 
+                    onClick={() => setShowSoldCars(!showSoldCars)}
+                    variant={showSoldCars ? "default" : "outline"}
+                    className={showSoldCars ? "bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto" : "border-red-300 text-red-600 hover:bg-red-50 w-full sm:w-auto"}
+                  >
+                    <DollarSign className="w-4 h-4 ml-2" />
+                    {showSoldCars ? "إخفاء السيارات المباعة" : "إظهار السيارات المباعة"}
+                  </Button>
+                )}
               </div>
             </div>
           </CardContent>

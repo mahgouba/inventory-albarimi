@@ -160,6 +160,7 @@ Changelog:
 - July 05, 2025: Fixed manufacturer card display in homepage - updated card view to show total vehicle count including sold vehicles using allGroupedData instead of filtered data, ensuring accurate count display in manufacturer cards
 - July 05, 2025: Updated manufacturer statistics to exclude sold vehicles - modified both frontend card display and backend getManufacturerStats to filter out sold vehicles from total counts, ensuring sold vehicles are removed from manufacturer card totals when sold
 - July 05, 2025: Implemented "Show Sold Cars" toggle feature in card view - added showSoldCars state variable, conditional display logic for sold vehicles, dynamic manufacturer count calculation (includes sold cars when toggle is active), and toggle button in filter section for complete sold car visibility control
+- July 05, 2025: Implemented role-based access control for admin-only features - restricted "Show Sold Cars" button and "Appearance Management" button to admin users only in both inventory table and card view interfaces, ensuring regular users cannot access these administrative functions while maintaining full functionality for admin users
 ```
 
 ## User Preferences

@@ -331,14 +331,16 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                 </Button>
               </Link>
 
-              {/* Appearance Management Button */}
-              <Link href="/appearance">
-                <Button variant="outline" size="sm" className="text-dynamic-primary hover:text-dynamic-primary-hover hover:bg-dynamic-card border-dynamic hover:border-dynamic">
-                  <Palette size={16} className="ml-1" />
-                  <span className="hidden sm:inline">إدارة المظهر</span>
-                  <span className="sm:hidden">المظهر</span>
-                </Button>
-              </Link>
+              {/* Appearance Management Button - Admin Only */}
+              {userRole === "admin" && (
+                <Link href="/appearance">
+                  <Button variant="outline" size="sm" className="text-dynamic-primary hover:text-dynamic-primary-hover hover:bg-dynamic-card border-dynamic hover:border-dynamic">
+                    <Palette size={16} className="ml-1" />
+                    <span className="hidden sm:inline">إدارة المظهر</span>
+                    <span className="sm:hidden">المظهر</span>
+                  </Button>
+                </Link>
+              )}
 
               {/* Admin Dropdown Menu */}
               {userRole === "admin" && (
@@ -414,15 +416,17 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
               </div>
             </div>
 
-            {/* Show Sold Cars Toggle */}
-            <Button 
-              onClick={() => setShowSoldCars(!showSoldCars)}
-              variant={showSoldCars ? "default" : "outline"}
-              className="text-sm"
-              size="sm"
-            >
-              {showSoldCars ? "إخفاء السيارات المباعة" : "إظهار السيارات المباعة"}
-            </Button>
+            {/* Show Sold Cars Toggle - Admin Only */}
+            {userRole === "admin" && (
+              <Button 
+                onClick={() => setShowSoldCars(!showSoldCars)}
+                variant={showSoldCars ? "default" : "outline"}
+                className="text-sm"
+                size="sm"
+              >
+                {showSoldCars ? "إخفاء السيارات المباعة" : "إظهار السيارات المباعة"}
+              </Button>
+            )}
 
             {/* Manufacturer Filter */}
             <div className="flex items-center gap-2 text-slate-700">
