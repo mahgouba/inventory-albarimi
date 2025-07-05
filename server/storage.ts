@@ -537,7 +537,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllInventoryItems(): Promise<InventoryItem[]> {
-    return await db.select().from(inventoryItems);
+    // استبعاد المركبات المباعة من العرض
+    const items = await db.select().from(inventoryItems);
+    return items.filter(item => !item.isSold);
   }
 
   async getInventoryItem(id: number): Promise<InventoryItem | undefined> {
@@ -570,7 +572,9 @@ export class DatabaseStorage implements IStorage {
   async searchInventoryItems(query: string): Promise<InventoryItem[]> {
     const lowerQuery = `%${query.toLowerCase()}%`;
     const items = await db.select().from(inventoryItems);
-    return items.filter(item =>
+    // استبعاد المركبات المباعة من البحث
+    const activeItems = items.filter(item => !item.isSold);
+    return activeItems.filter(item =>
       item.category.toLowerCase().includes(query.toLowerCase()) ||
       item.engineCapacity.toLowerCase().includes(query.toLowerCase()) ||
       item.exteriorColor.toLowerCase().includes(query.toLowerCase()) ||
@@ -578,7 +582,10 @@ export class DatabaseStorage implements IStorage {
       item.status.toLowerCase().includes(query.toLowerCase()) ||
       item.importType.toLowerCase().includes(query.toLowerCase()) ||
       item.manufacturer.toLowerCase().includes(query.toLowerCase()) ||
-      item.chassisNumber.toLowerCase().includes(query.toLowerCase())
+      item.chassisNumber.toLowerCase().includes(query.toLowerCase()) ||
+      item.location.toLowerCase().includes(query.toLowerCase()) ||
+      (item.notes && item.notes.toLowerCase().includes(query.toLowerCase())) ||
+      item.year.toString().includes(query)
     );
   }
 
@@ -590,7 +597,9 @@ export class DatabaseStorage implements IStorage {
     importType?: string;
   }): Promise<InventoryItem[]> {
     const items = await db.select().from(inventoryItems);
-    return items.filter(item => {
+    // استبعاد المركبات المباعة من الفلترة
+    const activeItems = items.filter(item => !item.isSold);
+    return activeItems.filter(item => {
       if (filters.category && item.category !== filters.category) return false;
       if (filters.status && item.status !== filters.status) return false;
       if (filters.year && item.year !== filters.year) return false;
@@ -612,16 +621,19 @@ export class DatabaseStorage implements IStorage {
     usedPersonal: number;
   }> {
     const items = await db.select().from(inventoryItems);
+    // استبعاد المركبات المباعة من الإحصائيات الأساسية
+    const activeItems = items.filter(item => !item.isSold);
+    
     return {
-      total: items.length,
-      available: items.filter(item => item.status === "متوفر").length,
-      inTransit: items.filter(item => item.status === "في الطريق").length,
-      maintenance: items.filter(item => item.status === "قيد الصيانة").length,
-      reserved: items.filter(item => item.status === "محجوز").length,
+      total: activeItems.length,
+      available: activeItems.filter(item => item.status === "متوفر").length,
+      inTransit: activeItems.filter(item => item.status === "في الطريق").length,
+      maintenance: activeItems.filter(item => item.status === "قيد الصيانة").length,
+      reserved: activeItems.filter(item => item.status === "محجوز").length,
       sold: items.filter(item => item.isSold).length,
-      personal: items.filter(item => item.importType === "شخصي").length,
-      company: items.filter(item => item.importType === "شركة").length,
-      usedPersonal: items.filter(item => item.importType === "مستعمل شخصي").length,
+      personal: activeItems.filter(item => item.importType === "شخصي").length,
+      company: activeItems.filter(item => item.importType === "شركة").length,
+      usedPersonal: activeItems.filter(item => item.importType === "مستعمل شخصي").length,
     };
   }
 
