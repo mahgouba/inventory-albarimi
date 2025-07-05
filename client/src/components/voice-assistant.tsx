@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Mic, 
   MicOff, 
@@ -16,7 +18,9 @@ import {
   Trash2,
   ShoppingCart,
   X,
-  Loader2
+  Loader2,
+  Send,
+  Type
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -67,6 +71,8 @@ export default function VoiceAssistant({
   const [messages, setMessages] = useState<Message[]>([]);
   const [transcript, setTranscript] = useState("");
   const [currentWaveform, setCurrentWaveform] = useState<number[]>([]);
+  const [textInput, setTextInput] = useState("");
+  const [inputMode, setInputMode] = useState<"voice" | "text">("voice");
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -236,6 +242,24 @@ export default function VoiceAssistant({
     }
   };
 
+  // Handle text input send
+  const handleSendText = () => {
+    if (textInput.trim()) {
+      setIsProcessing(true);
+      addMessage("user", textInput.trim());
+      processCommand.mutate(textInput.trim());
+      setTextInput("");
+    }
+  };
+
+  // Handle enter key in text input
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendText();
+    }
+  };
+
   // Handle command results
   const handleCommandResult = (result: VoiceCommand) => {
     setIsProcessing(false);
@@ -356,6 +380,7 @@ export default function VoiceAssistant({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl h-[600px] p-0">
+        <DialogTitle className="sr-only">المساعد الصوتي</DialogTitle>
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
@@ -435,68 +460,123 @@ export default function VoiceAssistant({
             </div>
           </ScrollArea>
 
-          {/* Voice Controls */}
+          {/* Input Controls */}
           <div className="p-4 border-t">
-            <div className="flex items-center justify-center gap-4">
-              {/* Waveform visualization */}
-              <AnimatePresence>
-                {isListening && (
-                  <motion.div 
-                    className="flex items-center gap-1"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
+            <Tabs value={inputMode} onValueChange={(value) => setInputMode(value as "voice" | "text")}>
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="voice" className="flex items-center gap-2">
+                  <Mic className="h-4 w-4" />
+                  صوتي
+                </TabsTrigger>
+                <TabsTrigger value="text" className="flex items-center gap-2">
+                  <Type className="h-4 w-4" />
+                  نص
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="voice" className="space-y-4">
+                <div className="flex items-center justify-center gap-4">
+                  {/* Waveform visualization */}
+                  <AnimatePresence>
+                    {isListening && (
+                      <motion.div 
+                        className="flex items-center gap-1"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                      >
+                        {currentWaveform.map((height, index) => (
+                          <motion.div
+                            key={index}
+                            className="w-1 bg-green-500 rounded-full"
+                            animate={{
+                              height: `${Math.max(height / 4, 8)}px`,
+                            }}
+                            transition={{
+                              duration: 0.1,
+                              ease: "easeInOut"
+                            }}
+                          />
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Microphone button */}
+                  <Button
+                    size="lg"
+                    variant={isListening ? "destructive" : "default"}
+                    className={`rounded-full p-4 ${
+                      isListening 
+                        ? "bg-red-500 hover:bg-red-600 animate-pulse" 
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
+                    onClick={toggleListening}
+                    disabled={isProcessing}
                   >
-                    {currentWaveform.map((height, index) => (
-                      <motion.div
-                        key={index}
-                        className="w-1 bg-green-500 rounded-full"
-                        animate={{
-                          height: `${Math.max(height / 4, 8)}px`,
-                        }}
-                        transition={{
-                          duration: 0.1,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    ))}
-                  </motion.div>
+                    {isProcessing ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : isListening ? (
+                      <MicOff className="h-6 w-6" />
+                    ) : (
+                      <Mic className="h-6 w-6" />
+                    )}
+                  </Button>
+                </div>
+
+                {/* Current transcript */}
+                {transcript && (
+                  <div className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                    {transcript}
+                  </div>
                 )}
-              </AnimatePresence>
 
-              {/* Microphone button */}
-              <Button
-                size="lg"
-                variant={isListening ? "destructive" : "default"}
-                className={`rounded-full p-4 ${
-                  isListening 
-                    ? "bg-red-500 hover:bg-red-600 animate-pulse" 
-                    : "bg-green-600 hover:bg-green-700"
-                }`}
-                onClick={toggleListening}
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                ) : isListening ? (
-                  <MicOff className="h-6 w-6" />
-                ) : (
-                  <Mic className="h-6 w-6" />
-                )}
-              </Button>
-            </div>
-
-            {/* Current transcript */}
-            {transcript && (
-              <div className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                {transcript}
-              </div>
-            )}
-
-            {/* Status */}
-            <div className="mt-2 text-center text-xs text-gray-500">
-              {isListening ? "أستمع..." : isProcessing ? "أعالج الطلب..." : "اضغط للتحدث"}
-            </div>
+                {/* Status */}
+                <div className="mt-2 text-center text-xs text-gray-500">
+                  {isListening ? "أستمع..." : isProcessing ? "أعالج الطلب..." : "اضغط للتحدث"}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="text" className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    value={textInput}
+                    onChange={(e) => setTextInput(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="اكتب أمرك هنا..."
+                    className="flex-1"
+                    disabled={isProcessing}
+                  />
+                  <Button
+                    onClick={handleSendText}
+                    disabled={!textInput.trim() || isProcessing}
+                    className="px-4"
+                  >
+                    {isProcessing ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                
+                {/* Status */}
+                <div className="text-center text-xs text-gray-500">
+                  {isProcessing ? "أعالج الطلب..." : "اكتب أمرك واضغط إدخال أو أيقونة الإرسال"}
+                </div>
+                
+                {/* Text input examples */}
+                <div className="mt-2 text-xs text-gray-400 space-y-1">
+                  <div className="text-center font-medium">أمثلة:</div>
+                  <div className="grid grid-cols-1 gap-1 text-right">
+                    <div>• "أضف مرسيدس C200 موديل 2023"</div>
+                    <div>• "بيع المركبة رقم 50"</div>
+                    <div>• "ابحث عن مرسيدس"</div>
+                    <div>• "اعرض الإحصائيات"</div>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </DialogContent>
