@@ -540,9 +540,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllInventoryItems(): Promise<InventoryItem[]> {
-    // استبعاد المركبات المباعة من العرض
+    // إرسال جميع المركبات بما في ذلك المباعة - الواجهة الأمامية ستتحكم في العرض
     const items = await db.select().from(inventoryItems);
-    return items.filter(item => !item.isSold);
+    return items;
   }
 
   async getInventoryItem(id: number): Promise<InventoryItem | undefined> {
@@ -575,9 +575,8 @@ export class DatabaseStorage implements IStorage {
   async searchInventoryItems(query: string): Promise<InventoryItem[]> {
     const lowerQuery = `%${query.toLowerCase()}%`;
     const items = await db.select().from(inventoryItems);
-    // استبعاد المركبات المباعة من البحث
-    const activeItems = items.filter(item => !item.isSold);
-    return activeItems.filter(item =>
+    // إرجاع جميع العناصر بما في ذلك المباعة - الواجهة الأمامية ستتحكم في العرض
+    return items.filter(item =>
       item.category.toLowerCase().includes(query.toLowerCase()) ||
       item.engineCapacity.toLowerCase().includes(query.toLowerCase()) ||
       item.exteriorColor.toLowerCase().includes(query.toLowerCase()) ||
@@ -600,9 +599,8 @@ export class DatabaseStorage implements IStorage {
     importType?: string;
   }): Promise<InventoryItem[]> {
     const items = await db.select().from(inventoryItems);
-    // استبعاد المركبات المباعة من الفلترة
-    const activeItems = items.filter(item => !item.isSold);
-    return activeItems.filter(item => {
+    // إرجاع جميع العناصر بما في ذلك المباعة - الواجهة الأمامية ستتحكم في العرض
+    return items.filter(item => {
       if (filters.category && item.category !== filters.category) return false;
       if (filters.status && item.status !== filters.status) return false;
       if (filters.year && item.year !== filters.year) return false;
