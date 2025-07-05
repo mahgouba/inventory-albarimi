@@ -54,7 +54,8 @@ export default function UserManagementSimple() {
   // Create user mutation
   const createUserMutation = useMutation({
     mutationFn: async (userData: { username: string; password: string; role: string }) => {
-      return await apiRequest("/api/users", "POST", userData);
+      const response = await apiRequest("POST", "/api/users", userData);
+      return await response.json();
     },
     onSuccess: () => {
       toast({
@@ -77,7 +78,8 @@ export default function UserManagementSimple() {
   // Update user mutation
   const updateUserMutation = useMutation({
     mutationFn: async (userData: Partial<User>) => {
-      return await apiRequest(`/api/users/${userData.id}`, "PUT", userData);
+      const response = await apiRequest("PUT", `/api/users/${userData.id}`, userData);
+      return await response.json();
     },
     onSuccess: () => {
       toast({
@@ -100,7 +102,7 @@ export default function UserManagementSimple() {
   // Delete user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
-      return await apiRequest(`/api/users/${userId}`, "DELETE");
+      return await apiRequest("DELETE", `/api/users/${userId}`);
     },
     onSuccess: () => {
       toast({
@@ -244,6 +246,9 @@ export default function UserManagementSimple() {
                 <DialogHeader>
                   <DialogTitle>إضافة مستخدم جديد</DialogTitle>
                 </DialogHeader>
+                <div className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                  أدخل بيانات المستخدم الجديد
+                </div>
                 <div className="space-y-4 mt-4">
                   <div>
                     <Label htmlFor="username">اسم المستخدم</Label>
@@ -364,6 +369,9 @@ export default function UserManagementSimple() {
             <DialogHeader>
               <DialogTitle>تعديل المستخدم</DialogTitle>
             </DialogHeader>
+            <div className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              تحديث بيانات المستخدم المحدد
+            </div>
             <div className="space-y-4 mt-4">
               <div>
                 <Label htmlFor="edit-username">اسم المستخدم</Label>
