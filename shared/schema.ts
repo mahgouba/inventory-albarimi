@@ -28,6 +28,7 @@ export const inventoryItems = pgTable("inventory_items", {
   price: decimal("price", { precision: 10, scale: 2 }), // السعر
   isSold: boolean("is_sold").default(false).notNull(), // مباع
   soldDate: timestamp("sold_date"), // تاريخ البيع
+  reservationDate: timestamp("reservation_date"), // تاريخ الحجز
 });
 
 // Manufacturers table for storing manufacturer logos
@@ -206,6 +207,8 @@ export const appearanceSettings = pgTable("appearance_settings", {
   cardHoverColor: varchar("card_hover_color", { length: 7 }).default("#f8fafc"), // Slate-50
   borderColor: varchar("border_color", { length: 7 }).default("#e2e8f0"), // Slate-200
   borderHoverColor: varchar("border_hover_color", { length: 7 }).default("#0f766e"), // Teal-700
+  backgroundColor: varchar("background_color", { length: 7 }).default("#ffffff"), // Light mode background
+  darkBackgroundColor: varchar("dark_background_color", { length: 7 }).default("#000000"), // Dark mode background
   darkMode: boolean("dark_mode").default(false),
   rtlLayout: boolean("rtl_layout").default(true),
   createdAt: timestamp("created_at").defaultNow(),

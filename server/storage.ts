@@ -72,6 +72,7 @@ export interface IStorage {
   getLocationTransfers(inventoryItemId?: number): Promise<LocationTransfer[]>;
   createLocationTransfer(transfer: InsertLocationTransfer): Promise<LocationTransfer>;
   markAsSold(id: number): Promise<boolean>;
+  reserveItem(id: number): Promise<boolean>;
   
   // Manufacturer methods
   getAllManufacturers(): Promise<Manufacturer[]>;
@@ -375,6 +376,15 @@ export class MemStorage implements IStorage {
     if (!item) return false;
     
     const updatedItem = { ...item, isSold: true, soldDate: new Date() };
+    this.inventoryItems.set(id, updatedItem);
+    return true;
+  }
+
+  async reserveItem(id: number): Promise<boolean> {
+    const item = this.inventoryItems.get(id);
+    if (!item) return false;
+    
+    const updatedItem = { ...item, status: "محجوز", reservationDate: new Date() };
     this.inventoryItems.set(id, updatedItem);
     return true;
   }
@@ -717,6 +727,14 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .update(inventoryItems)
       .set({ isSold: true, soldDate: new Date() })
+      .where(eq(inventoryItems.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async reserveItem(id: number): Promise<boolean> {
+    const result = await db
+      .update(inventoryItems)
+      .set({ status: "محجوز", reservationDate: new Date() })
       .where(eq(inventoryItems.id, id));
     return (result.rowCount ?? 0) > 0;
   }
