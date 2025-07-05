@@ -38,6 +38,7 @@ export interface IStorage {
     available: number; 
     inTransit: number; 
     maintenance: number;
+    reserved: number;
     sold: number;
     personal: number;
     company: number;
@@ -323,6 +324,7 @@ export class MemStorage implements IStorage {
     available: number; 
     inTransit: number; 
     maintenance: number;
+    reserved: number;
     sold: number;
     personal: number;
     company: number;
@@ -334,6 +336,7 @@ export class MemStorage implements IStorage {
       available: items.filter(item => item.status === "متوفر").length,
       inTransit: items.filter(item => item.status === "في الطريق").length,
       maintenance: items.filter(item => item.status === "قيد الصيانة").length,
+      reserved: items.filter(item => item.status === "محجوز").length,
       sold: items.filter(item => item.isSold).length,
       personal: items.filter(item => item.importType === "شخصي").length,
       company: items.filter(item => item.importType === "شركة").length,
@@ -601,6 +604,7 @@ export class DatabaseStorage implements IStorage {
     available: number; 
     inTransit: number; 
     maintenance: number;
+    reserved: number;
     sold: number;
     personal: number;
     company: number;
@@ -612,6 +616,7 @@ export class DatabaseStorage implements IStorage {
       available: items.filter(item => item.status === "متوفر").length,
       inTransit: items.filter(item => item.status === "في الطريق").length,
       maintenance: items.filter(item => item.status === "قيد الصيانة").length,
+      reserved: items.filter(item => item.status === "محجوز").length,
       sold: items.filter(item => item.isSold).length,
       personal: items.filter(item => item.importType === "شخصي").length,
       company: items.filter(item => item.importType === "شركة").length,

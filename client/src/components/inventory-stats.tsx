@@ -1,6 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { Package, Truck, CheckCircle, Wrench, ShoppingCart, User, Building, Users } from "lucide-react";
+import { Package, Truck, CheckCircle, Wrench, ShoppingCart, User, Building, Users, Calendar } from "lucide-react";
+
+// Type definitions for inventory statistics
+interface InventoryStats {
+  total: number;
+  available: number;
+  inTransit: number;
+  maintenance: number;
+  reserved: number;
+  sold: number;
+  personal: number;
+  company: number;
+  usedPersonal: number;
+}
 
 // Manufacturer logos mapping
 const manufacturerLogos: { [key: string]: string } = {
@@ -15,7 +28,7 @@ const manufacturerLogos: { [key: string]: string } = {
 };
 
 export default function InventoryStats() {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading } = useQuery<InventoryStats>({
     queryKey: ["/api/inventory/stats"],
   });
 
@@ -72,6 +85,12 @@ export default function InventoryStats() {
       value: stats?.maintenance || 0,
       icon: Wrench,
       color: "bg-red-100 text-red-600",
+    },
+    {
+      title: "محجوز",
+      value: stats?.reserved || 0,
+      icon: Calendar,
+      color: "bg-blue-100 text-blue-600",
     },
   ];
 
