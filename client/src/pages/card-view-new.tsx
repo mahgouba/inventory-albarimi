@@ -23,8 +23,7 @@ import {
   ChevronUp,
   Search,
   Moon,
-  Sun,
-  Calendar
+  Sun
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
@@ -54,7 +53,6 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [sellingItemId, setSellingItemId] = useState<number | null>(null);
-  const [reservingItemId, setReservingItemId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
@@ -182,30 +180,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
     }
   });
 
-  // Reserve item mutation
-  const reserveItemMutation = useMutation({
-    mutationFn: (id: number) => {
-      setReservingItemId(id);
-      return apiRequest("POST", `/api/inventory/${id}/reserve`);
-    },
-    onSuccess: () => {
-      toast({
-        title: "تم الحجز بنجاح",
-        description: "تم حجز المركبة بنجاح",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/manufacturer-stats"] });
-      setReservingItemId(null);
-    },
-    onError: () => {
-      toast({
-        title: "خطأ",
-        description: "فشل في حجز المركبة",
-        variant: "destructive",
-      });
-      setReservingItemId(null);
-    }
-  });
+
 
   // Handle delete confirmation
   const handleDeleteItem = (item: InventoryItem) => {
@@ -217,13 +192,6 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
     // Prevent multiple calls by checking if already processing
     if (sellingItemId !== null) return;
     sellItemMutation.mutate(item.id);
-  };
-
-  // Handle reserve item
-  const handleReserveItem = (item: InventoryItem) => {
-    // Prevent multiple calls by checking if already processing
-    if (reservingItemId !== null) return;
-    reserveItemMutation.mutate(item.id);
   };
 
   // Handle edit item
@@ -589,16 +557,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                               <Edit3 size={12} className="ml-1" />
                               تعديل
                             </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1 h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
-                              onClick={() => handleReserveItem(item)}
-                              disabled={reservingItemId === item.id || item.status === "محجوز"}
-                            >
-                              <Calendar size={12} className="ml-1" />
-                              {reservingItemId === item.id ? "جاري الحجز..." : item.status === "محجوز" ? "محجوز" : "حجز"}
-                            </Button>
+
                             <Button
                               size="sm"
                               variant="outline"
