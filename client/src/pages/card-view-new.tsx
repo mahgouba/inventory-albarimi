@@ -45,7 +45,7 @@ interface CardViewPageProps {
 }
 
 export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) {
-  const { companyName, darkMode, toggleDarkMode, isUpdatingDarkMode } = useTheme();
+  const { companyName, companyLogo, darkMode, toggleDarkMode, isUpdatingDarkMode } = useTheme();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [voiceChatOpen, setVoiceChatOpen] = useState(false);
@@ -304,11 +304,19 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo and Company Name */}
             <div className="flex items-center space-x-3 space-x-reverse">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-dynamic-gradient rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-lg sm:text-xl">ش</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-dynamic-gradient rounded-lg flex items-center justify-center shadow-md overflow-hidden">
+                {companyLogo ? (
+                  <img 
+                    src={companyLogo} 
+                    alt="شعار الشركة" 
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <span className="text-white font-bold text-lg sm:text-xl">ش</span>
+                )}
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg sm:text-xl font-bold text-slate-800">{companyName}</h1>
+                <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200">{companyName}</h1>
               </div>
             </div>
 

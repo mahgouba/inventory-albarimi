@@ -125,12 +125,20 @@ export default function InventoryPage({ userRole }: InventoryPageProps) {
           <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo and Company Name */}
             <div className="flex items-center space-x-3 space-x-reverse">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-lg sm:text-xl">ش</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-600 to-blue-600 rounded-lg flex items-center justify-center shadow-md overflow-hidden">
+                {companyLogo ? (
+                  <img 
+                    src={companyLogo} 
+                    alt="شعار الشركة" 
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <span className="text-white font-bold text-lg sm:text-xl">ش</span>
+                )}
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg sm:text-xl font-bold text-slate-800">{companyName}</h1>
-                <span className="text-xs text-slate-500 font-latin">Inventory System</span>
+                <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-200">{companyName}</h1>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-latin">Inventory System</span>
               </div>
             </div>
             {/* Mobile and Desktop Navigation */}
