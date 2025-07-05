@@ -158,6 +158,7 @@ Changelog:
 - July 05, 2025: Fixed vehicle reservation system - prevented reservation of sold vehicles by adding isSold condition to reservation buttons in both inventory table and card view, ensuring sold vehicles cannot be reserved while maintaining proper reservation functionality for available vehicles
 - July 05, 2025: Fixed manufacturer statistics in homepage - updated getManufacturerStats to include sold vehicles in total count and prevent manufacturer cards from being hidden when all vehicles are sold, ensuring accurate inventory representation across all statuses
 - July 05, 2025: Fixed manufacturer card display in homepage - updated card view to show total vehicle count including sold vehicles using allGroupedData instead of filtered data, ensuring accurate count display in manufacturer cards
+- July 05, 2025: Updated manufacturer statistics to exclude sold vehicles - modified both frontend card display and backend getManufacturerStats to filter out sold vehicles from total counts, ensuring sold vehicles are removed from manufacturer card totals when sold
 ```
 
 ## User Preferences

@@ -527,7 +527,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                         <h2 className="text-2xl font-bold text-slate-800 mb-2">{manufacturer}</h2>
                         <div className="flex items-center space-x-3 space-x-reverse">
                           <Badge variant="secondary" className="bg-dynamic-card text-dynamic-primary px-3 py-1 text-sm font-semibold">
-                            {allGroupedData[manufacturer]?.items.length || 0} مركبة
+                            {allGroupedData[manufacturer]?.items.filter(item => !item.isSold).length || 0} مركبة
                           </Badge>
                           <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-3 py-1 text-sm font-semibold">
                             {data.items.filter(item => item.status === "متوفر").length} متوفر

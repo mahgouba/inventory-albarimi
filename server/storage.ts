@@ -651,12 +651,13 @@ export class DatabaseStorage implements IStorage {
     const items = await db.select().from(inventoryItems);
     const manufacturerEntities = await db.select().from(manufacturers);
     
-    // إحصاء جميع السيارات بما في ذلك المباعة
-    const manufacturerSet = new Set(items.map(item => item.manufacturer));
+    // استبعاد السيارات المباعة من الإحصائيات
+    const availableItems = items.filter(item => !item.isSold);
+    const manufacturerSet = new Set(availableItems.map(item => item.manufacturer));
     const manufacturerNames = Array.from(manufacturerSet);
     
     return manufacturerNames.map(manufacturerName => {
-      const manufacturerItems = items.filter(item => item.manufacturer === manufacturerName);
+      const manufacturerItems = availableItems.filter(item => item.manufacturer === manufacturerName);
       const manufacturerEntity = manufacturerEntities.find(m => m.name === manufacturerName);
       
       return {
