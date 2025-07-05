@@ -23,7 +23,8 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { AppearanceSettings } from "@/../../shared/schema";
+import { AppearanceSettings, Manufacturer } from "@/../../shared/schema";
+import { apiRequest } from "@/lib/queryClient";
 
 function hexToHsl(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
@@ -100,9 +101,112 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
   const [newManufacturerName, setNewManufacturerName] = useState("");
   const [newManufacturerLogo, setNewManufacturerLogo] = useState<string | null>(null);
 
+  const queryClient = useQueryClient();
+
   // Fetch current appearance settings
   const { data: appearanceSettings } = useQuery<AppearanceSettings>({
     queryKey: ["/api/appearance"],
+  });
+
+  // Fetch manufacturers
+  const { data: manufacturers = [] } = useQuery<Manufacturer[]>({
+    queryKey: ["/api/manufacturers"],
+  });
+
+  // Save appearance settings mutation
+  const saveAppearanceMutation = useMutation({
+    mutationFn: async (settings: Partial<AppearanceSettings>) => {
+      const response = await fetch("/api/appearance", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(settings),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to save appearance settings");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "تم حفظ الإعدادات بنجاح",
+        description: "تم تطبيق إعدادات المظهر الجديدة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/appearance"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "خطأ في حفظ الإعدادات",
+        description: "حدث خطأ أثناء حفظ إعدادات المظهر",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Create new manufacturer mutation
+  const createManufacturerMutation = useMutation({
+    mutationFn: async (manufacturer: { name: string; logo?: string }) => {
+      const response = await fetch("/api/manufacturers", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(manufacturer),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to create manufacturer");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "تم إضافة الشركة المصنعة بنجاح",
+        description: "تم إضافة شركة مصنعة جديدة إلى القائمة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/manufacturers"] });
+      setShowNewManufacturerDialog(false);
+      setNewManufacturerName("");
+      setNewManufacturerLogo(null);
+    },
+    onError: (error) => {
+      toast({
+        title: "خطأ في إضافة الشركة المصنعة",
+        description: "حدث خطأ أثناء إضافة الشركة المصنعة",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update manufacturer logo mutation
+  const updateManufacturerLogoMutation = useMutation({
+    mutationFn: async ({ id, logo }: { id: number; logo: string }) => {
+      const response = await fetch(`/api/manufacturers/${id}/logo`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ logo }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update manufacturer logo");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "تم تحديث الشعار بنجاح",
+        description: "تم تحديث شعار الشركة المصنعة",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/manufacturers"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "خطأ في تحديث الشعار",
+        description: "حدث خطأ أثناء تحديث الشعار",
+        variant: "destructive",
+      });
+    },
   });
 
   // Update state when data is fetched
@@ -151,6 +255,80 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
     }
   }, [appearanceSettings]);
 
+  // Function to save all appearance settings
+  const handleSaveSettings = () => {
+    const settings = {
+      companyName,
+      companyNameEn,
+      companyLogo,
+      primaryColor,
+      primaryHoverColor,
+      secondaryColor,
+      secondaryHoverColor,
+      accentColor,
+      accentHoverColor,
+      gradientStart,
+      gradientEnd,
+      cardBackgroundColor,
+      cardHoverColor,
+      borderColor,
+      borderHoverColor,
+      backgroundColor,
+      textPrimaryColor,
+      textSecondaryColor,
+      headerBackgroundColor,
+      darkBackgroundColor,
+      darkPrimaryColor,
+      darkPrimaryHoverColor,
+      darkSecondaryColor,
+      darkSecondaryHoverColor,
+      darkAccentColor,
+      darkAccentHoverColor,
+      darkCardBackgroundColor,
+      darkCardHoverColor,
+      darkBorderColor,
+      darkBorderHoverColor,
+      darkTextPrimaryColor,
+      darkTextSecondaryColor,
+      darkHeaderBackgroundColor,
+      darkMode,
+      rtlLayout,
+    };
+    saveAppearanceMutation.mutate(settings);
+  };
+
+  // Function to add new manufacturer
+  const handleAddManufacturer = () => {
+    if (newManufacturerName.trim()) {
+      createManufacturerMutation.mutate({
+        name: newManufacturerName.trim(),
+        logo: newManufacturerLogo || undefined,
+      });
+    }
+  };
+
+  // Function to apply colors immediately for preview
+  useEffect(() => {
+    const root = document.documentElement;
+    
+    // Apply CSS variables for real-time preview
+    if (darkMode) {
+      root.style.setProperty('--primary', hexToHsl(darkPrimaryColor));
+      root.style.setProperty('--primary-hover', hexToHsl(darkPrimaryHoverColor));
+      root.style.setProperty('--secondary', hexToHsl(darkSecondaryColor));
+      root.style.setProperty('--background', hexToHsl(darkBackgroundColor));
+      root.style.setProperty('--card', hexToHsl(darkCardBackgroundColor));
+      root.classList.add('dark');
+    } else {
+      root.style.setProperty('--primary', hexToHsl(primaryColor));
+      root.style.setProperty('--primary-hover', hexToHsl(primaryHoverColor));
+      root.style.setProperty('--secondary', hexToHsl(secondaryColor));
+      root.style.setProperty('--background', hexToHsl(backgroundColor));
+      root.style.setProperty('--card', hexToHsl(cardBackgroundColor));
+      root.classList.remove('dark');
+    }
+  }, [darkMode, primaryColor, primaryHoverColor, secondaryColor, backgroundColor, cardBackgroundColor, darkPrimaryColor, darkPrimaryHoverColor, darkSecondaryColor, darkBackgroundColor, darkCardBackgroundColor]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-black transition-colors duration-300" dir="rtl">
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 transition-colors duration-300">
@@ -170,9 +348,13 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
             </div>
             
             <div className="flex items-center space-x-3 space-x-reverse">
-              <Button onClick={() => console.log('save')} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button 
+                onClick={handleSaveSettings} 
+                disabled={saveAppearanceMutation.isPending}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
                 <Save size={16} />
-                حفظ الإعدادات
+                {saveAppearanceMutation.isPending ? "جاري الحفظ..." : "حفظ الإعدادات"}
               </Button>
             </div>
           </div>
@@ -467,8 +649,111 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
                   شعارات الشركات المصنعة
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-slate-600">إدارة شعارات الشركات المصنعة</p>
+              <CardContent className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <p className="text-slate-600">إدارة شعارات الشركات المصنعة في النظام</p>
+                  <Button 
+                    onClick={() => setShowNewManufacturerDialog(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Plus size={16} />
+                    إضافة شركة مصنعة
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {manufacturers.map((manufacturer) => (
+                    <div key={manufacturer.id} className="border rounded-lg p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-lg">{manufacturer.name}</h3>
+                        <Badge variant="outline">#{manufacturer.id}</Badge>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        {manufacturer.logo ? (
+                          <div className="space-y-2">
+                            <img
+                              src={manufacturer.logo}
+                              alt={`${manufacturer.name} logo`}
+                              className="w-16 h-16 object-contain mx-auto border rounded"
+                            />
+                            <div className="flex items-center justify-center space-x-2 space-x-reverse">
+                              <label className="cursor-pointer">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onload = () => {
+                                        updateManufacturerLogoMutation.mutate({
+                                          id: manufacturer.id,
+                                          logo: reader.result as string,
+                                        });
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                />
+                                <Button variant="outline" size="sm">
+                                  <Edit2 size={14} />
+                                  تغيير
+                                </Button>
+                              </label>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => {
+                                  updateManufacturerLogoMutation.mutate({
+                                    id: manufacturer.id,
+                                    logo: "",
+                                  });
+                                }}
+                              >
+                                <Trash2 size={14} />
+                                حذف
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="w-16 h-16 bg-slate-200 rounded flex items-center justify-center mx-auto">
+                              <ImageIcon size={24} className="text-slate-400" />
+                            </div>
+                            <div className="text-center">
+                              <label className="cursor-pointer">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const reader = new FileReader();
+                                      reader.onload = () => {
+                                        updateManufacturerLogoMutation.mutate({
+                                          id: manufacturer.id,
+                                          logo: reader.result as string,
+                                        });
+                                      };
+                                      reader.readAsDataURL(file);
+                                    }
+                                  }}
+                                />
+                                <Button variant="outline" size="sm">
+                                  <Upload size={14} />
+                                  رفع شعار
+                                </Button>
+                              </label>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -497,6 +782,94 @@ export default function AppearancePage({ userRole }: AppearancePageProps) {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* New Manufacturer Dialog */}
+        <Dialog open={showNewManufacturerDialog} onOpenChange={setShowNewManufacturerDialog}>
+          <DialogContent className="sm:max-w-md" dir="rtl">
+            <DialogHeader>
+              <DialogTitle>إضافة شركة مصنعة جديدة</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="manufacturerName">اسم الشركة المصنعة</Label>
+                <Input
+                  id="manufacturerName"
+                  value={newManufacturerName}
+                  onChange={(e) => setNewManufacturerName(e.target.value)}
+                  placeholder="مرسيدس"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>شعار الشركة (اختياري)</Label>
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center">
+                  {newManufacturerLogo ? (
+                    <div className="space-y-2">
+                      <img
+                        src={newManufacturerLogo}
+                        alt="Logo Preview"
+                        className="max-h-16 mx-auto"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setNewManufacturerLogo(null)}
+                      >
+                        حذف الشعار
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="w-12 h-12 bg-slate-200 rounded mx-auto flex items-center justify-center">
+                        <ImageIcon size={20} className="text-slate-400" />
+                      </div>
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = () => {
+                                setNewManufacturerLogo(reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <Button variant="outline" size="sm">
+                          <Upload size={14} />
+                          اختر شعار
+                        </Button>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 space-x-reverse pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowNewManufacturerDialog(false);
+                    setNewManufacturerName("");
+                    setNewManufacturerLogo(null);
+                  }}
+                >
+                  إلغاء
+                </Button>
+                <Button 
+                  onClick={handleAddManufacturer}
+                  disabled={!newManufacturerName.trim() || createManufacturerMutation.isPending}
+                >
+                  {createManufacturerMutation.isPending ? "جاري الإضافة..." : "إضافة"}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
