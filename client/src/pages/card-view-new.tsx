@@ -58,6 +58,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
   const [reservingItemId, setReservingItemId] = useState<number | null>(null);
   const [cancelingReservationId, setCancelingReservationId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [showSoldCars, setShowSoldCars] = useState<boolean>(false);
 
   const { data: inventoryData = [], isLoading } = useQuery<InventoryItem[]>({
     queryKey: ["/api/inventory"],
@@ -74,8 +75,8 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
     queryKey: ["/api/inventory/manufacturer-stats"],
   });
 
-  // Filter out sold cars from display
-  const availableItems = inventoryData.filter(item => item.status !== "مباع");
+  // Filter out sold cars from display unless showSoldCars is true
+  const availableItems = showSoldCars ? inventoryData : inventoryData.filter(item => item.status !== "مباع");
 
   // Apply search filter
   const searchFilteredItems = searchQuery.trim() === "" 
@@ -413,6 +414,16 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
               </div>
             </div>
 
+            {/* Show Sold Cars Toggle */}
+            <Button 
+              onClick={() => setShowSoldCars(!showSoldCars)}
+              variant={showSoldCars ? "default" : "outline"}
+              className="text-sm"
+              size="sm"
+            >
+              {showSoldCars ? "إخفاء السيارات المباعة" : "إظهار السيارات المباعة"}
+            </Button>
+
             {/* Manufacturer Filter */}
             <div className="flex items-center gap-2 text-slate-700">
               <Filter size={18} />
@@ -527,7 +538,9 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                         <h2 className="text-2xl font-bold text-slate-800 mb-2">{manufacturer}</h2>
                         <div className="flex items-center space-x-3 space-x-reverse">
                           <Badge variant="secondary" className="bg-dynamic-card text-dynamic-primary px-3 py-1 text-sm font-semibold">
-                            {allGroupedData[manufacturer]?.items.filter(item => !item.isSold).length || 0} مركبة
+                            {showSoldCars 
+                              ? allGroupedData[manufacturer]?.items.length || 0 
+                              : allGroupedData[manufacturer]?.items.filter(item => !item.isSold).length || 0} مركبة
                           </Badge>
                           <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-3 py-1 text-sm font-semibold">
                             {data.items.filter(item => item.status === "متوفر").length} متوفر
