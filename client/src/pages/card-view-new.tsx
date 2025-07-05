@@ -539,7 +539,7 @@ export default function CardViewPage({ userRole, username, onLogout }: CardViewP
                           <Badge variant="secondary" className="bg-dynamic-card text-dynamic-primary px-3 py-1 text-sm font-semibold">
                             {showSoldCars 
                               ? allGroupedData[manufacturer]?.items.length || 0 
-                              : allGroupedData[manufacturer]?.items.filter(item => !item.isSold).length || 0} مركبة
+                              : allGroupedData[manufacturer]?.items.filter(item => item.status !== "مباع").length || 0} مركبة
                           </Badge>
                           <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 px-3 py-1 text-sm font-semibold">
                             {data.items.filter(item => item.status === "متوفر").length} متوفر
