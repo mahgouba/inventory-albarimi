@@ -155,6 +155,7 @@ Changelog:
 - July 05, 2025: Removed "sold" box from dashboard and reorganized statistics layout into cleaner 4-column grid (Reserved + 3 import types), and redesigned action buttons in card view with improved two-row layout (Edit/Delete in first row, Reserve-Cancel/Sell in second row) with better visual styling and larger button sizes for improved usability
 - July 05, 2025: Expanded seed data with comprehensive manufacturer categories including popular models (Mercedes S-Class/E-Class/C-Class, BMW 7/5/3 Series, Audi A8/A6/Q8, Toyota Land Cruiser/Camry, Lexus LX 600/ES 350, Range Rover Vogue/Sport, Porsche Cayenne/911, and luxury brands like Ferrari/Lamborghini/Maserati), added 25+ manufacturers total, and implemented reservation/cancel reservation buttons in main inventory table with proper API integration and visual indicators
 - July 05, 2025: Implemented company logo display system - integrated company logo from appearance management to be displayed in website headers across inventory and card view pages, with fallback to default "ش" character when no logo is uploaded, enhanced logo container with proper sizing and overflow handling for optimal display
+- July 05, 2025: Fixed vehicle reservation system - prevented reservation of sold vehicles by adding isSold condition to reservation buttons in both inventory table and card view, ensuring sold vehicles cannot be reserved while maintaining proper reservation functionality for available vehicles
 ```
 
 ## User Preferences

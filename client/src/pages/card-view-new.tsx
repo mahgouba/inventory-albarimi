@@ -670,7 +670,7 @@ export default function CardViewPage({ userRole, onLogout }: CardViewPageProps) 
                                   variant="outline"
                                   className="flex-1 h-9 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-300"
                                   onClick={() => handleReserveItem(item)}
-                                  disabled={reservingItemId === item.id || item.status !== "متوفر"}
+                                  disabled={reservingItemId === item.id || item.status !== "متوفر" || item.isSold}
                                 >
                                   <Calendar size={14} className="ml-1" />
                                   {reservingItemId === item.id ? "جاري الحجز..." : "حجز"}
