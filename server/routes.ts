@@ -25,17 +25,20 @@ async function processVoiceCommand(command: string) {
         {
           role: "system",
           content: `أنت مساعد ذكي لإدارة مخزون المركبات. قم بتحليل الأوامر الصوتية وإرجاع استجابة JSON تحتوي على:
-- intent: نوع الطلب (add_vehicle, search_vehicle, sell_vehicle, delete_vehicle, extract_chassis, get_stats)
+- intent: نوع الطلب (add_vehicle, search_vehicle, sell_vehicle, delete_vehicle, extract_chassis, get_stats, reserve_vehicle, cancel_reservation, edit_vehicle)
 - entities: البيانات المستخرجة من الأمر
 - confidence: مستوى الثقة (0-1)
 - action: الإجراء المطلوب
 - content: الرد النصي للمستخدم
 
 أمثلة الأوامر:
-- "أضف مركبة جديدة" → add_vehicle
+- "أضف مركبة مرسيدس C200 موديل 2023" → add_vehicle مع entities: {manufacturer: "مرسيدس", category: "C200", year: 2023}
 - "ابحث عن مرسيدس" → search_vehicle مع entities: {searchTerm: "مرسيدس"}
-- "بع المركبة رقم ABC123" → sell_vehicle مع entities: {chassisNumber: "ABC123"}
+- "بع المركبة رقم 50" → sell_vehicle مع entities: {vehicleId: 50}
 - "احذف المركبة رقم XYZ789" → delete_vehicle مع entities: {chassisNumber: "XYZ789"}
+- "احجز المركبة رقم 50" → reserve_vehicle مع entities: {vehicleId: 50}
+- "ألغي حجز المركبة رقم 50" → cancel_reservation مع entities: {vehicleId: 50}
+- "عدل المركبة رقم 50" → edit_vehicle مع entities: {vehicleId: 50}
 - "استخرج رقم الهيكل من الصورة" → extract_chassis
 - "أعطني إحصائيات المخزون" → get_stats`
         },
@@ -48,12 +51,17 @@ async function processVoiceCommand(command: string) {
     });
 
     const result = JSON.parse(response.choices[0].message.content || "{}");
+    
+    // Execute the action based on intent
+    const actionResult = await executeVoiceAction(result.intent, result.entities);
+    
     return {
       intent: result.intent || "unknown",
       entities: result.entities || {},
       confidence: result.confidence || 0.5,
       action: result.action || result.intent,
-      content: result.content || "تم معالجة طلبك."
+      content: actionResult.content || result.content || "تم معالجة طلبك.",
+      success: actionResult.success !== undefined ? actionResult.success : true
     };
   } catch (error) {
     console.error("Error processing voice command:", error);
@@ -63,6 +71,370 @@ async function processVoiceCommand(command: string) {
       confidence: 0,
       action: "error",
       content: "عذراً، لم أتمكن من فهم طلبك. يرجى المحاولة مرة أخرى."
+    };
+  }
+}
+
+// Execute database actions based on voice commands
+async function executeVoiceAction(intent: string, entities: any) {
+  try {
+    switch (intent) {
+      case "add_vehicle":
+        return await handleAddVehicle(entities);
+      
+      case "search_vehicle":
+        return await handleSearchVehicle(entities);
+      
+      case "sell_vehicle":
+        return await handleSellVehicle(entities);
+      
+      case "delete_vehicle":
+        return await handleDeleteVehicle(entities);
+      
+      case "reserve_vehicle":
+        return await handleReserveVehicle(entities);
+      
+      case "cancel_reservation":
+        return await handleCancelReservation(entities);
+      
+      case "edit_vehicle":
+        return await handleEditVehicle(entities);
+      
+      case "get_stats":
+        return await handleGetStats();
+      
+      default:
+        return {
+          success: false,
+          content: "لم أتمكن من فهم طلبك. يرجى المحاولة مرة أخرى."
+        };
+    }
+  } catch (error) {
+    console.error("Error executing voice action:", error);
+    return {
+      success: false,
+      content: "حدث خطأ أثناء تنفيذ العملية."
+    };
+  }
+}
+
+// Action handlers
+async function handleAddVehicle(entities: any) {
+  const { manufacturer, category, engineCapacity, year, exteriorColor, interiorColor, status, importType, location, chassisNumber, price, notes } = entities;
+  
+  if (!manufacturer || !category) {
+    return {
+      success: false,
+      content: "يرجى تحديد الصانع والفئة على الأقل لإضافة المركبة."
+    };
+  }
+  
+  try {
+    const newVehicle = await storage.createInventoryItem({
+      manufacturer,
+      category,
+      engineCapacity: engineCapacity || "غير محدد",
+      year: year || new Date().getFullYear(),
+      exteriorColor: exteriorColor || "غير محدد",
+      interiorColor: interiorColor || "غير محدد",
+      status: status || "متوفر",
+      importType: importType || "شخصي",
+      location: location || "المعرض الرئيسي",
+      chassisNumber: chassisNumber || "",
+      price: price || null,
+      notes: notes || null,
+      images: []
+    });
+    
+    return {
+      success: true,
+      content: `تمت إضافة المركبة بنجاح. ${manufacturer} ${category} برقم ${newVehicle.id}`
+    };
+  } catch (error) {
+    return {
+      success: false,
+      content: "حدث خطأ أثناء إضافة المركبة."
+    };
+  }
+}
+
+async function handleSearchVehicle(entities: any) {
+  const { searchTerm } = entities;
+  
+  if (!searchTerm) {
+    return {
+      success: false,
+      content: "يرجى تحديد ما تريد البحث عنه."
+    };
+  }
+  
+  try {
+    const results = await storage.searchInventoryItems(searchTerm);
+    
+    if (results.length === 0) {
+      return {
+        success: true,
+        content: `لم أجد أي مركبات تطابق "${searchTerm}"`
+      };
+    }
+    
+    const resultText = results.slice(0, 5).map(item => 
+      `رقم ${item.id}: ${item.manufacturer} ${item.category} - ${item.status}`
+    ).join(", ");
+    
+    return {
+      success: true,
+      content: `وجدت ${results.length} مركبة. أول 5 نتائج: ${resultText}`
+    };
+  } catch (error) {
+    return {
+      success: false,
+      content: "حدث خطأ أثناء البحث."
+    };
+  }
+}
+
+async function handleSellVehicle(entities: any) {
+  const { vehicleId, chassisNumber } = entities;
+  
+  let vehicle;
+  
+  try {
+    if (vehicleId) {
+      vehicle = await storage.getInventoryItem(vehicleId);
+    } else if (chassisNumber) {
+      const allVehicles = await storage.getAllInventoryItems();
+      vehicle = allVehicles.find(v => v.chassisNumber === chassisNumber);
+    }
+    
+    if (!vehicle) {
+      return {
+        success: false,
+        content: "لم أجد المركبة المحددة."
+      };
+    }
+    
+    if (vehicle.isSold) {
+      return {
+        success: false,
+        content: "هذه المركبة مباعة مسبقاً."
+      };
+    }
+    
+    const success = await storage.markAsSold(vehicle.id);
+    
+    if (success) {
+      return {
+        success: true,
+        content: `تم بيع المركبة بنجاح. ${vehicle.manufacturer} ${vehicle.category} رقم ${vehicle.id}`
+      };
+    } else {
+      return {
+        success: false,
+        content: "حدث خطأ أثناء بيع المركبة."
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      content: "حدث خطأ أثناء بيع المركبة."
+    };
+  }
+}
+
+async function handleDeleteVehicle(entities: any) {
+  const { vehicleId, chassisNumber } = entities;
+  
+  let vehicle;
+  
+  try {
+    if (vehicleId) {
+      vehicle = await storage.getInventoryItem(vehicleId);
+    } else if (chassisNumber) {
+      const allVehicles = await storage.getAllInventoryItems();
+      vehicle = allVehicles.find(v => v.chassisNumber === chassisNumber);
+    }
+    
+    if (!vehicle) {
+      return {
+        success: false,
+        content: "لم أجد المركبة المحددة."
+      };
+    }
+    
+    const success = await storage.deleteInventoryItem(vehicle.id);
+    
+    if (success) {
+      return {
+        success: true,
+        content: `تم حذف المركبة بنجاح. ${vehicle.manufacturer} ${vehicle.category} رقم ${vehicle.id}`
+      };
+    } else {
+      return {
+        success: false,
+        content: "حدث خطأ أثناء حذف المركبة."
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      content: "حدث خطأ أثناء حذف المركبة."
+    };
+  }
+}
+
+async function handleReserveVehicle(entities: any) {
+  const { vehicleId } = entities;
+  
+  if (!vehicleId) {
+    return {
+      success: false,
+      content: "يرجى تحديد رقم المركبة للحجز."
+    };
+  }
+  
+  try {
+    const vehicle = await storage.getInventoryItem(vehicleId);
+    
+    if (!vehicle) {
+      return {
+        success: false,
+        content: "لم أجد المركبة المحددة."
+      };
+    }
+    
+    if (vehicle.isSold) {
+      return {
+        success: false,
+        content: "لا يمكن حجز مركبة مباعة."
+      };
+    }
+    
+    if (vehicle.status === "محجوز") {
+      return {
+        success: false,
+        content: "هذه المركبة محجوزة مسبقاً."
+      };
+    }
+    
+    const success = await storage.reserveItem(vehicleId, "المساعد الصوتي", "تم الحجز عبر المساعد الصوتي");
+    
+    if (success) {
+      return {
+        success: true,
+        content: `تم حجز المركبة بنجاح. ${vehicle.manufacturer} ${vehicle.category} رقم ${vehicle.id}`
+      };
+    } else {
+      return {
+        success: false,
+        content: "حدث خطأ أثناء حجز المركبة."
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      content: "حدث خطأ أثناء حجز المركبة."
+    };
+  }
+}
+
+async function handleCancelReservation(entities: any) {
+  const { vehicleId } = entities;
+  
+  if (!vehicleId) {
+    return {
+      success: false,
+      content: "يرجى تحديد رقم المركبة لإلغاء الحجز."
+    };
+  }
+  
+  try {
+    const vehicle = await storage.getInventoryItem(vehicleId);
+    
+    if (!vehicle) {
+      return {
+        success: false,
+        content: "لم أجد المركبة المحددة."
+      };
+    }
+    
+    if (vehicle.status !== "محجوز") {
+      return {
+        success: false,
+        content: "هذه المركبة غير محجوزة."
+      };
+    }
+    
+    const success = await storage.cancelReservation(vehicleId);
+    
+    if (success) {
+      return {
+        success: true,
+        content: `تم إلغاء حجز المركبة بنجاح. ${vehicle.manufacturer} ${vehicle.category} رقم ${vehicle.id}`
+      };
+    } else {
+      return {
+        success: false,
+        content: "حدث خطأ أثناء إلغاء حجز المركبة."
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      content: "حدث خطأ أثناء إلغاء حجز المركبة."
+    };
+  }
+}
+
+async function handleEditVehicle(entities: any) {
+  const { vehicleId } = entities;
+  
+  if (!vehicleId) {
+    return {
+      success: false,
+      content: "يرجى تحديد رقم المركبة للتعديل."
+    };
+  }
+  
+  try {
+    const vehicle = await storage.getInventoryItem(vehicleId);
+    
+    if (!vehicle) {
+      return {
+        success: false,
+        content: "لم أجد المركبة المحددة."
+      };
+    }
+    
+    return {
+      success: true,
+      content: `المركبة رقم ${vehicleId} موجودة: ${vehicle.manufacturer} ${vehicle.category}. يرجى استخدام نموذج التعديل في الواجهة لتحديث البيانات.`
+    };
+  } catch (error) {
+    return {
+      success: false,
+      content: "حدث خطأ أثناء البحث عن المركبة."
+    };
+  }
+}
+
+async function handleGetStats() {
+  try {
+    const stats = await storage.getInventoryStats();
+    const manufacturerStats = await storage.getManufacturerStats();
+    
+    const topManufacturers = manufacturerStats.slice(0, 3).map(m => 
+      `${m.manufacturer}: ${m.total} مركبة`
+    ).join(", ");
+    
+    return {
+      success: true,
+      content: `إحصائيات المخزون: إجمالي ${stats.total} مركبة، متوفر ${stats.available}، محجوز ${stats.reserved}، في الطريق ${stats.inTransit}، قيد الصيانة ${stats.maintenance}. أكثر الصانعين: ${topManufacturers}`
+    };
+  } catch (error) {
+    return {
+      success: false,
+      content: "حدث خطأ أثناء جلب الإحصائيات."
     };
   }
 }
