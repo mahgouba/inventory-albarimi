@@ -69,6 +69,7 @@ export const locationTransfers = pgTable("location_transfers", {
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+  role: true,
 });
 
 export const insertInventoryItemSchema = createInsertSchema(inventoryItems).omit({

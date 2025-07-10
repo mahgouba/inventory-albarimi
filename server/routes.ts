@@ -12,12 +12,27 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+
+// Initialize OpenAI only if API key is available
+if (process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 // Voice command processing functions
 async function processVoiceCommand(command: string) {
+  if (!openai) {
+    return {
+      intent: "error",
+      entities: {},
+      confidence: 0,
+      action: "error",
+      content: "خدمة الذكاء الاصطناعي غير متاحة حالياً. يرجى المحاولة لاحقاً."
+    };
+  }
+  
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -440,6 +455,14 @@ async function handleGetStats() {
 }
 
 async function extractChassisNumberFromImage(imageData: string) {
+  if (!openai) {
+    return {
+      chassisNumber: null,
+      rawText: "",
+      error: "OpenAI service not available"
+    };
+  }
+  
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -1025,7 +1048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Image is required" });
       }
 
-      if (!process.env.OPENAI_API_KEY) {
+      if (!openai) {
         return res.status(500).json({ message: "OpenAI API key not configured" });
       }
 
