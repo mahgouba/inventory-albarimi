@@ -155,9 +155,12 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
         },
         body: JSON.stringify(manufacturer),
       });
+      
       if (!response.ok) {
-        throw new Error("Failed to create manufacturer");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create manufacturer");
       }
+      
       return response.json();
     },
     onSuccess: () => {
@@ -170,10 +173,11 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
       setNewManufacturerName("");
       setNewManufacturerLogo(null);
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Create manufacturer error:", error);
       toast({
         title: "خطأ في إضافة الشركة المصنعة",
-        description: "حدث خطأ أثناء إضافة الشركة المصنعة",
+        description: error.message || "حدث خطأ أثناء إضافة الشركة المصنعة",
         variant: "destructive",
       });
     },
@@ -189,9 +193,12 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
         },
         body: JSON.stringify({ logo }),
       });
+      
       if (!response.ok) {
-        throw new Error("Failed to update manufacturer logo");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to update manufacturer logo");
       }
+      
       return response.json();
     },
     onSuccess: () => {
@@ -201,10 +208,11 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
       });
       queryClient.invalidateQueries({ queryKey: ["/api/manufacturers"] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error("Logo update error:", error);
       toast({
         title: "خطأ في تحديث الشعار",
-        description: "حدث خطأ أثناء تحديث الشعار",
+        description: error.message || "حدث خطأ أثناء تحديث الشعار",
         variant: "destructive",
       });
     },
@@ -431,9 +439,36 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
+                                  // التحقق من نوع الملف
+                                  if (!file.type.startsWith('image/')) {
+                                    toast({
+                                      title: "خطأ في نوع الملف",
+                                      description: "يرجى اختيار ملف صورة صالح",
+                                      variant: "destructive",
+                                    });
+                                    return;
+                                  }
+
+                                  // التحقق من حجم الملف (أقل من 1MB)
+                                  if (file.size > 1024 * 1024) {
+                                    toast({
+                                      title: "حجم الملف كبير جداً",
+                                      description: "يرجى اختيار ملف أقل من 1 ميجابايت",
+                                      variant: "destructive",
+                                    });
+                                    return;
+                                  }
+
                                   const reader = new FileReader();
                                   reader.onload = () => {
                                     setCompanyLogo(reader.result as string);
+                                  };
+                                  reader.onerror = () => {
+                                    toast({
+                                      title: "خطأ في قراءة الملف",
+                                      description: "فشل في قراءة الملف المحدد",
+                                      variant: "destructive",
+                                    });
                                   };
                                   reader.readAsDataURL(file);
                                 }
@@ -461,9 +496,36 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
+                                  // التحقق من نوع الملف
+                                  if (!file.type.startsWith('image/')) {
+                                    toast({
+                                      title: "خطأ في نوع الملف",
+                                      description: "يرجى اختيار ملف صورة صالح",
+                                      variant: "destructive",
+                                    });
+                                    return;
+                                  }
+
+                                  // التحقق من حجم الملف (أقل من 1MB)
+                                  if (file.size > 1024 * 1024) {
+                                    toast({
+                                      title: "حجم الملف كبير جداً",
+                                      description: "يرجى اختيار ملف أقل من 1 ميجابايت",
+                                      variant: "destructive",
+                                    });
+                                    return;
+                                  }
+
                                   const reader = new FileReader();
                                   reader.onload = () => {
                                     setCompanyLogo(reader.result as string);
+                                  };
+                                  reader.onerror = () => {
+                                    toast({
+                                      title: "خطأ في قراءة الملف",
+                                      description: "فشل في قراءة الملف المحدد",
+                                      variant: "destructive",
+                                    });
                                   };
                                   reader.readAsDataURL(file);
                                 }
@@ -687,6 +749,26 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
                                   onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
+                                      // التحقق من نوع الملف
+                                      if (!file.type.startsWith('image/')) {
+                                        toast({
+                                          title: "خطأ في نوع الملف",
+                                          description: "يرجى اختيار ملف صورة صالح",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+
+                                      // التحقق من حجم الملف (أقل من 500KB)
+                                      if (file.size > 500 * 1024) {
+                                        toast({
+                                          title: "حجم الملف كبير جداً",
+                                          description: "يرجى اختيار ملف أقل من 500 كيلوبايت",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+
                                       const reader = new FileReader();
                                       reader.onload = () => {
                                         updateManufacturerLogoMutation.mutate({
@@ -694,13 +776,24 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
                                           logo: reader.result as string,
                                         });
                                       };
+                                      reader.onerror = () => {
+                                        toast({
+                                          title: "خطأ في قراءة الملف",
+                                          description: "فشل في قراءة الملف المحدد",
+                                          variant: "destructive",
+                                        });
+                                      };
                                       reader.readAsDataURL(file);
                                     }
                                   }}
                                 />
-                                <Button variant="outline" size="sm">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  disabled={updateManufacturerLogoMutation.isPending}
+                                >
                                   <Edit2 size={14} />
-                                  تغيير
+                                  {updateManufacturerLogoMutation.isPending ? "جاري..." : "تغيير"}
                                 </Button>
                               </label>
                               <Button 
@@ -732,6 +825,26 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
                                   onChange={(e) => {
                                     const file = e.target.files?.[0];
                                     if (file) {
+                                      // التحقق من نوع الملف
+                                      if (!file.type.startsWith('image/')) {
+                                        toast({
+                                          title: "خطأ في نوع الملف",
+                                          description: "يرجى اختيار ملف صورة صالح",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+
+                                      // التحقق من حجم الملف (أقل من 500KB)
+                                      if (file.size > 500 * 1024) {
+                                        toast({
+                                          title: "حجم الملف كبير جداً",
+                                          description: "يرجى اختيار ملف أقل من 500 كيلوبايت",
+                                          variant: "destructive",
+                                        });
+                                        return;
+                                      }
+
                                       const reader = new FileReader();
                                       reader.onload = () => {
                                         updateManufacturerLogoMutation.mutate({
@@ -739,13 +852,24 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
                                           logo: reader.result as string,
                                         });
                                       };
+                                      reader.onerror = () => {
+                                        toast({
+                                          title: "خطأ في قراءة الملف",
+                                          description: "فشل في قراءة الملف المحدد",
+                                          variant: "destructive",
+                                        });
+                                      };
                                       reader.readAsDataURL(file);
                                     }
                                   }}
                                 />
-                                <Button variant="outline" size="sm">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  disabled={updateManufacturerLogoMutation.isPending}
+                                >
                                   <Upload size={14} />
-                                  رفع شعار
+                                  {updateManufacturerLogoMutation.isPending ? "جاري..." : "رفع شعار"}
                                 </Button>
                               </label>
                             </div>
@@ -832,9 +956,36 @@ export default function AppearancePage({ userRole, onLogout }: AppearancePagePro
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
+                              // التحقق من نوع الملف
+                              if (!file.type.startsWith('image/')) {
+                                toast({
+                                  title: "خطأ في نوع الملف",
+                                  description: "يرجى اختيار ملف صورة صالح",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+
+                              // التحقق من حجم الملف (أقل من 500KB)
+                              if (file.size > 500 * 1024) {
+                                toast({
+                                  title: "حجم الملف كبير جداً",
+                                  description: "يرجى اختيار ملف أقل من 500 كيلوبايت",
+                                  variant: "destructive",
+                                });
+                                return;
+                              }
+
                               const reader = new FileReader();
                               reader.onload = () => {
                                 setNewManufacturerLogo(reader.result as string);
+                              };
+                              reader.onerror = () => {
+                                toast({
+                                  title: "خطأ في قراءة الملف",
+                                  description: "فشل في قراءة الملف المحدد",
+                                  variant: "destructive",
+                                });
                               };
                               reader.readAsDataURL(file);
                             }

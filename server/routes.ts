@@ -862,6 +862,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const manufacturerData = insertManufacturerSchema.parse(req.body);
       console.log("Parsed manufacturer data:", manufacturerData);
       
+      // التحقق من صحة بيانات الشعار إذا كانت موجودة
+      if (manufacturerData.logo) {
+        if (!manufacturerData.logo.startsWith('data:image/')) {
+          return res.status(400).json({ 
+            message: "Invalid logo format. Expected base64 data URL",
+            error: "invalid_logo_format"
+          });
+        }
+
+        // التحقق من حجم بيانات الشعار (أقل من 1MB)
+        const base64Data = manufacturerData.logo.split(',')[1];
+        const sizeInBytes = Math.ceil((base64Data.length * 3) / 4);
+        if (sizeInBytes > 1024 * 1024) {
+          return res.status(400).json({ 
+            message: "Logo size too large. Maximum 1MB allowed",
+            error: "logo_too_large"
+          });
+        }
+      }
+      
       // Check if manufacturer already exists
       const existingManufacturers = await storage.getAllManufacturers();
       const existingManufacturer = existingManufacturers.find(
@@ -935,6 +955,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!logo) {
         return res.status(400).json({ message: "Logo data is required" });
+      }
+
+      // التحقق من صحة بيانات base64
+      if (!logo.startsWith('data:image/')) {
+        return res.status(400).json({ message: "Invalid image format. Expected base64 data URL" });
+      }
+
+      // التحقق من حجم البيانات (أقل من 1MB)
+      const base64Data = logo.split(',')[1];
+      const sizeInBytes = Math.ceil((base64Data.length * 3) / 4);
+      if (sizeInBytes > 1024 * 1024) {
+        return res.status(400).json({ message: "Image size too large. Maximum 1MB allowed" });
       }
 
       const manufacturer = await storage.updateManufacturerLogo(id, logo);
